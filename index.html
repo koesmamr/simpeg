@@ -1045,8 +1045,103 @@
         // ==========================================
         // ACTION LOGIC (UPDATE & UPLOAD)
         // ==========================================
+        
+        // --- TAMBAHAN: Variabel & Fungsi Bantuan untuk Alamat ---
+        const KECAMATAN_TUBAN = [
+            "Bancar", "Bangilan", "Grabagan", "Jatirogo", "Jenu", "Kenduruan", 
+            "Kerek", "Merakurak", "Montong", "Palang", "Parengan", "Plumpang", 
+            "Rengel", "Semanding", "Senori", "Singgahan", "Soko", "Tambakboyo", 
+            "Tuban", "Widang"
+        ];
+
+        window.toggleKecamatanInput = function() {
+            const kab = document.getElementById('swal-alamat-kab').value.trim().toLowerCase();
+            const sel = document.getElementById('swal-alamat-kec-select');
+            const txt = document.getElementById('swal-alamat-kec-text');
+            if (kab === 'tuban' || kab === 'kabupaten tuban' || kab === 'kab. tuban') {
+                sel.style.display = 'block'; txt.style.display = 'none';
+            } else {
+                sel.style.display = 'none'; txt.style.display = 'block';
+            }
+        };
+        // --------------------------------------------------------
+
         async function editField(sheet, kolom) {
-            let inputType = 'text'; let inputOptions = {}; let currentValue = (sheet === 'IDENTITAS_LAIN') ? (STATE.identitasLain[kolom] || '') : (STATE.profile[kolom] || '');
+            let currentValue = (sheet === 'IDENTITAS_LAIN') ? (STATE.identitasLain[kolom] || '') : (STATE.profile[kolom] || '');
+            
+            // --- LOGIKA KHUSUS UNTUK ALAMAT DOMISILI ---
+            if (kolom === 'Alamat_Domisili') {
+                const kecOptions = KECAMATAN_TUBAN.map(k => `<option value="${k}">${k}</option>`).join('');
+                // Jika sudah ada alamat sebelumnya, taruh di kolom detail sebagai cadangan
+                const defaultDetail = currentValue ? currentValue : '';
+
+                const { value: newAlamat } = await Swal.fire({
+                    title: 'Ubah Alamat Domisili',
+                    html: `
+                        <div class="text-left text-sm space-y-3 mt-2">
+                            <div>
+                                <label class="font-bold text-gray-700">Kabupaten/Kota</label>
+                                <input id="swal-alamat-kab" class="swal2-input w-full m-0 mt-1 text-sm" value="Tuban" onkeyup="toggleKecamatanInput()" placeholder="Nama Kabupaten">
+                            </div>
+                            <div>
+                                <label class="font-bold text-gray-700">Kecamatan</label>
+                                <select id="swal-alamat-kec-select" class="swal2-select w-full m-0 mt-1 text-sm">
+                                    <option value="" disabled selected>-- Pilih Kecamatan --</option>
+                                    ${kecOptions}
+                                </select>
+                                <input id="swal-alamat-kec-text" class="swal2-input w-full m-0 mt-1 text-sm" placeholder="Ketik Nama Kecamatan" style="display:none;">
+                            </div>
+                            <div>
+                                <label class="font-bold text-gray-700">Desa / Kelurahan</label>
+                                <input id="swal-alamat-desa" class="swal2-input w-full m-0 mt-1 text-sm" placeholder="Nama Desa / Kelurahan">
+                            </div>
+                            <div>
+                                <label class="font-bold text-gray-700">Jalan / RT / RW / Dusun</label>
+                                <textarea id="swal-alamat-detail" class="swal2-textarea w-full m-0 mt-1 text-sm" placeholder="Contoh: Jl. Merdeka No 1, Dusun Krajan RT 01 RW 02">${defaultDetail}</textarea>
+                            </div>
+                        </div>
+                    `,
+                    focusConfirm: false,
+                    showCancelButton: true,
+                    confirmButtonText: 'Simpan',
+                    didOpen: () => { window.toggleKecamatanInput(); },
+                    preConfirm: () => {
+                        const kab = document.getElementById('swal-alamat-kab').value.trim();
+                        let kec = '';
+                        
+                        if (kab.toLowerCase().includes('tuban')) {
+                            kec = document.getElementById('swal-alamat-kec-select').value;
+                        } else {
+                            kec = document.getElementById('swal-alamat-kec-text').value.trim();
+                        }
+                        
+                        const desa = document.getElementById('swal-alamat-desa').value.trim();
+                        const detail = document.getElementById('swal-alamat-detail').value.trim();
+
+                        if (!kab || !kec || !desa || !detail) {
+                            Swal.showValidationMessage('Semua kolom alamat wajib diisi secara lengkap!');
+                            return false;
+                        }
+
+                        // Menggabungkan form menjadi 1 string terstruktur
+                        return `${detail}, Desa/Kel. ${desa}, Kec. ${kec}, Kab/Kota. ${kab}`;
+                    }
+                });
+
+                if (newAlamat && newAlamat !== currentValue) {
+                    showLoader();
+                    try {
+                        await apiCall({ action: 'submitUpdate', executorRole: STATE.user.role, nip_target: STATE.user.nip, sheet_target: sheet, kolom_target: kolom, nilai_baru: newAlamat });
+                        Toast.fire({ icon: 'success', title: 'Pengajuan perubahan berhasil dikirim.' });
+                        if(['admin','superadmin'].includes(STATE.user.role)) { fetchProfile(); } else { await fetchMyAntrian(); updateProfileUI(); }
+                    } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
+                    showLoader(false);
+                }
+                return; // Keluar dari fungsi agar tidak memunculkan popup standar
+            }
+            // ---------------------------------------------------
+
+            let inputType = 'text'; let inputOptions = {}; 
             
             if (kolom === 'Jenjang_Pendidikan') { inputType = 'select'; inputOptions = { 'SD /sederajat': 'SD /sederajat', 'SMP /sederajat': 'SMP /sederajat', 'SMA /sederajat': 'SMA /sederajat', 'D1': 'D1', 'D2': 'D2', 'D3': 'D3', 'D4': 'D4', 'Strata 1': 'Strata 1', 'Strata 2': 'Strata 2', 'Strata 3': 'Strata 3' }; } 
             else if (kolom === 'Jenis_Kelamin') { inputType = 'select'; inputOptions = { 'Laki-laki': 'Laki-laki', 'Perempuan': 'Perempuan' }; } 
