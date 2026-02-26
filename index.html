@@ -805,7 +805,8 @@
 
                     let tr = document.createElement('tr'); tr.className = 'border-b border-gray-300 hover:bg-gray-100 hover:text-black transition';
                     // Kolom Jenis ASN ditambahkan untuk membantu filter visual
-                    tr.innerHTML = `<td class="p-3">${p.NIP}</td><td class="p-3 font-medium">${p.Nama_Lengkap} ${roleBadge}</td><td class="p-3">${p.Jabatan_Terakhir || '-'}</td><td class="p-3 font-semibold text-gray-600 text-xs">${p.Jenis_ASN || '-'}</td><td class="p-3"><span class="px-2 py-1 ${statusBadge} rounded text-xs font-bold">${p.Status_Pegawai || 'AKTIF'}</span></td><td class="p-3 flex gap-2"><button onclick="editPegawaiAdmin('${p.NIP}')" class="text-blue-600 hover:underline bg-blue-50 px-2 py-1 rounded border border-blue-200 shadow-sm" title="Edit Data"><i class="fas fa-edit"></i> Edit</button><button onclick="cetakCVPegawai('${p.NIP}')" class="text-red-600 hover:underline bg-red-50 px-2 py-1 rounded border border-red-200 shadow-sm" title="Cetak CV (PDF)"><i class="fas fa-file-pdf"></i> CV</button></td>`;
+                    // TAMBAHAN: Tombol "Lihat" dengan icon fa-eye ditambahkan di kolom aksi
+                    tr.innerHTML = `<td class="p-3">${p.NIP}</td><td class="p-3 font-medium">${p.Nama_Lengkap} ${roleBadge}</td><td class="p-3">${p.Jabatan_Terakhir || '-'}</td><td class="p-3 font-semibold text-gray-600 text-xs">${p.Jenis_ASN || '-'}</td><td class="p-3"><span class="px-2 py-1 ${statusBadge} rounded text-xs font-bold">${p.Status_Pegawai || 'AKTIF'}</span></td><td class="p-3 flex gap-2"><button onclick="viewPegawaiAdmin('${p.NIP}')" class="text-green-600 hover:underline bg-green-50 px-2 py-1 rounded border border-green-200 shadow-sm" title="Lihat Detail"><i class="fas fa-eye"></i> Lihat</button><button onclick="editPegawaiAdmin('${p.NIP}')" class="text-blue-600 hover:underline bg-blue-50 px-2 py-1 rounded border border-blue-200 shadow-sm" title="Edit Data"><i class="fas fa-edit"></i> Edit</button><button onclick="cetakCVPegawai('${p.NIP}')" class="text-red-600 hover:underline bg-red-50 px-2 py-1 rounded border border-red-200 shadow-sm" title="Cetak CV (PDF)"><i class="fas fa-file-pdf"></i> CV</button></td>`;
                     tbody.appendChild(tr);
                 });
             }
@@ -927,6 +928,108 @@
                     } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
                     showLoader(false);
                 }
+            }
+        }
+
+        // TAMBAHAN: FUNGSI UNTUK MELIHAT DETAIL LENGKAP PEGAWAI DI SISI ADMIN
+        async function viewPegawaiAdmin(nip) {
+            if (!['admin', 'superadmin'].includes(STATE.user.role)) return;
+            showLoader(true);
+            try {
+                // Request seluruh data relasional pegawai dari Backend
+                const res = await apiCall({ action: 'getProfile', nip: nip });
+                const p = res.data;
+                if (!p) throw new Error('Data profil pegawai tidak ditemukan.');
+                
+                const r = {
+                    pendidikan: res.riwayat_pendidikan || [],
+                    pangkat: res.riwayat_pangkat || [],
+                    jabatan: res.riwayat_jabatan || [],
+                    kompetensi: res.riwayat_kompetensi || [],
+                    kgb: res.riwayat_kgb || [],
+                    keluarga: res.data_keluarga || [],
+                    kartu: res.data_kartu || [],
+                    identitas: (res.identitas_lain && res.identitas_lain.length > 0) ? res.identitas_lain[0] : {}
+                };
+
+                const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID') : '-';
+                const urlFoto = p.URL_Foto_Profil || 'https://via.placeholder.com/150';
+                const namaLengkap = (p.Gelar_Depan ? p.Gelar_Depan + ' ' : '') + (p.Nama_Lengkap || '-') + (p.Gelar_Belakang ? ', ' + p.Gelar_Belakang : '');
+
+                let html = `
+                    <div class="text-left text-sm max-h-[70vh] overflow-y-auto pr-3">
+                        
+                        <!-- Header Profile -->
+                        <div class="flex items-center space-x-4 mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <img src="${urlFoto}" class="w-20 h-24 object-cover rounded shadow border border-gray-300">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-800">${namaLengkap}</h3>
+                                <p class="text-gray-600 font-medium">NIP / NIN: ${p.NIP || '-'}</p>
+                                <span class="inline-block mt-1 px-2 py-0.5 bg-green-100 text-green-800 rounded text-xs font-bold">${p.Status_Pegawai || 'AKTIF'}</span>
+                            </div>
+                        </div>
+
+                        <!-- Data Personal Utama -->
+                        <h4 class="font-bold text-md mb-2 text-blue-600 border-b pb-1"><i class="fas fa-id-card mr-2"></i>Data Personal & Karir</h4>
+                        <table class="w-full mb-5 text-gray-700">
+                            <tr><td class="w-1/3 py-1 opacity-75">Status Kepeg.</td><td class="font-medium">${p.Jenis_ASN || '-'}</td></tr>
+                            <tr><td class="py-1 opacity-75">Pangkat/Gol</td><td class="font-medium">${p.Pangkat_Golongan || '-'}</td></tr>
+                            <tr><td class="py-1 opacity-75">Unit Kerja</td><td class="font-medium">${p.Unit_Kerja || '-'}</td></tr>
+                            <tr><td class="py-1 opacity-75">Jabatan Terakhir</td><td class="font-medium">${p.Jabatan_Terakhir || '-'}</td></tr>
+                            <tr><td class="py-1 opacity-75">Tempat, Tgl Lahir</td><td class="font-medium">${p.Tempat_Lahir || '-'}, ${formatDate(p.Tgl_Lahir)}</td></tr>
+                            <tr><td class="py-1 opacity-75">Jenis Kelamin</td><td class="font-medium">${p.Jenis_Kelamin || '-'}</td></tr>
+                            <tr><td class="py-1 opacity-75">Agama</td><td class="font-medium">${p.Agama || '-'}</td></tr>
+                            <tr><td class="py-1 opacity-75 align-top">Alamat</td><td class="font-medium">${p.Alamat_Domisili || '-'}</td></tr>
+                            <tr><td class="py-1 opacity-75">No HP / WA</td><td class="font-medium">${p.No_HP || '-'}</td></tr>
+                        </table>
+
+                        <!-- Identitas Lain -->
+                        <h4 class="font-bold text-md mb-2 text-blue-600 border-b pb-1 mt-4"><i class="fas fa-fingerprint mr-2"></i>Identitas Lain</h4>
+                        <table class="w-full mb-5 text-gray-700">
+                            <tr><td class="w-1/3 py-1 opacity-75">NIK KTP</td><td class="font-medium">${r.identitas.NIK_KTP || '-'}</td></tr>
+                            <tr><td class="py-1 opacity-75">No NPWP</td><td class="font-medium">${r.identitas.No_NPWP || '-'}</td></tr>
+                            <tr><td class="py-1 opacity-75">No BPJS</td><td class="font-medium">${r.identitas.No_BPJS || '-'}</td></tr>
+                            <tr><td class="py-1 opacity-75">No TASPEN</td><td class="font-medium">${r.identitas.No_TASPEN || '-'}</td></tr>
+                        </table>
+                `;
+
+                // Fungsi bantuan merender tabel riwayat secara ringkas
+                const buildList = (title, icon, data, mapFn) => {
+                    let section = `<h4 class="font-bold text-md mb-2 text-blue-600 border-b pb-1 mt-4"><i class="fas ${icon} mr-2"></i>${title}</h4>`;
+                    if(data.length === 0) {
+                        section += `<p class="text-gray-500 italic mb-5 text-xs">Belum ada data</p>`;
+                    } else {
+                        section += `<ul class="list-none pl-0 mb-5 space-y-2">`;
+                        data.forEach(item => { 
+                            section += `<li class="bg-gray-50 p-2 rounded border border-gray-200 shadow-sm">${mapFn(item)}</li>`; 
+                        });
+                        section += `</ul>`;
+                    }
+                    return section;
+                };
+
+                html += buildList('Riwayat Pendidikan', 'fa-graduation-cap', r.pendidikan, x => `<div class="font-bold">${x.Jenjang} - ${x.Jurusan||'-'}</div><div class="text-xs text-gray-600">${x.Instansi} (Lulus: ${x.Thn_Lulus||'-'})</div>`);
+                html += buildList('Riwayat Pangkat', 'fa-medal', r.pangkat, x => `<div class="font-bold">${x.Pangkat_Gol}</div><div class="text-xs text-gray-600">No. SK: ${x.No_SK||'-'} | TMT: ${formatDate(x.TMT)}</div>`);
+                html += buildList('Riwayat Jabatan', 'fa-briefcase', r.jabatan, x => `<div class="font-bold">${x.Jabatan}</div><div class="text-xs text-gray-600">Unit: ${x.Unit_Kerja||'-'} | TMT: ${formatDate(x.TMT_Pelantikan)}</div>`);
+                html += buildList('Pengembangan Kompetensi', 'fa-certificate', r.kompetensi, x => `<div class="font-bold">${x.Nama_Diklat}</div><div class="text-xs text-gray-600">Pelaksanaan: ${formatDate(x.Tgl_Mulai)} | Penyelenggara: ${x.Penyelenggara||'-'}</div>`);
+                html += buildList('Data Keluarga', 'fa-users', r.keluarga, x => `<div class="font-bold">${x.Nama} (${x.Status_Keluarga})</div><div class="text-xs text-gray-600">NIK: ${x.NIK_Keluarga||'-'} | L/P: ${x['L/P']||'-'}</div>`);
+                
+                html += `</div>`; 
+
+                showLoader(false);
+
+                // Munculkan popup dengan ukuran yang lebar
+                Swal.fire({
+                    title: 'Data Lengkap Pegawai',
+                    html: html,
+                    width: '700px',
+                    showCloseButton: true,
+                    showConfirmButton: false,
+                });
+
+            } catch (e) {
+                showLoader(false);
+                Swal.fire('Error', e.message, 'error');
             }
         }
 
@@ -1055,7 +1158,7 @@
             "Jenu": ["Beji", "Bogang", "Jenggolo", "Jenu", "Kaliuntu", "Karangasem", "Mentoso", "Purworejo", "Rawasan", "Remen", "Sekardadi", "Socorejo", "Sugihwaras", "Suwalan", "Tasikharjo", "Temaji", "Wadung", "Wayut"],
             "Kenduruan": ["Bendonglateng", "Jamprong", "Jlodro", "Mlagen", "Sidohasri", "Sidomukti", "Sidorejo", "Sokogunung", "Tawaran"],
             "Kerek": ["Gaji", "Gemulung", "Hargoretno", "Jarorejo", "Karanglo", "Kasian", "Kedungrejo", "Margomulyo", "Margorejo", "Mliwang", "Padasan", "Sidonganti", "Sumberarum", "Tenggerwetan", "Trantang", "Tuwiri Kulon", "Tuwiri Wetan"],
-            "Merakurak": ["Bogorejo", "Borehbangle", "Kapu", "Mandirejo", "Pongpongan", "Sambonggede", "Sembungrejo", "Sendanghaji", "Sembungrejo", "Senori", "Sugihan", "Sumber", "Sumberejo", "Tahulu", "Tegalrejo", "Temandang", "Tlogowaru", "Tobo", "Tuwiri Kulon", "Tuwiri Wetan"],
+            "Merakurak": ["Bogel", "Borehbangle", "Kapu", "Mandirejo", "Pongpongan", "Sambonggede", "Sembungrejo", "Sendanghaji", "Senori", "Sugihan", "Sumberejo", "Tahulu", "Tegalrejo", "Temandang", "Tobo", "Tuwiri Kulon", "Tuwiri Wetan"],
             "Montong": ["Bringin", "Guwoterus", "Jetak", "Maindu", "Manjung", "Montongsekar", "Nguluhan", "Pakel", "Pucangan", "Sumurgung", "Talangkembar", "Talun", "Tanggulangin"],
             "Palang": ["Cendoro", "Cepokorejo", "Dawung", "Gesikharjo", "Glodog", "Karangagung", "Ketandung", "Kradenan", "Leran Kulon", "Leran Wetan", "Ngimbang", "Palang", "Panyuran", "Pliwetan", "Pucangan", "Sumurgung", "Tasikmadu", "Tegalbang", "Wangun"],
             "Parengan": ["Brangkal", "Cengkong", "Dagangan", "Kemlaten", "Kumpulrejo", "Margorejo", "Mergoasri", "Mojomalang", "Moyang", "Ngawun", "Pacing", "Parangbatu", "Selogabus", "Sembung", "Sendangrejo", "Suciharjo", "Sugihwaras", "Wukirharjo"],
@@ -1888,4 +1991,3 @@
     </script>
 </body>
 </html>
-
