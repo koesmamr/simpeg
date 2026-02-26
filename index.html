@@ -139,7 +139,7 @@
                         </div>
                         <div class="flex-1 w-full text-center md:text-left overflow-hidden">
                             <h3 id="p-nama" class="text-2xl font-bold truncate">Memuat...</h3>
-                            <p id="p-nip" class="opacity-75 mb-2">NIP: -</p>
+                            <p id="p-nip" class="opacity-75 mb-2">NIP / NIN: -</p>
                             <span id="p-status" class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-bold">AKTIF</span>
                         </div>
                         <div class="mt-4 md:mt-0 md:text-right text-center w-full md:w-auto">
@@ -150,7 +150,6 @@
 
                     <!-- Tab Content: Profil Utama -->
                     <div id="tab-profil" class="user-tab-content">
-                        <!-- ... (Isi tab-profil tetap sama seperti sebelumnya) ... -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="card rounded-lg shadow-md p-6">
                                 <div class="flex justify-between items-center mb-4 border-b pb-2 border-gray-200">
@@ -162,13 +161,13 @@
                                     <tr class="border-b border-gray-100"><td class="py-2 opacity-75">Jenis Kelamin</td><td id="p-jk" class="font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'Jenis_Kelamin')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
                                     <tr class="border-b border-gray-100"><td class="py-2 opacity-75">Agama</td><td id="p-agama" class="font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'Agama')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
                                     <tr class="border-b border-gray-100"><td class="py-2 opacity-75">Alamat</td><td id="p-alamat" class="font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'Alamat_Domisili')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
-                                    <tr><td class="py-2 opacity-75">No HP</td><td id="p-hp" class="font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'No_HP')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
+                                    <tr><td class="py-2 opacity-75">No HP / WA</td><td id="p-hp" class="font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'No_HP')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
                                 </table>
                             </div>
                             <div class="card rounded-lg shadow-md p-6">
                                 <h4 class="font-bold text-lg mb-4 border-b pb-2 border-gray-200"><i class="fas fa-briefcase mr-2 text-blue-500"></i> Karir & Ringkasan</h4>
                                 <table class="w-full text-sm">
-                                    <tr class="border-b border-gray-100"><td class="py-2 opacity-75 w-1/3">Jenis ASN</td><td id="p-jasn" class="font-medium">-</td><td class="text-right w-8"><button onclick="editField('PROFIL', 'Jenis_ASN')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
+                                    <tr class="border-b border-gray-100"><td class="py-2 opacity-75 w-1/3">Status Kepeg.</td><td id="p-jasn" class="font-medium">-</td><td class="text-right w-8"><button onclick="editField('PROFIL', 'Jenis_ASN')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
                                     <tr class="border-b border-gray-100"><td class="py-2 opacity-75">Pangkat/Gol</td><td id="p-pangkat" class="font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'Pangkat_Golongan')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
                                     <tr class="border-b border-gray-100"><td class="py-2 opacity-75">Jabatan Terakhir</td><td id="p-jabatan" class="font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'Jabatan_Terakhir')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
                                     <tr><td class="py-2 opacity-75">Pendidikan</td><td id="p-pendidikan" class="font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'Jenjang_Pendidikan')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
@@ -192,7 +191,6 @@
 
                     <!-- Tab Content: Pendidikan -->
                     <div id="tab-pendidikan" class="user-tab-content hidden">
-                        <!-- ... (Isi tab-pendidikan tetap sama) ... -->
                         <div class="card rounded-lg shadow-md p-6">
                             <div class="flex justify-between items-center mb-4 border-b pb-2">
                                 <h4 class="font-bold text-lg"><i class="fas fa-graduation-cap mr-2 text-blue-500"></i> Riwayat Pendidikan</h4>
@@ -356,7 +354,7 @@
                 <div id="page-data-pegawai" class="page-content hidden">
                     <div class="card rounded-lg shadow-md p-6">
                         <div class="flex justify-between mb-4 flex-col md:flex-row gap-2">
-                            <input type="text" id="search-pegawai" placeholder="Cari Nama/NIP..." class="border p-2 rounded w-full md:w-64 text-black" onkeyup="filterTablePegawai()">
+                            <input type="text" id="search-pegawai" placeholder="Cari Nama / NIP / NIN..." class="border p-2 rounded w-full md:w-64 text-black" onkeyup="filterTablePegawai()">
                             <div class="flex flex-wrap gap-2">
                                 <button onclick="openExportModal()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 shadow whitespace-nowrap"><i class="fas fa-file-export mr-2"></i> Custom Download</button>
                                 <button onclick="exportToExcel()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 shadow whitespace-nowrap"><i class="fas fa-file-excel mr-2"></i> Export Semua</button>
@@ -365,7 +363,7 @@
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm whitespace-nowrap" id="table-pegawai">
                                 <thead class="bg-gray-200 text-black">
-                                    <tr><th class="p-3">NIP</th><th class="p-3">Nama Pegawai</th><th class="p-3">Jabatan</th><th class="p-3">Status</th><th class="p-3">Aksi</th></tr>
+                                    <tr><th class="p-3">NIP / NIN</th><th class="p-3">Nama Pegawai</th><th class="p-3">Jabatan</th><th class="p-3">Status</th><th class="p-3">Aksi</th></tr>
                                 </thead>
                                 <tbody id="tbody-pegawai"></tbody>
                             </table>
@@ -563,8 +561,8 @@
             const { value: formValues } = await Swal.fire({
                 title: 'Tautkan Akun Baru',
                 html: `
-                    <div class="text-sm text-gray-600 mb-4">Email <b>${email}</b> belum terdaftar. Silakan masukkan NIP dan No. WhatsApp aktif Anda:</div>
-                    <input id="swal-input-nip" class="swal2-input !w-[85%] !mx-auto" placeholder="Masukkan NIP (18 Digit)" type="number">
+                    <div class="text-sm text-gray-600 mb-4">Email <b>${email}</b> belum terdaftar. Silakan masukkan NIP / NIN dan No. WhatsApp aktif Anda:</div>
+                    <input id="swal-input-nip" class="swal2-input !w-[85%] !mx-auto" placeholder="Masukkan NIP atau NIN" type="number">
                     <input id="swal-input-wa" class="swal2-input !w-[85%] !mx-auto mt-3" placeholder="No. WhatsApp (Contoh: 08123...)" type="number">
                 `,
                 focusConfirm: false,
@@ -576,7 +574,7 @@
                     const nip = document.getElementById('swal-input-nip').value;
                     const wa = document.getElementById('swal-input-wa').value;
                     if (!nip || !wa) {
-                        Swal.showValidationMessage('NIP dan No. WhatsApp wajib diisi!');
+                        Swal.showValidationMessage('NIP / NIN dan No. WhatsApp wajib diisi!');
                         return false;
                     }
                     return { nip: nip, noWa: wa };
@@ -627,7 +625,7 @@
                 STATE.riwayat.kompetensi = res.riwayat_kompetensi || []; 
                 STATE.riwayat.kgb = res.riwayat_kgb || [];
                 STATE.riwayat.keluarga = res.data_keluarga || [];
-                STATE.riwayat.kartu = res.data_kartu || []; // Menampung Data Kartu Baru
+                STATE.riwayat.kartu = res.data_kartu || []; 
                 STATE.identitasLain = (res.identitas_lain && res.identitas_lain.length > 0) ? res.identitas_lain[0] : {};
                 
                 if(STATE.profile) {
@@ -635,7 +633,7 @@
 
                     document.getElementById('user-info-name').innerText = STATE.profile.Nama_Lengkap;
                     document.getElementById('p-nama').innerText = (STATE.profile.Gelar_Depan?STATE.profile.Gelar_Depan+' ':'') + STATE.profile.Nama_Lengkap + (STATE.profile.Gelar_Belakang?', '+STATE.profile.Gelar_Belakang:'');
-                    document.getElementById('p-nip').innerText = "NIP: " + STATE.profile.NIP;
+                    document.getElementById('p-nip').innerText = "NIP / NIN: " + STATE.profile.NIP;
                     document.getElementById('p-unit').innerText = STATE.profile.Unit_Kerja || '-';
                     
                     document.getElementById('p-status').innerText = STATE.profile.Status_Pegawai || 'AKTIF';
@@ -680,8 +678,6 @@
         }
 
         function renderSemuaRiwayat() {
-            // ... (Pendidikan, Pangkat, Jabatan, Kompetensi, KGB Sama)
-            
             const tbodyPend = document.getElementById('tbody-pendidikan'); tbodyPend.innerHTML = '';
             if (STATE.riwayat.pendidikan.length > 0) {
                 STATE.riwayat.pendidikan.forEach(p => {
@@ -729,7 +725,6 @@
                 STATE.riwayat.keluarga.forEach(p => { tbodyKeluarga.innerHTML += `<tr class="border-b"><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'NIK_Keluarga', p.NIK_Keluarga)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Nama', p.Nama)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Status_Keluarga', p.Status_Keluarga)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'L/P', p['L/P'])}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Tunjangan', p.Tunjangan)}</td><td class="p-2 text-center"><button onclick="editRiwayatRow('${p.ID_Data}', 'DATA_KELUARGA')" class="text-blue-600 hover:text-blue-800 bg-blue-50 px-2 py-1 rounded border border-blue-200 shadow-sm text-xs"><i class="fas fa-edit"></i> Edit</button></td></tr>`; });
             } else { tbodyKeluarga.innerHTML = `<tr><td colspan="6" class="text-center p-4 text-gray-500">Belum ada data keluarga.</td></tr>`; }
 
-            // RENDERING UNTUK DATA KARTU BARU
             const tbodyKartu = document.getElementById('tbody-kartu');
             tbodyKartu.innerHTML = '';
             if (STATE.riwayat.kartu.length > 0) {
@@ -797,7 +792,6 @@
                     if(!p.NIP) return;
                     let statusBadge = p.Status_Pegawai === 'PENSIUN' ? 'bg-gray-200 text-gray-800' : 'bg-green-100 text-green-800';
                     
-                    // Superadmin bisa melihat Badge Role Pegawai
                     let roleBadge = '';
                     if (STATE.user.role === 'superadmin' && p.Role) {
                         let rColor = p.Role === 'superadmin' ? 'bg-purple-100 text-purple-800' : (p.Role === 'admin' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600');
@@ -831,7 +825,6 @@
             const targetPegawai = STATE.allPegawai.find(p => String(p.NIP) === String(nip));
             if (!targetPegawai) return;
 
-            // 1. Kategorikan Menu Edit Menggunakan Optgroup
             let optgroups = {
                 'Otorisasi & Akun': {},
                 'Data Karir': {},
@@ -839,7 +832,6 @@
                 'Data Lainnya': {}
             };
 
-            // Khusus Superadmin bisa ganti Role & Status Akun
             if (STATE.user.role === 'superadmin') { 
                 optgroups['Otorisasi & Akun']['USERS:Role'] = 'Role Sistem (User/Admin/Superadmin)'; 
                 optgroups['Otorisasi & Akun']['USERS:Status_Akun'] = 'Status Akun (Aktif/Blokir)'; 
@@ -848,15 +840,14 @@
             optgroups['Data Karir']['PROFIL:Status_Pegawai'] = 'Status Pegawai (Aktif/Pensiun)';
             optgroups['Data Karir']['PROFIL:Jabatan_Terakhir'] = 'Jabatan Terakhir';
             optgroups['Data Karir']['PROFIL:Unit_Kerja'] = 'Unit Kerja';
-            optgroups['Data Karir']['PROFIL:Jenis_ASN'] = 'Jenis ASN';
+            optgroups['Data Karir']['PROFIL:Jenis_ASN'] = 'Status Kepegawaian (PNS/PPPK/Non ASN)';
             optgroups['Data Karir']['PROFIL:Pangkat_Golongan'] = 'Pangkat / Golongan';
             
             optgroups['Data Personal Utama']['PROFIL:Nama_Lengkap'] = 'Nama Lengkap';
             optgroups['Data Personal Utama']['PROFIL:Gelar_Depan'] = 'Gelar Depan';
             optgroups['Data Personal Utama']['PROFIL:Gelar_Belakang'] = 'Gelar Belakang';
-            optgroups['Data Personal Utama']['PROFIL:No_HP'] = 'Nomor HP';
+            optgroups['Data Personal Utama']['PROFIL:No_HP'] = 'Nomor HP / WA';
             
-            // Masukkan sisa data profil ke Kategori Lainnya (Agar admin bisa edit *semua* data)
             const excludeKeys = ['NIP', 'Role', 'Status_Akun', 'Status_Pegawai', 'Jabatan_Terakhir', 'Unit_Kerja', 'Jenis_ASN', 'Pangkat_Golongan', 'Nama_Lengkap', 'Gelar_Depan', 'Gelar_Belakang', 'No_HP', 'URL_Foto_Profil'];
             Object.keys(targetPegawai).forEach(key => {
                 if (!excludeKeys.includes(key)) {
@@ -864,7 +855,6 @@
                 }
             });
 
-            // 2. Tampilkan Menu Pemilihan Atribut
             const { value: selectedOption } = await Swal.fire({ 
                 title: `Edit Data Pegawai`, 
                 html: `<div class="text-sm">Pilih atribut data milik <b>${targetPegawai.Nama_Lengkap}</b> yang ingin Anda ubah:</div>`,
@@ -877,10 +867,9 @@
             if (selectedOption) {
                 const [targetSheet, targetKolom] = selectedOption.split(':');
                 if (targetSheet === 'USERS' && targetPegawai.Role === 'Belum Taut Akun') { 
-                    return Swal.fire('Gagal', 'Pegawai belum pernah Login / menautkan NIP dengan akun Google. Tidak dapat merubah Role/Status Akun.', 'error'); 
+                    return Swal.fire('Gagal', 'Pegawai belum pernah Login / menautkan NIP/NIN dengan akun Google. Tidak dapat merubah Role/Status Akun.', 'error'); 
                 }
 
-                // 3. Setup Tipe Input secara Profesional (Dropdown jika perlu)
                 let inputType = 'text';
                 let inputOpts = {};
                 let currentVal = targetPegawai[targetKolom] || '';
@@ -892,12 +881,12 @@
                 } else if (targetKolom === 'Status_Pegawai') {
                     inputType = 'select'; inputOpts = { 'AKTIF': 'AKTIF', 'PENSIUN': 'PENSIUN', 'PINDAH': 'PINDAH', 'MENGUNDURKAN DIRI': 'MENGUNDURKAN DIRI' };
                 } else if (targetKolom === 'Jenis_ASN') {
-                    inputType = 'select'; inputOpts = { 'PNS': 'PNS', 'PPPK': 'PPPK', 'NON ASN': 'NON ASN' };
+                    inputType = 'select'; inputOpts = { 'PNS': 'PNS', 'PPPK': 'PPPK', 'Tenaga Kontrak': 'Tenaga Kontrak', 'Tenaga Kegiatan': 'Tenaga Kegiatan' };
                 } else if (targetKolom === 'Jenis_Kelamin') {
                     inputType = 'select'; inputOpts = { 'Laki-laki': 'Laki-laki', 'Perempuan': 'Perempuan' };
                 } else if (targetKolom === 'Tgl_Lahir' || targetKolom === 'TMT_Batas_Usia_Pensiun') {
                     inputType = 'date'; 
-                    if(currentVal) currentVal = new Date(currentVal).toISOString().split('T')[0]; // Format for HTML date input
+                    if(currentVal) currentVal = new Date(currentVal).toISOString().split('T')[0];
                 }
 
                 const swalConfig = {
@@ -914,7 +903,6 @@
                     swalConfig.inputValue = currentVal;
                 }
 
-                // 4. Proses Update Data
                 const { value: newVal } = await Swal.fire(swalConfig);
 
                 if (newVal !== undefined && newVal !== currentVal && newVal !== '') {
@@ -922,7 +910,7 @@
                     try {
                         await apiCall({ action: 'submitUpdate', executorRole: STATE.user.role, nip_target: nip, sheet_target: targetSheet, kolom_target: targetKolom, nilai_baru: newVal });
                         Toast.fire({ icon: 'success', title: 'Data berhasil diperbarui.' }); 
-                        STATE.allPegawai = []; fetchAllPegawai(); // Refresh Table
+                        STATE.allPegawai = []; fetchAllPegawai();
                     } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
                     showLoader(false);
                 }
@@ -953,7 +941,7 @@
                 else if(displayNilai.includes('http') && displayNilai.includes('drive')) { displayNilai += ` <br><a href="${displayNilai.split(' | ').pop()}" target="_blank" class="text-blue-500 underline text-xs">Lihat File Upload</a>`; }
 
                 let tr = document.createElement('tr'); tr.className = 'border-b border-gray-300 hover:bg-gray-50';
-                tr.innerHTML = `<td class="p-2 text-center"><input type="checkbox" class="cb-antrian" value="${a.ID_Antrian}" onchange="checkBulkActionVisibility()"></td><td class="p-2 whitespace-nowrap">${tgl}</td><td class="p-2 font-bold">${a.Nama_Pengaju} <br><span class="text-xs text-gray-500 font-normal">NIP: ${a.NIP}</span></td><td class="p-2 text-blue-600 font-medium">${a.Kolom_Tujuan.replace(/_/g, ' ')}</td><td class="p-2 max-w-xs break-words">${displayNilai}</td><td class="p-2 whitespace-nowrap"><button onclick="prosesAntrian('${a.ID_Antrian}', 'Approved')" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs mr-1 shadow"><i class="fas fa-check"></i> Setuju</button><button onclick="prosesAntrian('${a.ID_Antrian}', 'Rejected')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs shadow"><i class="fas fa-times"></i> Tolak</button></td>`;
+                tr.innerHTML = `<td class="p-2 text-center"><input type="checkbox" class="cb-antrian" value="${a.ID_Antrian}" onchange="checkBulkActionVisibility()"></td><td class="p-2 whitespace-nowrap">${tgl}</td><td class="p-2 font-bold">${a.Nama_Pengaju} <br><span class="text-xs text-gray-500 font-normal">NIP/NIN: ${a.NIP}</span></td><td class="p-2 text-blue-600 font-medium">${a.Kolom_Tujuan.replace(/_/g, ' ')}</td><td class="p-2 max-w-xs break-words">${displayNilai}</td><td class="p-2 whitespace-nowrap"><button onclick="prosesAntrian('${a.ID_Antrian}', 'Approved')" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs mr-1 shadow"><i class="fas fa-check"></i> Setuju</button><button onclick="prosesAntrian('${a.ID_Antrian}', 'Rejected')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs shadow"><i class="fas fa-times"></i> Tolak</button></td>`;
                 tbody.appendChild(tr);
             });
             document.getElementById('cb-select-all').checked = false; checkBulkActionVisibility();
@@ -1049,6 +1037,7 @@
             
             if (kolom === 'Jenjang_Pendidikan') { inputType = 'select'; inputOptions = { 'SD /sederajat': 'SD /sederajat', 'SMP /sederajat': 'SMP /sederajat', 'SMA /sederajat': 'SMA /sederajat', 'D1': 'D1', 'D2': 'D2', 'D3': 'D3', 'D4': 'D4', 'Strata 1': 'Strata 1', 'Strata 2': 'Strata 2', 'Strata 3': 'Strata 3' }; } 
             else if (kolom === 'Jenis_Kelamin') { inputType = 'select'; inputOptions = { 'Laki-laki': 'Laki-laki', 'Perempuan': 'Perempuan' }; } 
+            else if (kolom === 'Jenis_ASN') { inputType = 'select'; inputOptions = { 'PNS': 'PNS', 'PPPK': 'PPPK', 'Tenaga Kontrak': 'Tenaga Kontrak', 'Tenaga Kegiatan': 'Tenaga Kegiatan' }; } 
             else if (kolom === 'Tgl_Lahir') { inputType = 'date'; }
 
             const swalConfig = { title: `Ubah ${kolom.replace(/_/g,' ')}`, input: inputType, inputValue: currentValue, showCancelButton: true };
@@ -1266,7 +1255,7 @@
                         <option value="Tidak">Tidak</option>
                     </select>
                 `;
-            } else if (sheet === 'DATA_KARTU') { // FORM UNTUK DATA KARTU BARU
+            } else if (sheet === 'DATA_KARTU') { 
                 formTitle = 'Tambah Dokumen / Kartu';
                 htmlForm = `
                     <select id="swal-jenis-kartu" class="swal2-select w-full m-0 mt-2 text-sm" onchange="document.getElementById('div-kartu-lainnya').style.display = this.value === 'Lainnya' ? 'block' : 'none'">
@@ -1308,7 +1297,7 @@
                         }
                         const nama = document.getElementById('swal-nama')?.value || '-'; const tmt = document.getElementById('swal-tmt')?.value || '-'; const sekarang = document.getElementById('swal-sekarang')?.value || '-';
                         vals = [jenis, eselon, unit, nama, tmt, sekarang];
-                    } else if (sheet === 'DATA_KARTU') { // LOGIKA CAPTURE KARTU
+                    } else if (sheet === 'DATA_KARTU') { 
                         let jenis = document.getElementById('swal-jenis-kartu')?.value;
                         if (!jenis) { Swal.showValidationMessage('Jenis Kartu wajib dipilih!'); return false; }
                         if (jenis === 'Lainnya') {
@@ -1318,7 +1307,7 @@
                         const nomor = document.getElementById('swal-nomor-kartu')?.value;
                         if (!nomor) { Swal.showValidationMessage('Nomor Kartu wajib diisi!'); return false; }
                         vals = [jenis, nomor];
-                    } else if (sheet === 'DATA_KELUARGA') { // LOGIKA CAPTURE COMBO KELUARGA & KK
+                    } else if (sheet === 'DATA_KELUARGA') {
                         let kkData = null;
                         if (document.getElementById('swal-kk-nomor')) {
                             const noKK = document.getElementById('swal-kk-nomor').value;
@@ -1386,7 +1375,7 @@
                             if(sheet === 'RIWAYAT_JABATAN') fNamePrefix = 'SK_JABATAN';
                             if(sheet === 'RIWAYAT_KOMPETENSI') fNamePrefix = 'SERTIFIKAT_DIKLAT';
                             if(sheet === 'RIWAYAT_KGB') fNamePrefix = 'SK_KGB';
-                            if(sheet === 'DATA_KARTU') fNamePrefix = 'DOK_KARTU'; // PREFIX FILE KARTU
+                            if(sheet === 'DATA_KARTU') fNamePrefix = 'DOK_KARTU'; 
                             
                             const resFile = await apiCall({
                                 action: 'uploadFile', nip: STATE.user.nip, nama: STATE.profile.Nama_Lengkap,
@@ -1477,7 +1466,6 @@
             XLSX.utils.book_append_sheet(wb, ws, "Data Pegawai"); XLSX.writeFile(wb, "Data_Pegawai_RSUD_Koesma.xlsx");
         }
 
-        // --- AWAL FITUR CUSTOM EXPORT ---
         let exportDataKiri = [];
         let exportDataKanan = [];
         let activeKiri = null;
@@ -1486,7 +1474,6 @@
         function openExportModal() {
             if(!STATE.allPegawai || STATE.allPegawai.length === 0) return Swal.fire('Info', 'Tunggu data pegawai dimuat.', 'info');
             
-            // Ambil semua nama kolom dari baris pertama data pegawai (mengabaikan nilai kosong)
             const allKeys = Object.keys(STATE.allPegawai[0]);
             
             exportDataKiri = [...allKeys];
@@ -1564,15 +1551,12 @@
             const idx = exportDataKanan.indexOf(activeKanan);
             
             if (direction === 'up' && idx > 0) {
-                // Tukar dengan item di atasnya
                 [exportDataKanan[idx - 1], exportDataKanan[idx]] = [exportDataKanan[idx], exportDataKanan[idx - 1]];
             } else if (direction === 'down' && idx < exportDataKanan.length - 1) {
-                // Tukar dengan item di bawahnya
                 [exportDataKanan[idx + 1], exportDataKanan[idx]] = [exportDataKanan[idx], exportDataKanan[idx + 1]];
             }
             renderExportLists();
             
-            // Auto scroll mengikuti item
             setTimeout(() => {
                 const activeEl = document.querySelector('#list-kanan .bg-blue-500');
                 if(activeEl) activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -1584,7 +1568,6 @@
             
             showLoader();
             try {
-                // Mengkonversi array data sesuai urutan kolom yang dipilih
                 const customData = STATE.allPegawai.map(pegawai => {
                     let obj = {};
                     exportDataKanan.forEach(col => {
@@ -1605,7 +1588,6 @@
             }
             showLoader(false);
         }
-        // --- AKHIR FITUR CUSTOM EXPORT ---
 
         function exportMyData() {
             if (!STATE.profile) return Swal.fire('Info', 'Data profil belum dimuat', 'info');
@@ -1643,7 +1625,6 @@
             const urlFoto = p.URL_Foto_Profil || 'https://via.placeholder.com/150';
             const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID') : '-';
 
-            // Pembangun Tabel Riwayat Langsung dari JSON
             const tbodyPend = r.pendidikan?.length ? r.pendidikan.map(x => `<tr><td style="padding:8px; border:1px solid #ddd;">${x.Jenjang||'-'}</td><td style="padding:8px; border:1px solid #ddd;">${x.Instansi||'-'}</td><td style="padding:8px; border:1px solid #ddd;">${x.Jurusan||'-'}</td><td style="padding:8px; border:1px solid #ddd;">${x.Thn_Lulus||'-'}</td><td style="padding:8px; border:1px solid #ddd;">${x.No_Ijazah||'-'}</td><td style="padding:8px; border:1px solid #ddd;">${formatDate(x.Tgl_Ijazah)}</td><td style="padding:8px; border:1px solid #ddd;">${x.Pendidikan_Terakhir||'-'}</td></tr>`).join('') : `<tr><td colspan="7" style="padding:8px; border:1px solid #ddd; text-align:center;">Tidak ada data</td></tr>`;
             const tbodyPangkat = r.pangkat?.length ? r.pangkat.map(x => `<tr><td style="padding:8px; border:1px solid #ddd;">${x.Pangkat_Gol||'-'}</td><td style="padding:8px; border:1px solid #ddd;">${x.No_SK||'-'}</td><td style="padding:8px; border:1px solid #ddd;">${formatDate(x.TMT)}</td><td style="padding:8px; border:1px solid #ddd;">${formatDate(x.Tgl_SK)}</td><td style="padding:8px; border:1px solid #ddd;">${x.Masa_Kerja_Thn||'0'} Thn, ${x.Masa_Kerja_Bln||'0'} Bln</td><td style="padding:8px; border:1px solid #ddd;">${x.Pangkat_Sekarang||'-'}</td></tr>`).join('') : `<tr><td colspan="6" style="padding:8px; border:1px solid #ddd; text-align:center;">Tidak ada data</td></tr>`;
             const tbodyJabatan = r.jabatan?.length ? r.jabatan.map(x => `<tr><td style="padding:8px; border:1px solid #ddd;">${x.Jenis_Jabatan||'-'}</td><td style="padding:8px; border:1px solid #ddd;">${x.Jabatan||'-'}</td><td style="padding:8px; border:1px solid #ddd;">${x.Eselon||'-'}</td><td style="padding:8px; border:1px solid #ddd;">${x.Unit_Kerja||'-'}</td><td style="padding:8px; border:1px solid #ddd;">${formatDate(x.TMT_Pelantikan)}</td><td style="padding:8px; border:1px solid #ddd;">${x.Jabatan_Sekarang||'-'}</td></tr>`).join('') : `<tr><td colspan="6" style="padding:8px; border:1px solid #ddd; text-align:center;">Tidak ada data</td></tr>`;
@@ -1666,7 +1647,7 @@
                         <td style="vertical-align:top; padding-left:15px;">
                             <h3 style="margin:0 0 10px 0; font-size:18px; text-transform:uppercase;">${namaLengkap}</h3>
                             <table style="font-size:13px; text-align:left;">
-                                <tr><td style="padding-bottom:5px; width:100px;"><strong>NIP</strong></td><td style="padding-bottom:5px;">: ${p.NIP || '-'}</td></tr>
+                                <tr><td style="padding-bottom:5px; width:100px;"><strong>NIP / NIN</strong></td><td style="padding-bottom:5px;">: ${p.NIP || '-'}</td></tr>
                                 <tr><td style="padding-bottom:5px;"><strong>Pangkat/Gol</strong></td><td style="padding-bottom:5px;">: ${p.Pangkat_Golongan || '-'}</td></tr>
                                 <tr><td style="padding-bottom:5px;"><strong>Jabatan</strong></td><td style="padding-bottom:5px;">: ${p.Jabatan_Terakhir || '-'}</td></tr>
                                 <tr><td style="padding-bottom:5px;"><strong>Unit Kerja</strong></td><td style="padding-bottom:5px;">: ${p.Unit_Kerja || '-'}</td></tr>
@@ -1681,8 +1662,8 @@
                     <tr><td style="padding:5px; border:1px solid #ddd;">Jenis Kelamin</td><td style="padding:5px; border:1px solid #ddd;">${p.Jenis_Kelamin || '-'}</td></tr>
                     <tr><td style="padding:5px; border:1px solid #ddd;">Agama</td><td style="padding:5px; border:1px solid #ddd;">${p.Agama || '-'}</td></tr>
                     <tr><td style="padding:5px; border:1px solid #ddd;">Alamat</td><td style="padding:5px; border:1px solid #ddd;">${p.Alamat_Domisili || '-'}</td></tr>
-                    <tr><td style="padding:5px; border:1px solid #ddd;">No HP</td><td style="padding:5px; border:1px solid #ddd;">${p.No_HP || '-'}</td></tr>
-                    <tr><td style="padding:5px; border:1px solid #ddd;">Jenis ASN</td><td style="padding:5px; border:1px solid #ddd;">${p.Jenis_ASN || '-'}</td></tr>
+                    <tr><td style="padding:5px; border:1px solid #ddd;">No HP / WA</td><td style="padding:5px; border:1px solid #ddd;">${p.No_HP || '-'}</td></tr>
+                    <tr><td style="padding:5px; border:1px solid #ddd;">Status Kepeg.</td><td style="padding:5px; border:1px solid #ddd;">${p.Jenis_ASN || '-'}</td></tr>
                 </table>
 
                 <h4 style="background-color:#f0f0f0; padding:8px; margin:10px 0; border:1px solid #ddd; font-size:14px;">II. RIWAYAT PENDIDIKAN</h4>
