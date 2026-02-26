@@ -1748,7 +1748,27 @@
         // ==========================================
         function exportToExcel() {
             if(!STATE.allPegawai || STATE.allPegawai.length === 0) return Swal.fire('Info', 'Data belum dimuat', 'info');
-            const ws = XLSX.utils.json_to_sheet(STATE.allPegawai); const wb = XLSX.utils.book_new();
+            
+            // Format data tanggal sebelum diexport
+            const formattedData = STATE.allPegawai.map(pegawai => {
+                let obj = {};
+                for (let key in pegawai) {
+                    let val = pegawai[key];
+                    if (val && typeof val === 'string' && val.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)) {
+                        const d = new Date(val);
+                        if (!isNaN(d.getTime())) {
+                            const day = String(d.getDate()).padStart(2, '0');
+                            const month = String(d.getMonth() + 1).padStart(2, '0');
+                            const year = d.getFullYear();
+                            val = `${day}-${month}-${year}`;
+                        }
+                    }
+                    obj[key] = val;
+                }
+                return obj;
+            });
+
+            const ws = XLSX.utils.json_to_sheet(formattedData); const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Data Pegawai"); XLSX.writeFile(wb, "Data_Pegawai_RSUD_Koesma.xlsx");
         }
 
@@ -1857,7 +1877,20 @@
                 const customData = STATE.allPegawai.map(pegawai => {
                     let obj = {};
                     exportDataKanan.forEach(col => {
-                        obj[col.replace(/_/g, ' ')] = pegawai[col] || '-'; 
+                        let val = pegawai[col];
+                        
+                        // Cek dan format jika datanya merupakan string ISO tanggal
+                        if (val && typeof val === 'string' && val.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)) {
+                            const d = new Date(val);
+                            if (!isNaN(d.getTime())) {
+                                const day = String(d.getDate()).padStart(2, '0');
+                                const month = String(d.getMonth() + 1).padStart(2, '0');
+                                const year = d.getFullYear();
+                                val = `${day}-${month}-${year}`;
+                            }
+                        }
+                        
+                        obj[col.replace(/_/g, ' ')] = val || '-'; 
                     });
                     return obj;
                 });
