@@ -374,7 +374,6 @@
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm whitespace-nowrap" id="table-pegawai">
                                 <thead class="bg-gray-200 text-black">
-                                    <!-- Kolom Header Diperbarui: Kolom Status Disembunyikan -->
                                     <tr><th class="p-3">NIP / NIN</th><th class="p-3">Nama Pegawai</th><th class="p-3">Jabatan</th><th class="p-3">Jenis ASN</th><th class="p-3">Aksi</th></tr>
                                 </thead>
                                 <tbody id="tbody-pegawai"></tbody>
@@ -805,7 +804,6 @@
                     }
 
                     let tr = document.createElement('tr'); tr.className = 'border-b border-gray-300 hover:bg-gray-100 hover:text-black transition';
-                    // Kolom Status dihilangkan dari innerHTML
                     tr.innerHTML = `<td class="p-3">${p.NIP}</td><td class="p-3 font-medium">${p.Nama_Lengkap} ${roleBadge}</td><td class="p-3">${p.Jabatan_Terakhir || '-'}</td><td class="p-3 font-semibold text-gray-600 text-xs">${p.Jenis_ASN || '-'}</td><td class="p-3 flex gap-1.5"><button onclick="viewPegawaiAdmin('${p.NIP}')" class="text-green-600 hover:bg-green-200 bg-green-50 w-8 h-8 flex items-center justify-center rounded border border-green-200 shadow-sm transition" title="Lihat Detail"><i class="fas fa-eye"></i></button><button onclick="editPegawaiAdmin('${p.NIP}')" class="text-blue-600 hover:bg-blue-200 bg-blue-50 w-8 h-8 flex items-center justify-center rounded border border-blue-200 shadow-sm transition" title="Edit Data"><i class="fas fa-edit"></i></button><button onclick="cetakCVPegawai('${p.NIP}')" class="text-red-600 hover:bg-red-200 bg-red-50 w-8 h-8 flex items-center justify-center rounded border border-red-200 shadow-sm transition" title="Cetak CV (PDF)"><i class="fas fa-file-pdf"></i></button></td>`;
                     tbody.appendChild(tr);
                 });
@@ -821,7 +819,6 @@
             let btnNext = document.createElement('button'); btnNext.className = `px-3 py-1 border border-gray-300 rounded transition ${STATE.currentPage === totalPages ? 'opacity-50 cursor-not-allowed bg-gray-100 text-gray-400' : 'bg-white hover:bg-gray-200 text-black'}`; btnNext.innerHTML = '<i class="fas fa-chevron-right"></i>'; btnNext.disabled = STATE.currentPage === totalPages; btnNext.onclick = () => { STATE.currentPage++; renderTablePegawai(); }; container.appendChild(btnNext);
         }
 
-        // FUNGSI FILTER TABLE ADMIN DIPERBARUI
         function filterTablePegawai() {
             const term = document.getElementById('search-pegawai').value.toLowerCase();
             const filterAsn = document.getElementById('filter-status-asn').value;
@@ -1313,9 +1310,19 @@
             else if (kolom === 'Jenis_Kelamin') { inputType = 'select'; inputOptions = { 'Laki-laki': 'Laki-laki', 'Perempuan': 'Perempuan' }; } 
             else if (kolom === 'Jenis_ASN') { inputType = 'select'; inputOptions = { 'PNS': 'PNS', 'PPPK': 'PPPK', 'Tenaga Kontrak': 'Tenaga Kontrak', 'Tenaga Kegiatan': 'Tenaga Kegiatan' }; } 
             else if (kolom === 'Tgl_Lahir') { inputType = 'date'; }
+            else if (kolom === 'NIK_KTP' || kolom === 'No_NPWP' || kolom === 'No_BPJS' || kolom === 'No_TASPEN') { inputType = 'number'; } // Paksa tipe number agar memunculkan pad numerik pada handphone
 
             const swalConfig = { title: `Ubah ${kolom.replace(/_/g,' ')}`, input: inputType, inputValue: currentValue, showCancelButton: true };
             if (inputType === 'select') { swalConfig.inputOptions = inputOptions; swalConfig.inputPlaceholder = `-- Pilih --`; }
+
+            // Tambahan Validasi Khusus NIK 16 Digit
+            if (kolom === 'NIK_KTP') {
+                swalConfig.inputValidator = (value) => {
+                    if (!value || value.length !== 16) {
+                        return 'NIK harus terdiri dari tepat 16 angka!';
+                    }
+                };
+            }
 
             const { value: newVal } = await Swal.fire(swalConfig);
 
@@ -1372,7 +1379,7 @@
                 
                 if (selectedKolom.includes('Tgl_') || selectedKolom.includes('Tanggal_') || selectedKolom.includes('TMT')) { inputType = 'date'; }
                 if (selectedKolom.includes('File_')) { inputType = 'file'; } 
-                if (selectedKolom.includes('Masa_Kerja') || selectedKolom === 'Gaji_Pokok_Baru') { inputType = 'number'; } 
+                if (selectedKolom.includes('Masa_Kerja') || selectedKolom === 'Gaji_Pokok_Baru' || selectedKolom === 'NIK_Keluarga' || (sheet === 'DATA_KARTU' && selectedKolom === 'Nomor_Kartu' && rowData['Jenis_Kartu'] === 'KTP')) { inputType = 'number'; } 
 
                 const swalConfig = { title: `Ubah ${kolomOptions[selectedKolom]}`, input: inputType, showCancelButton: true };
                 
@@ -1386,6 +1393,15 @@
                     }
                 } else {
                     swalConfig.inputValue = rowData[selectedKolom] || '';
+                }
+
+                // Tambahan Validasi Khusus NIK 16 Digit
+                if (selectedKolom === 'NIK_Keluarga' || (sheet === 'DATA_KARTU' && selectedKolom === 'Nomor_Kartu' && rowData['Jenis_Kartu'] === 'KTP')) {
+                    swalConfig.inputValidator = (value) => {
+                        if (!value || value.length !== 16) {
+                            return 'NIK harus terdiri dari tepat 16 angka!';
+                        }
+                    };
                 }
 
                 if (inputType === 'file') {
@@ -1504,7 +1520,7 @@
                         <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded text-left">
                             <p class="text-sm font-bold text-blue-800 mb-1"><i class="fas fa-info-circle"></i> Upload Kartu Keluarga</p>
                             <p class="text-xs text-blue-700 mb-3">Karena ini pengisian pertama, Anda diwajibkan mengunggah Kartu Keluarga Anda.</p>
-                            <input id="swal-kk-nomor" class="swal2-input text-sm m-0 w-full mb-2" placeholder="Nomor Kartu Keluarga">
+                            <input id="swal-kk-nomor" class="swal2-input text-sm m-0 w-full mb-2" type="number" placeholder="Nomor Kartu Keluarga">
                             <input type="file" id="swal-file-kk" class="swal2-file text-sm m-0 w-full" accept="application/pdf, image/*">
                         </div>
                     `;
@@ -1512,7 +1528,7 @@
                 
                 htmlForm = kkHtml + `
                     <div class="text-left px-1 mb-1 font-bold text-sm text-gray-700">Data Anggota Keluarga:</div>
-                    <input id="swal-in1" class="swal2-input text-sm m-0 w-full mb-2" placeholder="NIK Anggota Keluarga">
+                    <input id="swal-in1" class="swal2-input text-sm m-0 w-full mb-2" type="number" placeholder="NIK Anggota Keluarga (16 Angka)">
                     <input id="swal-in2" class="swal2-input text-sm m-0 w-full mb-2" placeholder="Nama Anggota Keluarga">
                     <select id="swal-in3" class="swal2-select w-full m-0 mb-2 text-sm">
                         <option value="" disabled selected>-- Pilih Jenis Kelamin --</option>
@@ -1542,7 +1558,7 @@
                     <div id="div-kartu-lainnya" style="display:none;" class="mt-2 w-full">
                         <input id="swal-kartu-lainnya" class="swal2-input text-sm m-0 w-full" placeholder="Ketik Nama Kartu">
                     </div>
-                    <input id="swal-nomor-kartu" class="swal2-input text-sm m-0 mt-3 w-full" placeholder="Nomor Kartu">
+                    <input id="swal-nomor-kartu" class="swal2-input text-sm m-0 mt-3 w-full" type="number" placeholder="Nomor Kartu (Gunakan angka untuk KTP)">
                     
                     <div class="text-left mt-4 px-1"><label class="text-sm font-bold text-gray-700">File Dokumen Kartu (PDF atau Image, Maks 7MB):</label></div>
                     <input type="file" id="swal-file" class="swal2-file text-sm" accept="application/pdf, image/*">
@@ -1579,6 +1595,12 @@
                         }
                         const nomor = document.getElementById('swal-nomor-kartu')?.value;
                         if (!nomor) { Swal.showValidationMessage('Nomor Kartu wajib diisi!'); return false; }
+                        
+                        // Tambahan Validasi Khusus NIK KTP di Form Kartu
+                        if (jenis === 'KTP' && nomor.length !== 16) {
+                            Swal.showValidationMessage('Nomor NIK KTP harus terdiri dari tepat 16 angka!'); return false;
+                        }
+
                         vals = [jenis, nomor];
                     } else if (sheet === 'DATA_KELUARGA') {
                         let kkData = null;
@@ -1609,6 +1631,13 @@
                             } catch (err) { Swal.showValidationMessage('Gagal mengupload file KK: ' + err.message); return false; }
                         }
                         
+                        // Tambahan Validasi Khusus NIK Anggota Keluarga
+                        const nikKeluarga = document.getElementById('swal-in1').value;
+                        if (!nikKeluarga || nikKeluarga.length !== 16) {
+                            Swal.showValidationMessage('NIK Anggota Keluarga harus terdiri dari tepat 16 angka!');
+                            return false;
+                        }
+
                         let idx = 1;
                         while(true) {
                             const el = document.getElementById('swal-in'+idx);
