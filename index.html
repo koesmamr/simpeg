@@ -1046,22 +1046,75 @@
         // ACTION LOGIC (UPDATE & UPLOAD)
         // ==========================================
         
-        // --- TAMBAHAN: Variabel & Fungsi Bantuan untuk Alamat ---
-        const KECAMATAN_TUBAN = [
-            "Bancar", "Bangilan", "Grabagan", "Jatirogo", "Jenu", "Kenduruan", 
-            "Kerek", "Merakurak", "Montong", "Palang", "Parengan", "Plumpang", 
-            "Rengel", "Semanding", "Senori", "Singgahan", "Soko", "Tambakboyo", 
-            "Tuban", "Widang"
-        ];
+        // --- TAMBAHAN: Variabel & Fungsi Bantuan untuk Alamat Berjenjang ---
+        const DATA_WILAYAH_TUBAN = {
+            "Bancar": ["Bancar", "Banjarejo", "Bogorejo", "Boncong", "Bulu Jowo", "Bulu Meduro", "Cingklung", "Jatisari", "Karangrejo", "Kayen", "Latsari", "Margosuko", "Ngampelrejo", "Pugoh", "Siding", "Sidomulyo", "Sukoharjo", "Sukasari", "Tengger Kulon", "Tenggilisrejo", "Tlogoagung", "Toko", "Wonosari"],
+            "Bangilan": ["Bangilan", "Banuaju", "Bate", "Brangkal", "Cabak", "Kedungharjo", "Kedungjambangan", "Kedungmulyo", "Kumpulrejo", "Ngrojo", "Sidodadi", "Sidokumpul", "Sidotentrem", "Weden"],
+            "Grabagan": ["Banyubang", "Dahor", "Dermawuharjo", "Gesikan", "Grabagan", "Menyunyur", "Ngandong", "Ngarum", "Pakah", "Sumberejo", "Waleran"],
+            "Jatirogo": ["Bader", "Besowo", "Demit", "Dingil", "Jatiklabang", "Jombok", "Karangtengah", "Kebonharjo", "Kedungmakam", "Ketodan", "Ngepon", "Paseyan", "Sadang", "Sekaran", "Sidotentrem", "Sugihan", "Wangi", "Wotsogo"],
+            "Jenu": ["Beji", "Bogang", "Jenggolo", "Jenu", "Kaliuntu", "Karangasem", "Mentoso", "Purworejo", "Rawasan", "Remen", "Sekardadi", "Socorejo", "Sugihwaras", "Suwalan", "Tasikharjo", "Temaji", "Wadung", "Wayut"],
+            "Kenduruan": ["Bendonglateng", "Jamprong", "Jlodro", "Mlagen", "Sidohasri", "Sidomukti", "Sidorejo", "Sokogunung", "Tawaran"],
+            "Kerek": ["Gaji", "Gemulung", "Hargoretno", "Jarorejo", "Karanglo", "Kasian", "Kedungrejo", "Margomulyo", "Margorejo", "Mliwang", "Padasan", "Sidonganti", "Sumberarum", "Tenggerwetan", "Trantang", "Tuwiri Kulon", "Tuwiri Wetan"],
+            "Merakurak": ["Bogel", "Borehbangle", "Kapu", "Mandirejo", "Pongpongan", "Sambonggede", "Sembungrejo", "Sendanghaji", "Senori", "Sugihan", "Sumberejo", "Tahulu", "Tegalrejo", "Temandang", "Tobo", "Tuwiri Kulon", "Tuwiri Wetan"],
+            "Montong": ["Bringin", "Guwoterus", "Jetak", "Maindu", "Manjung", "Montongsekar", "Nguluhan", "Pakel", "Pucangan", "Sumurgung", "Talangkembar", "Talun", "Tanggulangin"],
+            "Palang": ["Cendoro", "Cepokorejo", "Dawung", "Gesikharjo", "Glodog", "Karangagung", "Ketandung", "Kradenan", "Leran Kulon", "Leran Wetan", "Ngimbang", "Palang", "Panyuran", "Pliwetan", "Pucangan", "Sumurgung", "Tasikmadu", "Tegalbang", "Wangun"],
+            "Parengan": ["Brangkal", "Cengkong", "Dagangan", "Kemlaten", "Kumpulrejo", "Margorejo", "Mergoasri", "Mojomalang", "Moyang", "Ngawun", "Pacing", "Parangbatu", "Selogabus", "Sembung", "Sendangrejo", "Suciharjo", "Sugihwaras", "Wukirharjo"],
+            "Plumpang": ["Bandungrejo", "Cangkring", "Dasin", "Jatimulyo", "Kebomlati", "Kedungrojo", "Kedungsoko", "Klotok", "Magersari", "Ngrayung", "Penidon", "Plandirejo", "Plumpang", "Sembungrejo", "Sumberagung", "Sumurjalak", "Trutup"],
+            "Rengel": ["Banjaragung", "Banjarejo", "Bulurejo", "Campurejo", "Kanorejo", "Karangtinoto", "Kebonagung", "Maibit", "Ngadirejo", "Pekuwon", "Prambonwetan", "Punggulrejo", "Rengel", "Sawahan", "Sumberejo", "Tambirejo"],
+            "Semanding": ["Bejagung", "Bektiharjo", "Boto", "Gedongombo", "Genaharjo", "Gesing", "Jadi", "Karang", "Kowang", "Ngino", "Penambangan", "Prunggahan Kulon", "Prunggahan Wetan", "Sambongrejo", "Semanding", "Tegalagung", "Tunah"],
+            "Senori": ["Banyuurip", "Jatisari", "Kaligede", "Katerban", "Leran", "Medalem", "Rayung", "Sendang", "Sidoarjo", "Sidoharjo", "Wanglu Kulon", "Wanglu Wetan", "Wonosari"],
+            "Singgahan": ["Binangun", "Kedungjambe", "Lajo Kidul", "Lajo Lor", "Mergosari", "Mulyoagung", "Mulyorejo", "Saringembat", "Tanggir", "Tanjungrejo", "Tingkis"],
+            "Soko": ["Bangunrejo", "Glagahtengah", "Gununganyar", "Jati", "Jegulo", "Kendalrejo", "Kenongosari", "Klotok", "Menilo", "Mentoro", "Mojosari", "Nguruan", "Pandanagung", "Pandanwangi", "Prambon Tergayang", "Rahayu", "Sandingrejo", "Simo", "Soko", "Sokosari", "Sumurcinde", "Tluwe", "Wadung"],
+            "Tambakboyo": ["Belikanget", "Cokrowati", "Dasmangan", "Dikir", "Gadon", "Glondonggede", "Kenanti", "Klari", "Klodro", "Mander", "Merkawang", "Ngulahan", "Pabeyan", "Plajan", "Pulogede", "Sawir", "Sotang", "Tambakboyo"],
+            "Tuban": ["Baturetno", "Doromukti", "Karangsari", "Kebonsari", "Kingking", "Kutorejo", "Latsari", "Mondokan", "Perbon", "Ronggomulyo", "Sendangharjo", "Sidomulyo", "Sidorejo", "Sugiharjo", "Sukolilo", "Sumberejo", "Sumurgung"],
+            "Widang": ["Banjar", "Bunut", "Compreng", "Kedungharjo", "Kujung", "Minohorejo", "Mlangi", "Mrutuk", "Ngadipuro", "Ngadirejo", "Patihan", "Simorejo", "Sumberejo", "Tegalsari", "Tegalrejo", "Widang"]
+        };
 
         window.toggleKecamatanInput = function() {
             const kab = document.getElementById('swal-alamat-kab').value.trim().toLowerCase();
-            const sel = document.getElementById('swal-alamat-kec-select');
-            const txt = document.getElementById('swal-alamat-kec-text');
+            const kecSel = document.getElementById('swal-alamat-kec-select');
+            const kecTxt = document.getElementById('swal-alamat-kec-text');
+            const desaSel = document.getElementById('swal-alamat-desa-select');
+            const desaTxt = document.getElementById('swal-alamat-desa-text');
+            
             if (kab === 'tuban' || kab === 'kabupaten tuban' || kab === 'kab. tuban') {
-                sel.style.display = 'block'; txt.style.display = 'none';
+                kecSel.style.display = 'block'; kecTxt.style.display = 'none';
+                desaSel.style.display = 'block'; desaTxt.style.display = 'none';
+                window.updateDesaDropdown(); 
             } else {
-                sel.style.display = 'none'; txt.style.display = 'block';
+                kecSel.style.display = 'none'; kecTxt.style.display = 'block';
+                desaSel.style.display = 'none'; desaTxt.style.display = 'block';
+            }
+        };
+
+        window.updateDesaDropdown = function() {
+            const kec = document.getElementById('swal-alamat-kec-select').value;
+            const desaSel = document.getElementById('swal-alamat-desa-select');
+            const desaTxt = document.getElementById('swal-alamat-desa-text');
+            
+            desaSel.innerHTML = '<option value="" disabled selected>-- Pilih Desa/Kelurahan --</option>';
+            desaTxt.style.display = 'none';
+            
+            if (kec && DATA_WILAYAH_TUBAN[kec]) {
+                const desas = DATA_WILAYAH_TUBAN[kec].sort(); 
+                desas.forEach(desa => {
+                    desaSel.innerHTML += `<option value="${desa}">${desa}</option>`;
+                });
+                // Menambahkan Opsi Lainnya untuk input manual
+                desaSel.innerHTML += `<option value="Lainnya" class="font-bold text-blue-600">Lainnya (Ketik Manual)...</option>`;
+            }
+        };
+
+        window.toggleDesaInput = function() {
+            const desaSel = document.getElementById('swal-alamat-desa-select').value;
+            const desaTxt = document.getElementById('swal-alamat-desa-text');
+            
+            if (desaSel === 'Lainnya') {
+                desaTxt.style.display = 'block';
+                desaTxt.value = '';
+                desaTxt.focus();
+            } else {
+                desaTxt.style.display = 'none';
             }
         };
         // --------------------------------------------------------
@@ -1071,8 +1124,7 @@
             
             // --- LOGIKA KHUSUS UNTUK ALAMAT DOMISILI ---
             if (kolom === 'Alamat_Domisili') {
-                const kecOptions = KECAMATAN_TUBAN.map(k => `<option value="${k}">${k}</option>`).join('');
-                // Jika sudah ada alamat sebelumnya, taruh di kolom detail sebagai cadangan
+                const kecOptions = Object.keys(DATA_WILAYAH_TUBAN).sort().map(k => `<option value="${k}">${k}</option>`).join('');
                 const defaultDetail = currentValue ? currentValue : '';
 
                 const { value: newAlamat } = await Swal.fire({
@@ -1085,7 +1137,7 @@
                             </div>
                             <div>
                                 <label class="font-bold text-gray-700">Kecamatan</label>
-                                <select id="swal-alamat-kec-select" class="swal2-select w-full m-0 mt-1 text-sm">
+                                <select id="swal-alamat-kec-select" class="swal2-select w-full m-0 mt-1 text-sm" onchange="updateDesaDropdown()">
                                     <option value="" disabled selected>-- Pilih Kecamatan --</option>
                                     ${kecOptions}
                                 </select>
@@ -1093,7 +1145,10 @@
                             </div>
                             <div>
                                 <label class="font-bold text-gray-700">Desa / Kelurahan</label>
-                                <input id="swal-alamat-desa" class="swal2-input w-full m-0 mt-1 text-sm" placeholder="Nama Desa / Kelurahan">
+                                <select id="swal-alamat-desa-select" class="swal2-select w-full m-0 mt-1 text-sm" style="display:none;" onchange="toggleDesaInput()">
+                                    <option value="" disabled selected>-- Pilih Desa/Kelurahan --</option>
+                                </select>
+                                <input id="swal-alamat-desa-text" class="swal2-input w-full m-0 mt-1 text-sm" placeholder="Ketik Nama Desa / Kelurahan" style="display:none;">
                             </div>
                             <div>
                                 <label class="font-bold text-gray-700">Jalan / RT / RW / Dusun</label>
@@ -1108,14 +1163,23 @@
                     preConfirm: () => {
                         const kab = document.getElementById('swal-alamat-kab').value.trim();
                         let kec = '';
+                        let desa = '';
                         
                         if (kab.toLowerCase().includes('tuban')) {
                             kec = document.getElementById('swal-alamat-kec-select').value;
+                            const desaDropdown = document.getElementById('swal-alamat-desa-select').value;
+                            
+                            // Ambil nilai dari teks jika user memilih 'Lainnya'
+                            if (desaDropdown === 'Lainnya') {
+                                desa = document.getElementById('swal-alamat-desa-text').value.trim();
+                            } else {
+                                desa = desaDropdown;
+                            }
                         } else {
                             kec = document.getElementById('swal-alamat-kec-text').value.trim();
+                            desa = document.getElementById('swal-alamat-desa-text').value.trim();
                         }
                         
-                        const desa = document.getElementById('swal-alamat-desa').value.trim();
                         const detail = document.getElementById('swal-alamat-detail').value.trim();
 
                         if (!kab || !kec || !desa || !detail) {
@@ -1123,7 +1187,6 @@
                             return false;
                         }
 
-                        // Menggabungkan form menjadi 1 string terstruktur
                         return `${detail}, Desa/Kel. ${desa}, Kec. ${kec}, Kab/Kota. ${kab}`;
                     }
                 });
@@ -1137,7 +1200,7 @@
                     } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
                     showLoader(false);
                 }
-                return; // Keluar dari fungsi agar tidak memunculkan popup standar
+                return; 
             }
             // ---------------------------------------------------
 
