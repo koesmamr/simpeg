@@ -479,7 +479,7 @@
 
     <!-- MAIN SCRIPT -->
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzkUkszNk24nIXJFuAtXnwTKZ_woDhffBGFWNR6ldrUNotKHsbyBjOckOe7-fc0hZgXzg/exec'; // TELAH DIPERBARUI
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzkUkszNk24nIXJFuAtXnwTKZ_woDhffBGFWNR6ldrUNotKHsbyBjOckOe7-fc0hZgXzg/exec';
         
         let STATE = { user: null, profile: null, riwayat: {}, identitasLain: null, allPegawai: [], myAntrian: [], filteredPegawai: [], currentPage: 1, rowsPerPage: 15 };
 
@@ -560,14 +560,39 @@
         }
 
         async function promptLinkNIP(email, role) {
-            const { value: nip } = await Swal.fire({ title: 'Akun Belum Ditautkan', text: `Email ${email} belum memiliki NIP. Masukkan NIP Anda:`, input: 'text', inputPlaceholder: 'Masukkan NIP 18 Digit', allowOutsideClick: false, showCancelButton: true });
-            if (nip) {
+            const { value: formValues } = await Swal.fire({
+                title: 'Tautkan Akun Baru',
+                html: `
+                    <div class="text-sm text-gray-600 mb-4">Email <b>${email}</b> belum terdaftar. Silakan masukkan NIP dan No. WhatsApp aktif Anda:</div>
+                    <input id="swal-input-nip" class="swal2-input !w-[85%] !mx-auto" placeholder="Masukkan NIP (18 Digit)" type="number">
+                    <input id="swal-input-wa" class="swal2-input !w-[85%] !mx-auto mt-3" placeholder="No. WhatsApp (Contoh: 08123...)" type="number">
+                `,
+                focusConfirm: false,
+                allowOutsideClick: false,
+                showCancelButton: true,
+                confirmButtonText: 'Tautkan Sekarang',
+                cancelButtonText: 'Batal',
+                preConfirm: () => {
+                    const nip = document.getElementById('swal-input-nip').value;
+                    const wa = document.getElementById('swal-input-wa').value;
+                    if (!nip || !wa) {
+                        Swal.showValidationMessage('NIP dan No. WhatsApp wajib diisi!');
+                        return false;
+                    }
+                    return { nip: nip, noWa: wa };
+                }
+            });
+
+            if (formValues) {
                 showLoader();
                 try {
-                    const res = await apiCall({ action: 'linkNip', email: email, nip: nip, role: role });
+                    const res = await apiCall({ action: 'linkNip', email: email, nip: formValues.nip, no_wa: formValues.noWa, role: role });
                     Swal.fire('Sukses', res.message, 'success');
                     STATE.user = res.user; localStorage.setItem('simpeg_user', JSON.stringify(STATE.user)); showApp();
-                } catch (err) { showLoader(false); Swal.fire('Gagal Menautkan', err.message, 'error'); }
+                } catch (err) { 
+                    showLoader(false); 
+                    Swal.fire('Gagal Menautkan', err.message, 'error'); 
+                }
             }
         }
 
@@ -1712,4 +1737,3 @@
     </script>
 </body>
 </html>
-
