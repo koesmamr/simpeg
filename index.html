@@ -156,6 +156,7 @@
                                     <h4 class="font-bold text-lg"><i class="fas fa-id-card mr-2 text-blue-500"></i> Data Personal</h4>
                                 </div>
                                 <table class="w-full text-sm">
+                                    <tr class="border-b border-gray-100"><td class="py-2 opacity-75 w-1/3">NIK</td><td id="p-nik-personal" class="font-medium">-</td><td class="text-right w-8"><button onclick="editField('IDENTITAS_LAIN', 'NIK_KTP')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
                                     <tr class="border-b border-gray-100"><td class="py-2 opacity-75 w-1/3">Tempat Lahir</td><td id="p-tempatlahir" class="font-medium">-</td><td class="text-right w-8"><button onclick="editField('PROFIL', 'Tempat_Lahir')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
                                     <tr class="border-b border-gray-100"><td class="py-2 opacity-75 w-1/3">Tanggal Lahir</td><td id="p-tgllahir" class="font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'Tgl_Lahir')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
                                     <tr class="border-b border-gray-100"><td class="py-2 opacity-75">Jenis Kelamin</td><td id="p-jk" class="font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'Jenis_Kelamin')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
@@ -665,6 +666,7 @@
         }
 
         function updateProfileUI() {
+            document.getElementById('p-nik-personal').innerHTML = getFieldHTML('NIK_KTP', STATE.identitasLain.NIK_KTP);
             document.getElementById('p-tempatlahir').innerHTML = getFieldHTML('Tempat_Lahir', STATE.profile.Tempat_Lahir);
             document.getElementById('p-tgllahir').innerHTML = getFieldHTML('Tgl_Lahir', STATE.profile.Tgl_Lahir ? new Date(STATE.profile.Tgl_Lahir).toLocaleDateString('id-ID') : '');
             document.getElementById('p-jk').innerHTML = getFieldHTML('Jenis_Kelamin', STATE.profile.Jenis_Kelamin);
@@ -1151,14 +1153,14 @@
         
         // --- TAMBAHAN: Variabel & Fungsi Bantuan untuk Alamat Berjenjang ---
         const DATA_WILAYAH_TUBAN = {
-            "Bancar": ["Bancar", "Banjarejo", "Bogorejo", "Boncong", "Bulu Jowo", "Bulu Meduro", "Cingklung", "Jatisari", "Karangrejo", "Kayen", "Latsari", "Margosuko", "Ngampelrejo", "Pugoh", "Siding", "Sidomulyo", "Sukoharjo", "Sukasari", "Tengger Kulon", "Tenggilisrejo", "Tlogoagung", "Toko", "Wonosari"],
+            "Bancar": ["Bancar", "Banjarjo", "Bogorejo", "Boncong", "Bulumeduro", "Bulujowo", "Cingklung", "Jatisari", "Karangrejo", "Kayen", "Latsari", "Margosuko", "Ngampelrejo", "Ngujuran", "Pugoh", "Sembungin", "Siding", "Sidomulyo", "Sukoharjo", "Sukolilo", "Sumberan", "Tenggerkulon", "Tergambang", "Tlogoagung"],
             "Bangilan": ["Bangilan", "Banuaju", "Bate", "Brangkal", "Cabak", "Kedungharjo", "Kedungjambangan", "Kedungmulyo", "Kumpulrejo", "Ngrojo", "Sidodadi", "Sidokumpul", "Sidotentrem", "Weden"],
             "Grabagan": ["Banyubang", "Dahor", "Dermawuharjo", "Gesikan", "Grabagan", "Menyunyur", "Ngandong", "Ngarum", "Pakah", "Sumberejo", "Waleran"],
             "Jatirogo": ["Bader", "Besowo", "Demit", "Dingil", "Jatiklabang", "Jombok", "Karangtengah", "Kebonharjo", "Kedungmakam", "Ketodan", "Ngepon", "Paseyan", "Sadang", "Sekaran", "Sidotentrem", "Sugihan", "Wangi", "Wotsogo"],
             "Jenu": ["Beji", "Bogang", "Jenggolo", "Jenu", "Kaliuntu", "Karangasem", "Mentoso", "Purworejo", "Rawasan", "Remen", "Sekardadi", "Socorejo", "Sugihwaras", "Suwalan", "Tasikharjo", "Temaji", "Wadung", "Wayut"],
             "Kenduruan": ["Bendonglateng", "Jamprong", "Jlodro", "Mlagen", "Sidohasri", "Sidomukti", "Sidorejo", "Sokogunung", "Tawaran"],
             "Kerek": ["Gaji", "Gemulung", "Hargoretno", "Jarorejo", "Karanglo", "Kasian", "Kedungrejo", "Margomulyo", "Margorejo", "Mliwang", "Padasan", "Sidonganti", "Sumberarum", "Tenggerwetan", "Trantang", "Tuwiri Kulon", "Tuwiri Wetan"],
-            "Merakurak": ["Bogel", "Borehbangle", "Kapu", "Mandirejo", "Pongpongan", "Sambonggede", "Sembungrejo", "Sendanghaji", "Senori", "Sugihan", "Sumberejo", "Tahulu", "Tegalrejo", "Temandang", "Tobo", "Tuwiri Kulon", "Tuwiri Wetan"],
+            "Merakurak": ["Bogorejo", "Borehbangle", "Kapu", "Mandirejo", "Pongpongan", "Sambonggede", "Sembungrejo", "Sendanghaji", "Senori", "Sugihan", "Sumber", "Sumberjo", "Tahulu", "Tegalrejo", "Temandang", "Tlogowaru", "Tobo", "Tuwiri Kulon", "Tuwiri Wetan"],
             "Montong": ["Bringin", "Guwoterus", "Jetak", "Maindu", "Manjung", "Montongsekar", "Nguluhan", "Pakel", "Pucangan", "Sumurgung", "Talangkembar", "Talun", "Tanggulangin"],
             "Palang": ["Cendoro", "Cepokorejo", "Dawung", "Gesikharjo", "Glodog", "Karangagung", "Ketandung", "Kradenan", "Leran Kulon", "Leran Wetan", "Ngimbang", "Palang", "Panyuran", "Pliwetan", "Pucangan", "Sumurgung", "Tasikmadu", "Tegalbang", "Wangun"],
             "Parengan": ["Brangkal", "Cengkong", "Dagangan", "Kemlaten", "Kumpulrejo", "Margorejo", "Mergoasri", "Mojomalang", "Moyang", "Ngawun", "Pacing", "Parangbatu", "Selogabus", "Sembung", "Sendangrejo", "Suciharjo", "Sugihwaras", "Wukirharjo"],
@@ -1166,10 +1168,10 @@
             "Rengel": ["Banjaragung", "Banjarejo", "Bulurejo", "Campurejo", "Kanorejo", "Karangtinoto", "Kebonagung", "Maibit", "Ngadirejo", "Pekuwon", "Prambonwetan", "Punggulrejo", "Rengel", "Sawahan", "Sumberejo", "Tambirejo"],
             "Semanding": ["Bejagung", "Bektiharjo", "Boto", "Gedongombo", "Genaharjo", "Gesing", "Jadi", "Karang", "Kowang", "Ngino", "Penambangan", "Prunggahan Kulon", "Prunggahan Wetan", "Sambongrejo", "Semanding", "Tegalagung", "Tunah"],
             "Senori": ["Banyuurip", "Jatisari", "Kaligede", "Katerban", "Leran", "Medalem", "Rayung", "Sendang", "Sidoarjo", "Sidoharjo", "Wanglu Kulon", "Wanglu Wetan", "Wonosari"],
-            "Singgahan": ["Binangun", "Kedungjambe", "Lajo Kidul", "Lajo Lor", "Mergosari", "Mulyoagung", "Mulyorejo", "Saringembat", "Tanggir", "Tanjungrejo", "Tingkis"],
+            "Singgahan": ["Binangun", "Kedungjambe", "Lajo Kidul", "Lajo Lor", "Mergosari", "Mulyoagung", "Mulyorejo", "Saringembat", "Tanggir", "Tanjungrejo", "Tingkis", "Tunggulrejo"],
             "Soko": ["Bangunrejo", "Glagahtengah", "Gununganyar", "Jati", "Jegulo", "Kendalrejo", "Kenongosari", "Klotok", "Menilo", "Mentoro", "Mojosari", "Nguruan", "Pandanagung", "Pandanwangi", "Prambon Tergayang", "Rahayu", "Sandingrejo", "Simo", "Soko", "Sokosari", "Sumurcinde", "Tluwe", "Wadung"],
             "Tambakboyo": ["Belikanget", "Cokrowati", "Dasmangan", "Dikir", "Gadon", "Glondonggede", "Kenanti", "Klari", "Klodro", "Mander", "Merkawang", "Ngulahan", "Pabeyan", "Plajan", "Pulogede", "Sawir", "Sotang", "Tambakboyo"],
-            "Tuban": ["Baturetno", "Doromukti", "Karangsari", "Kebonsari", "Kingking", "Kutorejo", "Latsari", "Mondokan", "Perbon", "Ronggomulyo", "Sendangharjo", "Sidomulyo", "Sidorejo", "Sugiharjo", "Sukolilo", "Sumberejo", "Sumurgung"],
+            "Tuban": ["Baturetno", "Doromukti", "Karangsari", "Kebonsari", "Kembangbilo", "Kingking", "Kutorejo", "Latsari", "Mondokan", "Perbon", "Ronggomulyo", "Sendangharjo", "Sidomulyo", "Sidorejo", "Sugiharjo", "Sukolilo", "Sumurgung"],
             "Widang": ["Banjar", "Bunut", "Compreng", "Kedungharjo", "Kujung", "Minohorejo", "Mlangi", "Mrutuk", "Ngadipuro", "Ngadirejo", "Patihan", "Simorejo", "Sumberejo", "Tegalsari", "Tegalrejo", "Widang"]
         };
 
