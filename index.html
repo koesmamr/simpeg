@@ -547,7 +547,6 @@
         async function handleCredentialResponse(response) {
             showLoader();
             try {
-                // SECURITY FIX: Kirim token JWT utuh langsung ke server. Backend yang akan men-decode dan verifikasi email.
                 const res = await apiCall({ action: 'login', token: response.credential });
                 
                 if (res.needNip) {
@@ -588,7 +587,6 @@
             if (formValues) {
                 showLoader();
                 try {
-                    // SECURITY FIX: Sertakan juga token otentikasi saat menautkan data untuk memvalidasi user
                     const res = await apiCall({ action: 'linkNip', token: token, nip: formValues.nip, no_wa: formValues.noWa, role: role });
                     Swal.fire('Sukses', res.message, 'success');
                     STATE.user = res.user; localStorage.setItem('simpeg_user', JSON.stringify(STATE.user)); showApp();
@@ -928,12 +926,10 @@
             }
         }
 
-        // TAMBAHAN: FUNGSI UNTUK MELIHAT DETAIL LENGKAP PEGAWAI DI SISI ADMIN
         async function viewPegawaiAdmin(nip) {
             if (!['admin', 'superadmin'].includes(STATE.user.role)) return;
             showLoader(true);
             try {
-                // Request seluruh data relasional pegawai dari Backend
                 const res = await apiCall({ action: 'getProfile', nip: nip });
                 const p = res.data;
                 if (!p) throw new Error('Data profil pegawai tidak ditemukan.');
@@ -990,7 +986,6 @@
                         </table>
                 `;
 
-                // Fungsi bantuan merender tabel riwayat secara ringkas
                 const buildList = (title, icon, data, mapFn) => {
                     let section = `<h4 class="font-bold text-md mb-2 text-blue-600 border-b pb-1 mt-4"><i class="fas ${icon} mr-2"></i>${title}</h4>`;
                     if(data.length === 0) {
@@ -1015,7 +1010,6 @@
 
                 showLoader(false);
 
-                // Munculkan popup dengan ukuran yang lebar
                 Swal.fire({
                     title: 'Data Lengkap Pegawai',
                     html: html,
@@ -1146,7 +1140,6 @@
         // ACTION LOGIC (UPDATE & UPLOAD)
         // ==========================================
         
-        // --- TAMBAHAN: Variabel & Fungsi Bantuan untuk Alamat Berjenjang ---
         const DATA_WILAYAH_TUBAN = {
             "Bancar": ["Bancar", "Banjarjo", "Bogorejo", "Boncong", "Bulumeduro", "Bulujowo", "Cingklung", "Jatisari", "Karangrejo", "Kayen", "Latsari", "Margosuko", "Ngampelrejo", "Ngujuran", "Pugoh", "Sembungin", "Siding", "Sidomulyo", "Sukoharjo", "Sukolilo", "Sumberan", "Tenggerkulon", "Tergambang", "Tlogoagung"],
             "Bangilan": ["Bangilan", "Banuaju", "Bate", "Brangkal", "Cabak", "Kedungharjo", "Kedungjambangan", "Kedungmulyo", "Kumpulrejo", "Ngrojo", "Sidodadi", "Sidokumpul", "Sidotentrem", "Weden"],
@@ -1200,7 +1193,6 @@
                 desas.forEach(desa => {
                     desaSel.innerHTML += `<option value="${desa}">${desa}</option>`;
                 });
-                // Menambahkan Opsi Lainnya untuk input manual
                 desaSel.innerHTML += `<option value="Lainnya" class="font-bold text-blue-600">Lainnya (Ketik Manual)...</option>`;
             }
         };
@@ -1217,12 +1209,10 @@
                 desaTxt.style.display = 'none';
             }
         };
-        // --------------------------------------------------------
 
         async function editField(sheet, kolom) {
             let currentValue = (sheet === 'IDENTITAS_LAIN') ? (STATE.identitasLain[kolom] || '') : (STATE.profile[kolom] || '');
             
-            // --- LOGIKA KHUSUS UNTUK ALAMAT DOMISILI ---
             if (kolom === 'Alamat_Domisili') {
                 const kecOptions = Object.keys(DATA_WILAYAH_TUBAN).sort().map(k => `<option value="${k}">${k}</option>`).join('');
                 const defaultDetail = currentValue ? currentValue : '';
@@ -1269,7 +1259,6 @@
                             kec = document.getElementById('swal-alamat-kec-select').value;
                             const desaDropdown = document.getElementById('swal-alamat-desa-select').value;
                             
-                            // Ambil nilai dari teks jika user memilih 'Lainnya'
                             if (desaDropdown === 'Lainnya') {
                                 desa = document.getElementById('swal-alamat-desa-text').value.trim();
                             } else {
@@ -1302,7 +1291,6 @@
                 }
                 return; 
             }
-            // ---------------------------------------------------
 
             let inputType = 'text'; let inputOptions = {}; 
             
@@ -1310,12 +1298,11 @@
             else if (kolom === 'Jenis_Kelamin') { inputType = 'select'; inputOptions = { 'Laki-laki': 'Laki-laki', 'Perempuan': 'Perempuan' }; } 
             else if (kolom === 'Jenis_ASN') { inputType = 'select'; inputOptions = { 'PNS': 'PNS', 'PPPK': 'PPPK', 'Tenaga Kontrak': 'Tenaga Kontrak', 'Tenaga Kegiatan': 'Tenaga Kegiatan' }; } 
             else if (kolom === 'Tgl_Lahir') { inputType = 'date'; }
-            else if (kolom === 'NIK_KTP' || kolom === 'No_NPWP' || kolom === 'No_BPJS' || kolom === 'No_TASPEN') { inputType = 'number'; } // Paksa tipe number agar memunculkan pad numerik pada handphone
+            else if (kolom === 'NIK_KTP' || kolom === 'No_NPWP' || kolom === 'No_BPJS' || kolom === 'No_TASPEN') { inputType = 'number'; } 
 
             const swalConfig = { title: `Ubah ${kolom.replace(/_/g,' ')}`, input: inputType, inputValue: currentValue, showCancelButton: true };
             if (inputType === 'select') { swalConfig.inputOptions = inputOptions; swalConfig.inputPlaceholder = `-- Pilih --`; }
 
-            // Tambahan Validasi Khusus NIK 16 Digit
             if (kolom === 'NIK_KTP') {
                 swalConfig.inputValidator = (value) => {
                     if (!value || value.length !== 16) {
@@ -1395,7 +1382,6 @@
                     swalConfig.inputValue = rowData[selectedKolom] || '';
                 }
 
-                // Tambahan Validasi Khusus NIK 16 Digit
                 if (selectedKolom === 'NIK_Keluarga' || (sheet === 'DATA_KARTU' && selectedKolom === 'Nomor_Kartu' && rowData['Jenis_Kartu'] === 'KTP')) {
                     swalConfig.inputValidator = (value) => {
                         if (!value || value.length !== 16) {
@@ -1596,7 +1582,6 @@
                         const nomor = document.getElementById('swal-nomor-kartu')?.value;
                         if (!nomor) { Swal.showValidationMessage('Nomor Kartu wajib diisi!'); return false; }
                         
-                        // Tambahan Validasi Khusus NIK KTP di Form Kartu
                         if (jenis === 'KTP' && nomor.length !== 16) {
                             Swal.showValidationMessage('Nomor NIK KTP harus terdiri dari tepat 16 angka!'); return false;
                         }
@@ -1631,7 +1616,6 @@
                             } catch (err) { Swal.showValidationMessage('Gagal mengupload file KK: ' + err.message); return false; }
                         }
                         
-                        // Tambahan Validasi Khusus NIK Anggota Keluarga
                         const nikKeluarga = document.getElementById('swal-in1').value;
                         if (!nikKeluarga || nikKeluarga.length !== 16) {
                             Swal.showValidationMessage('NIK Anggota Keluarga harus terdiri dari tepat 16 angka!');
@@ -1894,7 +1878,7 @@
         function exportMyData() {
             if (!STATE.profile) return Swal.fire('Info', 'Data profil belum dimuat', 'info');
             showLoader(true);
-            generateAndDownloadCV(STATE.profile, STATE.riwayat);
+            generateAndDownloadCV(STATE.profile, STATE.riwayat, STATE.identitasLain);
         }
 
         async function cetakCVPegawai(nip) {
@@ -1912,14 +1896,15 @@
                     keluarga: res.data_keluarga || []
                 };
                 
-                generateAndDownloadCV(res.data, riwayatData);
+                const identitas = (res.identitas_lain && res.identitas_lain.length > 0) ? res.identitas_lain[0] : {};
+                generateAndDownloadCV(res.data, riwayatData, identitas);
             } catch (e) {
                 showLoader(false);
                 Swal.fire('Error', e.message, 'error');
             }
         }
 
-        function generateAndDownloadCV(p, r) {
+        function generateAndDownloadCV(p, r, identitas = {}) {
             const cvContainer = document.createElement('div');
             cvContainer.style.padding = '20px'; cvContainer.style.fontFamily = 'Arial, sans-serif'; cvContainer.style.color = '#000'; cvContainer.style.backgroundColor = '#fff';
 
@@ -1950,6 +1935,7 @@
                             <h3 style="margin:0 0 10px 0; font-size:18px; text-transform:uppercase;">${namaLengkap}</h3>
                             <table style="font-size:13px; text-align:left;">
                                 <tr><td style="padding-bottom:5px; width:100px;"><strong>NIP / NIN</strong></td><td style="padding-bottom:5px;">: ${p.NIP || '-'}</td></tr>
+                                <tr><td style="padding-bottom:5px;"><strong>NIK KTP</strong></td><td style="padding-bottom:5px;">: ${identitas.NIK_KTP || '-'}</td></tr>
                                 <tr><td style="padding-bottom:5px;"><strong>Pangkat/Gol</strong></td><td style="padding-bottom:5px;">: ${p.Pangkat_Golongan || '-'}</td></tr>
                                 <tr><td style="padding-bottom:5px;"><strong>Jabatan</strong></td><td style="padding-bottom:5px;">: ${p.Jabatan_Terakhir || '-'}</td></tr>
                                 <tr><td style="padding-bottom:5px;"><strong>Unit Kerja</strong></td><td style="padding-bottom:5px;">: ${p.Unit_Kerja || '-'}</td></tr>
@@ -1960,7 +1946,8 @@
 
                 <h4 style="background-color:#f0f0f0; padding:8px; margin:10px 0; border:1px solid #ddd; font-size:14px;">I. KETERANGAN PERORANGAN</h4>
                 <table style="width:100%; border-collapse:collapse; font-size:12px; margin-bottom:15px;">
-                    <tr><td style="width:30%; padding:5px; border:1px solid #ddd;">Tempat, Tanggal Lahir</td><td style="padding:5px; border:1px solid #ddd;">${p.Tempat_Lahir || '-'}, ${formatDate(p.Tgl_Lahir)}</td></tr>
+                    <tr><td style="width:30%; padding:5px; border:1px solid #ddd;">NIK KTP</td><td style="padding:5px; border:1px solid #ddd;">${identitas.NIK_KTP || '-'}</td></tr>
+                    <tr><td style="padding:5px; border:1px solid #ddd;">Tempat, Tanggal Lahir</td><td style="padding:5px; border:1px solid #ddd;">${p.Tempat_Lahir || '-'}, ${formatDate(p.Tgl_Lahir)}</td></tr>
                     <tr><td style="padding:5px; border:1px solid #ddd;">Jenis Kelamin</td><td style="padding:5px; border:1px solid #ddd;">${p.Jenis_Kelamin || '-'}</td></tr>
                     <tr><td style="padding:5px; border:1px solid #ddd;">Agama</td><td style="padding:5px; border:1px solid #ddd;">${p.Agama || '-'}</td></tr>
                     <tr><td style="padding:5px; border:1px solid #ddd;">Alamat</td><td style="padding:5px; border:1px solid #ddd;">${p.Alamat_Domisili || '-'}</td></tr>
