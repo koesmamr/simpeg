@@ -1747,10 +1747,10 @@
         // EXPORT LOGIC
         // ==========================================
         function exportToExcel() {
-            if(!STATE.allPegawai || STATE.allPegawai.length === 0) return Swal.fire('Info', 'Data belum dimuat', 'info');
+            if(!STATE.filteredPegawai || STATE.filteredPegawai.length === 0) return Swal.fire('Info', 'Tidak ada data untuk diexport (periksa filter Anda)', 'info');
             
             // Format data tanggal sebelum diexport
-            const formattedData = STATE.allPegawai.map(pegawai => {
+            const formattedData = STATE.filteredPegawai.map(pegawai => {
                 let obj = {};
                 for (let key in pegawai) {
                     let val = pegawai[key];
@@ -1871,10 +1871,11 @@
 
         function processCustomExport() {
             if (exportDataKanan.length === 0) return Swal.fire('Peringatan', 'Anda belum memindahkan data satupun ke kotak kanan!', 'warning');
-            
+            if(!STATE.filteredPegawai || STATE.filteredPegawai.length === 0) return Swal.fire('Info', 'Tidak ada data untuk diexport (periksa filter Anda)', 'info');
+
             showLoader();
             try {
-                const customData = STATE.allPegawai.map(pegawai => {
+                const customData = STATE.filteredPegawai.map(pegawai => {
                     let obj = {};
                     exportDataKanan.forEach(col => {
                         let val = pegawai[col];
