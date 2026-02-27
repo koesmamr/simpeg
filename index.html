@@ -1752,8 +1752,20 @@
             // Format data tanggal sebelum diexport
             const formattedData = STATE.filteredPegawai.map(pegawai => {
                 let obj = {};
+                
+                // Gabungkan Gelar Depan, Nama Lengkap, dan Gelar Belakang
+                let namaLengkapDenganGelar = (pegawai.Gelar_Depan ? pegawai.Gelar_Depan + ' ' : '') + 
+                                             (pegawai.Nama_Lengkap || '-') + 
+                                             (pegawai.Gelar_Belakang ? ', ' + pegawai.Gelar_Belakang : '');
+
                 for (let key in pegawai) {
                     let val = pegawai[key];
+                    
+                    // Gunakan nama yang sudah digabung dengan gelar jika kolomnya adalah Nama_Lengkap
+                    if (key === 'Nama_Lengkap') {
+                        val = namaLengkapDenganGelar;
+                    }
+
                     if (val && typeof val === 'string' && val.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)) {
                         const d = new Date(val);
                         if (!isNaN(d.getTime())) {
@@ -1877,8 +1889,19 @@
             try {
                 const customData = STATE.filteredPegawai.map(pegawai => {
                     let obj = {};
+                    
+                    // Gabungkan Gelar Depan, Nama Lengkap, dan Gelar Belakang
+                    let namaLengkapDenganGelar = (pegawai.Gelar_Depan ? pegawai.Gelar_Depan + ' ' : '') + 
+                                                 (pegawai.Nama_Lengkap || '-') + 
+                                                 (pegawai.Gelar_Belakang ? ', ' + pegawai.Gelar_Belakang : '');
+
                     exportDataKanan.forEach(col => {
                         let val = pegawai[col];
+                        
+                        // Gunakan nama yang sudah digabung dengan gelar jika kolomnya adalah Nama_Lengkap
+                        if (col === 'Nama_Lengkap') {
+                            val = namaLengkapDenganGelar;
+                        }
                         
                         // Cek dan format jika datanya merupakan string ISO tanggal
                         if (val && typeof val === 'string' && val.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)) {
