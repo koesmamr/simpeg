@@ -1760,10 +1760,11 @@
 
                 for (let key in pegawai) {
                     let val = pegawai[key];
+                    let colName = key;
                     
-                    // Gunakan nama yang sudah digabung dengan gelar jika kolomnya adalah Nama_Lengkap
+                    // Rename Nama_Lengkap menjadi Nama_KTP (tanpa gelar)
                     if (key === 'Nama_Lengkap') {
-                        val = namaLengkapDenganGelar;
+                        colName = 'Nama_KTP';
                     }
 
                     if (val && typeof val === 'string' && val.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)) {
@@ -1775,9 +1776,19 @@
                             val = `${day}-${month}-${year}`;
                         }
                     }
-                    obj[key] = val;
+                    obj[colName] = val;
                 }
-                return obj;
+                
+                // Sisipkan kolom Nama Lengkap (dengan gelar) tepat setelah Nama KTP
+                const finalObj = {};
+                for (let k in obj) {
+                    finalObj[k] = obj[k];
+                    if (k === 'Nama_KTP') {
+                        finalObj['Nama_Lengkap'] = namaLengkapDenganGelar;
+                    }
+                }
+
+                return finalObj;
             });
 
             const ws = XLSX.utils.json_to_sheet(formattedData); const wb = XLSX.utils.book_new();
@@ -1792,7 +1803,17 @@
         function openExportModal() {
             if(!STATE.allPegawai || STATE.allPegawai.length === 0) return Swal.fire('Info', 'Tunggu data pegawai dimuat.', 'info');
             
-            const allKeys = Object.keys(STATE.allPegawai[0]);
+            let allKeys = Object.keys(STATE.allPegawai[0]);
+            
+            // Tambahkan virtual kolom untuk Nama Lengkap dengan Gelar
+            if (!allKeys.includes('Nama_Lengkap_Beserta_Gelar')) {
+                const idx = allKeys.indexOf('Nama_Lengkap');
+                if (idx !== -1) {
+                    allKeys.splice(idx + 1, 0, 'Nama_Lengkap_Beserta_Gelar');
+                } else {
+                    allKeys.push('Nama_Lengkap_Beserta_Gelar');
+                }
+            }
             
             exportDataKiri = [...allKeys];
             exportDataKanan = [];
@@ -1807,12 +1828,18 @@
             document.getElementById('modal-export-custom').classList.add('hidden');
         }
 
+        function getDisplayName(item) {
+            if (item === 'Nama_Lengkap') return 'Nama KTP';
+            if (item === 'Nama_Lengkap_Beserta_Gelar') return 'Nama Lengkap (+ Gelar)';
+            return item.replace(/_/g, ' ');
+        }
+
         function renderExportLists() {
             const elKiri = document.getElementById('list-kiri');
             const elKanan = document.getElementById('list-kanan');
             
             elKiri.innerHTML = exportDataKiri.map(item => 
-                `<div onclick="selectExportItem('kiri', '${item}')" class="p-2 cursor-pointer border-b border-gray-100 text-sm transition-colors select-none ${activeKiri === item ? 'bg-blue-500 text-white font-medium shadow-inner' : 'hover:bg-blue-50 text-gray-700'}">${item.replace(/_/g, ' ')}</div>`
+                `<div onclick="selectExportItem('kiri', '${item}')" class="p-2 cursor-pointer border-b border-gray-100 text-sm transition-colors select-none ${activeKiri === item ? 'bg-blue-500 text-white font-medium shadow-inner' : 'hover:bg-blue-50 text-gray-700'}">${getDisplayName(item)}</div>`
             ).join('');
             
             if(exportDataKanan.length === 0) {
@@ -1820,7 +1847,7 @@
             } else {
                 elKanan.innerHTML = exportDataKanan.map((item, idx) => 
                     `<div onclick="selectExportItem('kanan', '${item}')" class="p-2 cursor-pointer border-b border-gray-100 text-sm flex gap-2 items-center transition-colors select-none ${activeKanan === item ? 'bg-blue-500 text-white font-medium shadow-inner' : 'hover:bg-blue-50 text-gray-700'}">
-                        <span class="opacity-50 text-xs w-5 font-bold">${idx+1}.</span> ${item.replace(/_/g, ' ')}
+                        <span class="opacity-50 text-xs w-5 font-bold">${idx+1}.</span> ${getDisplayName(item)}
                     </div>`
                 ).join('');
             }
@@ -1898,8 +1925,7 @@
                     exportDataKanan.forEach(col => {
                         let val = pegawai[col];
                         
-                        // Gunakan nama yang sudah digabung dengan gelar jika kolomnya adalah Nama_Lengkap
-                        if (col === 'Nama_Lengkap') {
+                        if (col === 'Nama_Lengkap_Beserta_Gelar') {
                             val = namaLengkapDenganGelar;
                         }
                         
@@ -1914,7 +1940,12 @@
                             }
                         }
                         
-                        obj[col.replace(/_/g, ' ')] = val || '-'; 
+                        let colName = col;
+                        if (col === 'Nama_Lengkap') colName = 'Nama KTP';
+                        else if (col === 'Nama_Lengkap_Beserta_Gelar') colName = 'Nama Lengkap';
+                        else colName = col.replace(/_/g, ' ');
+
+                        obj[colName] = val || '-'; 
                     });
                     return obj;
                 });
