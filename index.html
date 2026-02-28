@@ -643,6 +643,7 @@
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzkUkszNk24nIXJFuAtXnwTKZ_woDhffBGFWNR6ldrUNotKHsbyBjOckOe7-fc0hZgXzg/exec';
         
         let STATE = { user: null, profile: null, riwayat: {}, identitasLain: null, allPegawai: [], myAntrian: [], allAntrianGlobal: [], filteredPegawai: [], currentPage: 1, rowsPerPage: 15 };
+        let isRiwayatFetched = false;
 
         const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true, didOpen: (toast) => { toast.addEventListener('mouseenter', Swal.stopTimer); toast.addEventListener('mouseleave', Swal.resumeTimer); } });
 
@@ -769,6 +770,12 @@
             document.getElementById('user-info-name').innerText = STATE.user.nip; document.getElementById('user-info-role').innerText = STATE.user.role;
             if (['admin', 'superadmin'].includes(STATE.user.role)) { document.getElementById('admin-menu-section').classList.remove('hidden'); }
             
+            // OPTIMASI #5: Matikan animasi background setelah login untuk hemat CPU perangkat pengguna
+            if(window.pJSDom && window.pJSDom.length > 0) {
+                window.pJSDom[0].pJS.fn.vendors.destroypJS();
+                window.pJSDom = [];
+            }
+
             await fetchProfile(); // Profile & User Antrian loaded here
             
             const urlHash = window.location.hash.substring(1);
@@ -845,35 +852,22 @@
         async function renderAdminDashboard() {
             showLoader(true);
             try {
-                // Background fetch if empty
-                if(STATE.allPegawai.length === 0) {
-                    const res = await apiCall({ action: 'getAllData', role: STATE.user.role });
-                    STATE.allPegawai = res.data || [];
-                }
-                if(STATE.allAntrianGlobal.length === 0) {
-                    const resQ = await apiCall({ action: 'getAllAntrian', role: STATE.user.role });
-                    STATE.allAntrianGlobal = resQ.data || [];
-                }
+                // OPTIMASI #2: Server-Side Aggregation - Langsung ambil statistik ringan dari backend
+                const res = await apiCall({ action: 'getDashboardAdminStats', role: STATE.user.role });
+                const stats = res.stats;
+                const recentPending = res.recentAntrian;
 
-                // Hitung KPI
-                const total = STATE.allPegawai.length;
-                const pns = STATE.allPegawai.filter(p => p.Jenis_ASN === 'PNS').length;
-                const pppk = STATE.allPegawai.filter(p => p.Jenis_ASN === 'PPPK').length;
-                const kontrak = STATE.allPegawai.filter(p => p.Jenis_ASN === 'Tenaga Kontrak').length;
-                const kegiatan = STATE.allPegawai.filter(p => p.Jenis_ASN === 'Tenaga Kegiatan').length;
-                const pendingQ = STATE.allAntrianGlobal.filter(a => a.Status === 'Pending');
-
-                document.getElementById('dash-admin-total').innerText = total;
-                document.getElementById('dash-admin-pns').innerText = pns;
-                document.getElementById('dash-admin-pppk').innerText = pppk;
-                document.getElementById('dash-admin-kontrak').innerText = kontrak;
-                document.getElementById('dash-admin-kegiatan').innerText = kegiatan;
-                document.getElementById('dash-admin-antrian').innerText = pendingQ.length;
+                document.getElementById('dash-admin-total').innerText = stats.total;
+                document.getElementById('dash-admin-pns').innerText = stats.pns;
+                document.getElementById('dash-admin-pppk').innerText = stats.pppk;
+                document.getElementById('dash-admin-kontrak').innerText = stats.kontrak;
+                document.getElementById('dash-admin-kegiatan').innerText = stats.kegiatan;
+                document.getElementById('dash-admin-antrian').innerText = stats.pendingAntrian;
 
                 // Update Badge Sidebar
                 const badge = document.getElementById('badge-antrian');
-                if(pendingQ.length > 0) {
-                    badge.innerText = pendingQ.length;
+                if(stats.pendingAntrian > 0) {
+                    badge.innerText = stats.pendingAntrian;
                     badge.classList.remove('hidden');
                 } else {
                     badge.classList.add('hidden');
@@ -882,10 +876,9 @@
                 // Render Mini Table Antrian
                 const tbody = document.getElementById('dash-admin-table-antrian');
                 tbody.innerHTML = '';
-                if(pendingQ.length === 0) {
+                if(recentPending.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="4" class="text-center p-6 opacity-70 italic text-gray-500 bg-gray-50 rounded-b-lg"><i class="fas fa-check-circle text-green-500 text-xl mb-2 block"></i>Semua pengajuan telah diverifikasi.</td></tr>';
                 } else {
-                    const recentPending = pendingQ.slice(0, 5); // 5 terlama/terbaru
                     recentPending.forEach(a => {
                         const tgl = new Date(a.Tgl_Pengajuan).toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
                         const labelKategori = a.Sheet_Tujuan.replace(/_/g, ' ');
@@ -913,16 +906,9 @@
         // ==========================================
         async function fetchProfile() {
             try {
-                const res = await apiCall({ action: 'getProfile', nip: STATE.user.nip });
+                // OPTIMASI #1: Lazy Loading - Hanya tarik profil utama agar login instan (dibawah 1 detik)
+                const res = await apiCall({ action: 'getProfileMain', nip: STATE.user.nip });
                 STATE.profile = res.data;
-                
-                STATE.riwayat.pendidikan = res.riwayat_pendidikan || [];
-                STATE.riwayat.pangkat = res.riwayat_pangkat || [];
-                STATE.riwayat.jabatan = res.riwayat_jabatan || [];
-                STATE.riwayat.kompetensi = res.riwayat_kompetensi || []; 
-                STATE.riwayat.kgb = res.riwayat_kgb || [];
-                STATE.riwayat.keluarga = res.data_keluarga || [];
-                STATE.riwayat.kartu = res.data_kartu || []; 
                 STATE.identitasLain = (res.identitas_lain && res.identitas_lain.length > 0) ? res.identitas_lain[0] : {};
                 
                 if(STATE.profile) {
@@ -937,9 +923,33 @@
                     if(STATE.profile.URL_Foto_Profil) { document.getElementById('profile-img').src = STATE.profile.URL_Foto_Profil; }
 
                     updateProfileUI();
-                    renderSemuaRiwayat();
+                    
+                    // Panggil data riwayat yang berat di belakang layar secara diam-diam
+                    fetchRiwayatLazily();
                 }
             } catch (err) { console.error(err); Swal.fire('Error', 'Gagal memuat profil', 'error'); }
+        }
+
+        async function fetchRiwayatLazily() {
+            if(isRiwayatFetched) return;
+            try {
+                const res = await apiCall({ action: 'getRiwayatUser', nip: STATE.user.nip });
+                STATE.riwayat.pendidikan = res.riwayat_pendidikan || [];
+                STATE.riwayat.pangkat = res.riwayat_pangkat || [];
+                STATE.riwayat.jabatan = res.riwayat_jabatan || [];
+                STATE.riwayat.kompetensi = res.riwayat_kompetensi || []; 
+                STATE.riwayat.kgb = res.riwayat_kgb || [];
+                STATE.riwayat.keluarga = res.data_keluarga || [];
+                STATE.riwayat.kartu = res.data_kartu || []; 
+                
+                isRiwayatFetched = true;
+                renderSemuaRiwayat();
+                
+                // Segarkan angka total JP Diklat di dashboard user jika dia sudah membukanya
+                if (window.location.hash.substring(1) === 'beranda' || window.location.hash === '') {
+                    renderUserDashboard();
+                }
+            } catch(e) { console.error('Gagal load riwayat', e); }
         }
 
         function getFieldHTML(kolom, currentValue) {
@@ -1732,7 +1742,11 @@
                     try {
                         await apiCall({ action: 'submitUpdate', executorRole: STATE.user.role, nip_target: STATE.user.nip, sheet_target: sheet, baris_target: idData, kolom_target: selectedKolom, nilai_baru: newVal });
                         Toast.fire({ icon: 'success', title: 'Perubahan berhasil masuk antrian.' });
-                        if(['admin','superadmin'].includes(STATE.user.role)) { fetchProfile(); } else { await fetchMyAntrian(); renderSemuaRiwayat(); renderDashboard(); }
+                        if(['admin','superadmin'].includes(STATE.user.role)) { 
+                            isRiwayatFetched = false; await fetchProfile(); await fetchRiwayatLazily(); 
+                        } else { 
+                            await fetchMyAntrian(); isRiwayatFetched = false; await fetchRiwayatLazily(); renderDashboard(); 
+                        }
                     } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
                     showLoader(false);
                 }
@@ -1999,7 +2013,11 @@
                             sheet_target: sheet, kolom_target: 'Pengajuan Data Baru', nilai_baru: nilaiKeluarga
                         });
                         Toast.fire({ icon: 'success', title: 'Pengajuan data masuk antrian.' });
-                        if(['admin','superadmin'].includes(STATE.user.role)) { fetchProfile(); } else { fetchMyAntrian(); renderDashboard(); }
+                        if(['admin','superadmin'].includes(STATE.user.role)) { 
+                            isRiwayatFetched = false; await fetchProfile(); await fetchRiwayatLazily(); 
+                        } else { 
+                            await fetchMyAntrian(); isRiwayatFetched = false; await fetchRiwayatLazily(); renderDashboard(); 
+                        }
                     } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
                     showLoader(false);
                 } else if (formValues.length > 0) {
@@ -2011,7 +2029,11 @@
                             sheet_target: sheet, kolom_target: 'Pengajuan Data Baru', nilai_baru: nilaiGabungan
                         });
                         Toast.fire({ icon: 'success', title: 'Pengajuan data masuk antrian.' });
-                        if(['admin','superadmin'].includes(STATE.user.role)) { fetchProfile(); } else { fetchMyAntrian(); renderDashboard(); }
+                        if(['admin','superadmin'].includes(STATE.user.role)) { 
+                            isRiwayatFetched = false; await fetchProfile(); await fetchRiwayatLazily(); 
+                        } else { 
+                            await fetchMyAntrian(); isRiwayatFetched = false; await fetchRiwayatLazily(); renderDashboard(); 
+                        }
                     } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
                     showLoader(false);
                 }
@@ -2271,9 +2293,15 @@
             showLoader(false);
         }
 
-        function exportMyData() {
+        async function exportMyData() {
             if (!STATE.profile) return Swal.fire('Info', 'Data profil belum dimuat', 'info');
             showLoader(true);
+            
+            // Pengaman: Jika user menekan tombol cetak sangat cepat sebelum data riwayat selesai ditarik (lazy load)
+            if (!isRiwayatFetched) {
+                await fetchRiwayatLazily();
+            }
+            
             generateAndDownloadCV(STATE.profile, STATE.riwayat, STATE.identitasLain);
         }
 
