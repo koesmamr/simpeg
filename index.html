@@ -78,7 +78,7 @@
     <!-- APP CONTAINER -->
     <div id="app-container" class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
-        <aside id="sidebar" class="sidebar w-64 flex flex-col hidden md:flex absolute md:relative z-20 h-full">
+        <aside id="sidebar" class="sidebar w-64 flex flex-col hidden md:flex absolute md:relative z-20 h-full shadow-lg">
             <div class="p-4 flex items-center justify-between border-b border-gray-600">
                 <div class="flex items-center">
                     <img src="https://github.com/simpegkoesma/1/blob/main/logo%20rsud%202%20png.png?raw=true" alt="Logo" class="h-8 mr-3 object-contain">
@@ -87,8 +87,11 @@
                 <button onclick="toggleSidebar()" class="md:hidden"><i class="fas fa-times"></i></button>
             </div>
             <nav class="flex-1 overflow-y-auto p-2">
-                <div class="text-xs uppercase opacity-50 px-3 mt-2 mb-1">Data Pegawai</div>
-                <div id="nav-tab-profil" class="sidebar-item p-3 rounded mb-1 flex items-center bg-gray-700 bg-opacity-50" onclick="window.location.hash='profil'"><i class="fas fa-id-card mr-3 w-5"></i> Profil Utama</div>
+                <div class="text-xs uppercase opacity-50 px-3 mt-2 mb-1">Menu Utama</div>
+                <div id="nav-tab-beranda" class="sidebar-item p-3 rounded mb-1 flex items-center bg-gray-700 bg-opacity-50" onclick="window.location.hash='beranda'"><i class="fas fa-home mr-3 w-5"></i> Beranda</div>
+                
+                <div class="text-xs uppercase opacity-50 px-3 mt-4 mb-1">Data Pegawai</div>
+                <div id="nav-tab-profil" class="sidebar-item p-3 rounded mb-1 flex items-center" onclick="window.location.hash='profil'"><i class="fas fa-id-card mr-3 w-5"></i> Profil Utama</div>
                 <div id="nav-tab-pendidikan" class="sidebar-item p-3 rounded mb-1 flex items-center" onclick="window.location.hash='pendidikan'"><i class="fas fa-graduation-cap mr-3 w-5"></i> Pendidikan</div>
                 <div id="nav-tab-pangkat" class="sidebar-item p-3 rounded mb-1 flex items-center" onclick="window.location.hash='pangkat'"><i class="fas fa-medal mr-3 w-5"></i> Pangkat / Gol</div>
                 <div id="nav-tab-jabatan" class="sidebar-item p-3 rounded mb-1 flex items-center" onclick="window.location.hash='jabatan'"><i class="fas fa-briefcase mr-3 w-5"></i> Jabatan</div>
@@ -100,14 +103,14 @@
                 <div id="admin-menu-section" class="hidden">
                     <div class="text-xs uppercase opacity-50 px-3 mt-4 mb-1">Administrator</div>
                     <div id="menu-data-pegawai" class="sidebar-item p-3 rounded mb-1 flex items-center" onclick="window.location.hash='data-pegawai'"><i class="fas fa-users-cog mr-3 w-5"></i> Semua Pegawai</div>
-                    <div id="menu-antrian" class="sidebar-item p-3 rounded mb-1 flex items-center" onclick="window.location.hash='antrian'"><i class="fas fa-tasks mr-3 w-5"></i> Antrian Update</div>
+                    <div id="menu-antrian" class="sidebar-item p-3 rounded mb-1 flex items-center" onclick="window.location.hash='antrian'"><i class="fas fa-tasks mr-3 w-5"></i> Antrian Update <span id="badge-antrian" class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full hidden">0</span></div>
                     <div id="menu-pengaturan" class="sidebar-item p-3 rounded mb-1 flex items-center" onclick="window.location.hash='pengaturan'"><i class="fas fa-cog mr-3 w-5"></i> Pengaturan</div>
                 </div>
             </nav>
             <div class="p-4 border-t border-gray-600 text-sm">
-                <div id="user-info-name" class="font-bold mb-1">Nama Pegawai</div>
+                <div id="user-info-name" class="font-bold mb-1 truncate">Nama Pegawai</div>
                 <div id="user-info-role" class="text-xs uppercase opacity-75 mb-3">Role</div>
-                <button onclick="logout()" class="w-full bg-red-600 hover:bg-red-700 text-white p-2 rounded flex justify-center items-center"><i class="fas fa-sign-out-alt mr-2"></i> Logout</button>
+                <button onclick="logout()" class="w-full bg-red-600 hover:bg-red-700 text-white p-2 rounded flex justify-center items-center transition"><i class="fas fa-sign-out-alt mr-2"></i> Logout</button>
             </div>
         </aside>
 
@@ -117,70 +120,195 @@
             <header class="card shadow p-4 flex justify-between items-center z-10">
                 <div class="flex items-center">
                     <button onclick="toggleSidebar()" class="md:hidden text-xl mr-4"><i class="fas fa-bars"></i></button>
-                    <h2 id="page-title" class="font-bold text-xl">Profil Saya</h2>
+                    <h2 id="page-title" class="font-bold text-xl">Beranda</h2>
                 </div>
                 <div class="flex items-center">
-                    <button onclick="exportMyData()" id="btn-export-pdf" class="btn-primary px-3 py-1 text-sm rounded mr-2"><i class="fas fa-file-pdf mr-1"></i> Cetak CV</button>
+                    <button onclick="exportMyData()" id="btn-export-pdf" class="btn-primary px-3 py-1 text-sm rounded shadow"><i class="fas fa-file-pdf mr-1"></i> Cetak CV</button>
                 </div>
             </header>
 
             <!-- Pages -->
             <div class="p-4 md:p-6 flex-1 overflow-y-auto" id="main-scroll-area">
                 
-                <!-- Page: Dashboard (Tab Container) -->
-                <div id="page-dashboard" class="page-content">
-                    <div class="card rounded-lg shadow-md p-6 mb-6 flex flex-col md:flex-row items-center">
-                        <div class="w-32 h-32 rounded-full overflow-hidden bg-gray-300 mb-4 md:mb-0 md:mr-6 relative group flex-shrink-0">
+                <!-- PAGE: BERANDA / DASHBOARD BARU -->
+                <div id="page-beranda" class="page-content">
+                    
+                    <!-- Dashboard USER -->
+                    <div id="dashboard-user" class="hidden">
+                        <div class="bg-gradient-to-r from-blue-600 to-blue-400 rounded-lg shadow-lg p-6 mb-6 text-white relative overflow-hidden">
+                            <i class="fas fa-id-badge absolute -right-4 -bottom-4 text-9xl opacity-10"></i>
+                            <h2 class="text-2xl font-bold mb-1">Selamat datang kembali, <span id="dash-user-name">Pegawai</span>!</h2>
+                            <p class="opacity-90 mb-4" id="dash-user-jabatan">Jabatan - Unit Kerja</p>
+                            <div class="flex space-x-3">
+                                <button onclick="window.location.hash='profil'" class="bg-white text-blue-600 px-4 py-2 rounded shadow font-medium text-sm hover:bg-gray-100 transition"><i class="fas fa-user-edit mr-1"></i> Lihat Profil Saya</button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                            <div class="card rounded-lg shadow p-5 border-l-4 border-green-500">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="text-xs text-gray-500 uppercase font-bold">Status Kepegawaian</p>
+                                        <h3 class="text-lg font-bold mt-1" id="dash-user-status">Aktif</h3>
+                                        <p class="text-sm mt-1 opacity-75" id="dash-user-asn">PNS</p>
+                                    </div>
+                                    <div class="bg-green-100 text-green-600 p-3 rounded-full"><i class="fas fa-user-check text-xl"></i></div>
+                                </div>
+                            </div>
+                            
+                            <div class="card rounded-lg shadow p-5 border-l-4 border-yellow-500 cursor-pointer hover:bg-gray-50 transition" onclick="window.location.hash='profil'">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="text-xs text-gray-500 uppercase font-bold">Pengajuan Data (Pending)</p>
+                                        <h3 class="text-2xl font-bold mt-1" id="dash-user-antrian">0</h3>
+                                        <p class="text-sm mt-1 text-yellow-600 font-medium">Menunggu Verifikasi Admin</p>
+                                    </div>
+                                    <div class="bg-yellow-100 text-yellow-600 p-3 rounded-full"><i class="fas fa-clock text-xl"></i></div>
+                                </div>
+                            </div>
+
+                            <div class="card rounded-lg shadow p-5 border-l-4 border-blue-500 cursor-pointer hover:bg-gray-50 transition" onclick="window.location.hash='kompetensi'">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="text-xs text-gray-500 uppercase font-bold">Pengembangan Kompetensi</p>
+                                        <h3 class="text-2xl font-bold mt-1" id="dash-user-jp">0</h3>
+                                        <p class="text-sm mt-1 opacity-75">Riwayat Diklat/Pelatihan</p>
+                                    </div>
+                                    <div class="bg-blue-100 text-blue-600 p-3 rounded-full"><i class="fas fa-certificate text-xl"></i></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card rounded-lg shadow-md p-6">
+                            <h3 class="font-bold text-lg mb-4 border-b pb-2"><i class="fas fa-history text-blue-500 mr-2"></i>Aktivitas Pengajuan Terakhir</h3>
+                            <div id="dash-user-timeline" class="space-y-4">
+                                <p class="text-sm text-center text-gray-500 py-4">Memuat data...</p>
+                            </div>
+                            <div class="mt-4 text-center">
+                                <button onclick="window.location.hash='profil'" class="text-sm text-blue-600 hover:underline">Lihat Semua Riwayat Pengajuan <i class="fas fa-arrow-right text-xs ml-1"></i></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dashboard ADMIN -->
+                    <div id="dashboard-admin" class="hidden">
+                        <div class="bg-gradient-to-r from-gray-800 to-gray-600 rounded-lg shadow-lg p-6 mb-6 text-white relative overflow-hidden">
+                            <i class="fas fa-shield-alt absolute -right-4 -bottom-4 text-9xl opacity-10"></i>
+                            <h2 class="text-2xl font-bold mb-1">Beranda Administrator</h2>
+                            <p class="opacity-90">Pantau statistik kepegawaian dan proses antrian pembaruan data yang masuk.</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                            <div class="card rounded-lg shadow p-4 border-b-4 border-blue-500 flex flex-col justify-between">
+                                <div class="flex justify-between items-center mb-2">
+                                    <p class="text-xs text-gray-500 uppercase font-bold">Total Pegawai</p>
+                                    <i class="fas fa-users text-blue-500"></i>
+                                </div>
+                                <h3 class="text-3xl font-bold" id="dash-admin-total">0</h3>
+                            </div>
+                            
+                            <div class="card rounded-lg shadow p-4 border-b-4 border-green-500 flex flex-col justify-between">
+                                <div class="flex justify-between items-center mb-2">
+                                    <p class="text-xs text-gray-500 uppercase font-bold">Total PNS</p>
+                                    <i class="fas fa-user-tie text-green-500"></i>
+                                </div>
+                                <h3 class="text-3xl font-bold" id="dash-admin-pns">0</h3>
+                            </div>
+
+                            <div class="card rounded-lg shadow p-4 border-b-4 border-yellow-500 flex flex-col justify-between">
+                                <div class="flex justify-between items-center mb-2">
+                                    <p class="text-xs text-gray-500 uppercase font-bold">Total PPPK</p>
+                                    <i class="fas fa-user-graduate text-yellow-500"></i>
+                                </div>
+                                <h3 class="text-3xl font-bold" id="dash-admin-pppk">0</h3>
+                            </div>
+
+                            <div class="card rounded-lg shadow p-4 border-b-4 border-red-500 flex flex-col justify-between cursor-pointer hover:bg-red-50 transition" onclick="window.location.hash='antrian'">
+                                <div class="flex justify-between items-center mb-2">
+                                    <p class="text-xs text-red-500 uppercase font-bold">Perlu Verifikasi</p>
+                                    <i class="fas fa-bell text-red-500"></i>
+                                </div>
+                                <h3 class="text-3xl font-bold text-red-600" id="dash-admin-antrian">0</h3>
+                                <p class="text-[10px] text-red-500 mt-1">Pengajuan data menunggu aksi</p>
+                            </div>
+                        </div>
+
+                        <div class="card rounded-lg shadow-md p-6">
+                            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                                <h3 class="font-bold text-lg"><i class="fas fa-exclamation-circle text-red-500 mr-2"></i>Prioritas: Antrian Terbaru</h3>
+                                <button onclick="window.location.hash='antrian'" class="text-sm bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1 rounded transition">Lihat Semua Antrian</button>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-sm">
+                                    <thead class="bg-gray-100 text-black">
+                                        <tr><th class="p-2">Tgl Ajuan</th><th class="p-2">Nama Pengaju</th><th class="p-2">Kategori Data</th><th class="p-2">Aksi</th></tr>
+                                    </thead>
+                                    <tbody id="dash-admin-table-antrian">
+                                        <tr><td colspan="4" class="text-center p-4">Memuat data...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page: Profil Wrapper (Tab Container) -->
+                <div id="page-profil-container" class="page-content hidden">
+                    <div class="card rounded-lg shadow-md p-6 mb-6 flex flex-col md:flex-row items-center relative overflow-hidden">
+                        <!-- BG Pattern -->
+                        <div class="absolute right-0 top-0 w-64 h-full bg-blue-500 opacity-5 transform skew-x-12 translate-x-10"></div>
+                        
+                        <div class="w-32 h-32 rounded-full overflow-hidden bg-gray-300 mb-4 md:mb-0 md:mr-6 relative group flex-shrink-0 border-4 border-white shadow-lg z-10">
                             <img id="profile-img" src="https://via.placeholder.com/150" alt="Foto Profil" class="w-full h-full object-cover">
                             <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" onclick="document.getElementById('file-upload').click()">
-                                <span class="text-white text-xs text-center">Ubah Foto</span>
+                                <span class="text-white text-xs text-center"><i class="fas fa-camera text-xl mb-1 block"></i> Ubah Foto</span>
                             </div>
                             <input type="file" id="file-upload" class="hidden" accept="image/*" onchange="uploadFoto(this)">
                         </div>
-                        <div class="flex-1 w-full text-center md:text-left overflow-hidden">
+                        <div class="flex-1 w-full text-center md:text-left overflow-hidden z-10">
                             <h3 id="p-nama" class="text-2xl font-bold truncate">Memuat...</h3>
-                            <p id="p-nip" class="opacity-75 mb-2">NIP / NIN: -</p>
-                            <span id="p-status" class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-bold">AKTIF</span>
+                            <p id="p-nip" class="opacity-75 mb-2 font-medium">NIP / NIN: -</p>
+                            <span id="p-status" class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-bold shadow-sm">AKTIF</span>
                         </div>
-                        <div class="mt-4 md:mt-0 md:text-right text-center w-full md:w-auto">
-                            <p class="text-sm opacity-75">Unit Kerja</p>
-                            <p id="p-unit" class="font-bold">RSUD dr. R. KOESMA</p>
+                        <div class="mt-4 md:mt-0 md:text-right text-center w-full md:w-auto z-10">
+                            <p class="text-sm opacity-75">Unit Kerja Saat Ini</p>
+                            <p id="p-unit" class="font-bold text-lg text-blue-700 dark:text-blue-400">RSUD dr. R. KOESMA</p>
                         </div>
                     </div>
 
                     <!-- Tab Content: Profil Utama -->
                     <div id="tab-profil" class="user-tab-content">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="card rounded-lg shadow-md p-6">
+                            <div class="card rounded-lg shadow-md p-6 border-t-4 border-blue-500">
                                 <div class="flex justify-between items-center mb-4 border-b pb-2 border-gray-200">
                                     <h4 class="font-bold text-lg"><i class="fas fa-id-card mr-2 text-blue-500"></i> Data Personal</h4>
                                 </div>
                                 <table class="w-full text-sm">
-                                    <tr class="border-b border-gray-100"><td class="py-2 opacity-75 w-1/3">NIK</td><td id="p-nik-personal" class="font-medium">-</td><td class="text-right w-8"><button onclick="editField('IDENTITAS_LAIN', 'NIK_KTP')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
-                                    <tr class="border-b border-gray-100"><td class="py-2 opacity-75 w-1/3">Tempat Lahir</td><td id="p-tempatlahir" class="font-medium">-</td><td class="text-right w-8"><button onclick="editField('PROFIL', 'Tempat_Lahir')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
-                                    <tr class="border-b border-gray-100"><td class="py-2 opacity-75 w-1/3">Tanggal Lahir</td><td id="p-tgllahir" class="font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'Tgl_Lahir')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
-                                    <tr class="border-b border-gray-100"><td class="py-2 opacity-75">Jenis Kelamin</td><td id="p-jk" class="font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'Jenis_Kelamin')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
-                                    <tr class="border-b border-gray-100"><td class="py-2 opacity-75">Agama</td><td id="p-agama" class="font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'Agama')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
-                                    <tr class="border-b border-gray-100"><td class="py-2 opacity-75">Alamat</td><td id="p-alamat" class="font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'Alamat_Domisili')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
-                                    <tr><td class="py-2 opacity-75">No HP / WA</td><td id="p-hp" class="font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'No_HP')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50"><td class="py-3 px-2 opacity-75 w-1/3">NIK</td><td id="p-nik-personal" class="py-3 font-medium">-</td><td class="text-right w-8"><button onclick="editField('IDENTITAS_LAIN', 'NIK_KTP')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50"><td class="py-3 px-2 opacity-75 w-1/3">Tempat Lahir</td><td id="p-tempatlahir" class="py-3 font-medium">-</td><td class="text-right w-8"><button onclick="editField('PROFIL', 'Tempat_Lahir')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50"><td class="py-3 px-2 opacity-75 w-1/3">Tanggal Lahir</td><td id="p-tgllahir" class="py-3 font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'Tgl_Lahir')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50"><td class="py-3 px-2 opacity-75">Jenis Kelamin</td><td id="p-jk" class="py-3 font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'Jenis_Kelamin')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50"><td class="py-3 px-2 opacity-75">Agama</td><td id="p-agama" class="py-3 font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'Agama')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50"><td class="py-3 px-2 opacity-75">Alamat</td><td id="p-alamat" class="py-3 font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'Alamat_Domisili')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
+                                    <tr class="hover:bg-gray-50"><td class="py-3 px-2 opacity-75">No HP / WA</td><td id="p-hp" class="py-3 font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'No_HP')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
                                 </table>
                             </div>
-                            <div class="card rounded-lg shadow-md p-6">
-                                <h4 class="font-bold text-lg mb-4 border-b pb-2 border-gray-200"><i class="fas fa-briefcase mr-2 text-blue-500"></i> Karir & Ringkasan</h4>
+                            <div class="card rounded-lg shadow-md p-6 border-t-4 border-green-500">
+                                <h4 class="font-bold text-lg mb-4 border-b pb-2 border-gray-200"><i class="fas fa-briefcase mr-2 text-green-500"></i> Karir & Ringkasan</h4>
                                 <table class="w-full text-sm">
-                                    <tr class="border-b border-gray-100"><td class="py-2 opacity-75 w-1/3">Status Kepeg.</td><td id="p-jasn" class="font-medium">-</td><td class="text-right w-8"><button onclick="editField('PROFIL', 'Jenis_ASN')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
-                                    <tr class="border-b border-gray-100"><td class="py-2 opacity-75">Pangkat/Gol</td><td id="p-pangkat" class="font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'Pangkat_Golongan')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
-                                    <tr class="border-b border-gray-100"><td class="py-2 opacity-75">Jabatan Terakhir</td><td id="p-jabatan" class="font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'Jabatan_Terakhir')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
-                                    <tr><td class="py-2 opacity-75">Pendidikan</td><td id="p-pendidikan" class="font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'Jenjang_Pendidikan')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50"><td class="py-3 px-2 opacity-75 w-1/3">Status Kepeg.</td><td id="p-jasn" class="py-3 font-medium">-</td><td class="text-right w-8"><button onclick="editField('PROFIL', 'Jenis_ASN')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50"><td class="py-3 px-2 opacity-75">Pangkat/Gol</td><td id="p-pangkat" class="py-3 font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'Pangkat_Golongan')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50"><td class="py-3 px-2 opacity-75">Jabatan Terakhir</td><td id="p-jabatan" class="py-3 font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'Jabatan_Terakhir')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
+                                    <tr class="hover:bg-gray-50"><td class="py-3 px-2 opacity-75">Pendidikan</td><td id="p-pendidikan" class="py-3 font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'Jenjang_Pendidikan')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
                                 </table>
                             </div>
                         </div>
                         <div class="card rounded-lg shadow-md p-6 mt-6">
-                            <h4 class="font-bold text-lg mb-4 border-b pb-2 border-gray-200"><i class="fas fa-history mr-2 text-blue-500"></i> Riwayat Pengajuan Perubahan Data</h4>
+                            <h4 class="font-bold text-lg mb-4 border-b pb-2 border-gray-200"><i class="fas fa-history mr-2 text-yellow-500"></i> Riwayat Pengajuan Perubahan Data (Log)</h4>
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left text-sm">
-                                    <thead class="bg-gray-200 text-black">
-                                        <tr><th class="p-2">Tgl Ajuan</th><th class="p-2">Data/Kolom Target</th><th class="p-2">Nilai Diajukan</th><th class="p-2">Status</th></tr>
+                                    <thead class="bg-gray-100 text-black">
+                                        <tr><th class="p-3">Tgl Ajuan</th><th class="p-3">Data/Kolom Target</th><th class="p-3">Nilai Diajukan</th><th class="p-3">Status</th></tr>
                                     </thead>
                                     <tbody id="tbody-my-antrian">
                                         <tr><td colspan="4" class="text-center p-4">Sedang memuat data...</td></tr>
@@ -195,7 +323,7 @@
                         <div class="card rounded-lg shadow-md p-6">
                             <div class="flex justify-between items-center mb-4 border-b pb-2">
                                 <h4 class="font-bold text-lg"><i class="fas fa-graduation-cap mr-2 text-blue-500"></i> Riwayat Pendidikan</h4>
-                                <button onclick="ajukanRiwayat('RIWAYAT_PENDIDIKAN')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm shadow"><i class="fas fa-plus mr-1"></i> Tambah Data & Ijazah</button>
+                                <button onclick="ajukanRiwayat('RIWAYAT_PENDIDIKAN')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm shadow transition"><i class="fas fa-plus mr-1"></i> Tambah Data & Ijazah</button>
                             </div>
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left text-sm">
@@ -215,7 +343,7 @@
                         <div class="card rounded-lg shadow-md p-6">
                             <div class="flex justify-between items-center mb-4 border-b pb-2">
                                 <h4 class="font-bold text-lg"><i class="fas fa-medal mr-2 text-blue-500"></i> Riwayat Pangkat</h4>
-                                <button onclick="ajukanRiwayat('RIWAYAT_PANGKAT')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm shadow"><i class="fas fa-plus mr-1"></i> Tambah Data & SK</button>
+                                <button onclick="ajukanRiwayat('RIWAYAT_PANGKAT')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm shadow transition"><i class="fas fa-plus mr-1"></i> Tambah Data & SK</button>
                             </div>
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left text-sm whitespace-nowrap">
@@ -235,7 +363,7 @@
                         <div class="card rounded-lg shadow-md p-6">
                             <div class="flex justify-between items-center mb-4 border-b pb-2">
                                 <h4 class="font-bold text-lg"><i class="fas fa-briefcase mr-2 text-blue-500"></i> Riwayat Jabatan</h4>
-                                <button onclick="ajukanRiwayat('RIWAYAT_JABATAN')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm shadow"><i class="fas fa-plus mr-1"></i> Ajukan Data & SK</button>
+                                <button onclick="ajukanRiwayat('RIWAYAT_JABATAN')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm shadow transition"><i class="fas fa-plus mr-1"></i> Ajukan Data & SK</button>
                             </div>
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left text-sm whitespace-nowrap">
@@ -255,7 +383,7 @@
                         <div class="card rounded-lg shadow-md p-6">
                             <div class="flex justify-between items-center mb-4 border-b pb-2">
                                 <h4 class="font-bold text-lg"><i class="fas fa-certificate mr-2 text-blue-500"></i> Pengembangan Kompetensi</h4>
-                                <button onclick="ajukanRiwayat('RIWAYAT_KOMPETENSI')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm shadow"><i class="fas fa-plus mr-1"></i> Ajukan Kompetensi / Diklat</button>
+                                <button onclick="ajukanRiwayat('RIWAYAT_KOMPETENSI')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm shadow transition"><i class="fas fa-plus mr-1"></i> Ajukan Kompetensi / Diklat</button>
                             </div>
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left text-sm whitespace-nowrap">
@@ -275,7 +403,7 @@
                         <div class="card rounded-lg shadow-md p-6">
                             <div class="flex justify-between items-center mb-4 border-b pb-2">
                                 <h4 class="font-bold text-lg"><i class="fas fa-money-bill-wave mr-2 text-blue-500"></i> Riwayat KGB</h4>
-                                <button onclick="ajukanRiwayat('RIWAYAT_KGB')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm shadow"><i class="fas fa-plus mr-1"></i> Ajukan Data & SK</button>
+                                <button onclick="ajukanRiwayat('RIWAYAT_KGB')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm shadow transition"><i class="fas fa-plus mr-1"></i> Ajukan Data & SK</button>
                             </div>
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left text-sm whitespace-nowrap">
@@ -295,7 +423,7 @@
                         <div class="card rounded-lg shadow-md p-6">
                             <div class="flex justify-between items-center mb-4 border-b pb-2">
                                 <h4 class="font-bold text-lg"><i class="fas fa-users mr-2 text-blue-500"></i> Data Keluarga</h4>
-                                <button onclick="ajukanRiwayat('DATA_KELUARGA')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm shadow"><i class="fas fa-plus mr-1"></i> Tambah Anggota</button>
+                                <button onclick="ajukanRiwayat('DATA_KELUARGA')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm shadow transition"><i class="fas fa-plus mr-1"></i> Tambah Anggota</button>
                             </div>
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left text-sm whitespace-nowrap">
@@ -317,10 +445,10 @@
                                 <h4 class="font-bold text-lg"><i class="fas fa-fingerprint mr-2 text-blue-500"></i> Ringkasan Identitas Utama</h4>
                             </div>
                             <table class="w-full text-sm">
-                                <tr class="border-b border-gray-100"><td class="py-2 opacity-75 w-1/3">NIK (KTP)</td><td id="p-nik" class="font-medium">-</td><td class="text-right w-8"><button onclick="editField('IDENTITAS_LAIN', 'NIK_KTP')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
-                                <tr class="border-b border-gray-100"><td class="py-2 opacity-75 w-1/3">NPWP</td><td id="p-npwp" class="font-medium">-</td><td class="text-right"><button onclick="editField('IDENTITAS_LAIN', 'No_NPWP')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
-                                <tr class="border-b border-gray-100"><td class="py-2 opacity-75">BPJS</td><td id="p-bpjs" class="font-medium">-</td><td class="text-right"><button onclick="editField('IDENTITAS_LAIN', 'No_BPJS')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
-                                <tr><td class="py-2 opacity-75">TASPEN</td><td id="p-taspen" class="font-medium">-</td><td class="text-right"><button onclick="editField('IDENTITAS_LAIN', 'No_TASPEN')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
+                                <tr class="border-b border-gray-100"><td class="py-3 opacity-75 w-1/3">NIK (KTP)</td><td id="p-nik" class="py-3 font-medium">-</td><td class="text-right w-8"><button onclick="editField('IDENTITAS_LAIN', 'NIK_KTP')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
+                                <tr class="border-b border-gray-100"><td class="py-3 opacity-75 w-1/3">NPWP</td><td id="p-npwp" class="py-3 font-medium">-</td><td class="text-right"><button onclick="editField('IDENTITAS_LAIN', 'No_NPWP')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
+                                <tr class="border-b border-gray-100"><td class="py-3 opacity-75">BPJS</td><td id="p-bpjs" class="py-3 font-medium">-</td><td class="text-right"><button onclick="editField('IDENTITAS_LAIN', 'No_BPJS')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
+                                <tr><td class="py-3 opacity-75">TASPEN</td><td id="p-taspen" class="py-3 font-medium">-</td><td class="text-right"><button onclick="editField('IDENTITAS_LAIN', 'No_TASPEN')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
                             </table>
                         </div>
                         
@@ -328,7 +456,7 @@
                         <div class="card rounded-lg shadow-md p-6 max-w-4xl mx-auto">
                             <div class="flex justify-between items-center mb-4 border-b pb-2">
                                 <h4 class="font-bold text-lg"><i class="fas fa-id-badge mr-2 text-blue-500"></i> Daftar Dokumen / Kartu</h4>
-                                <button onclick="ajukanRiwayat('DATA_KARTU')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm shadow"><i class="fas fa-plus mr-1"></i> Tambah Kartu</button>
+                                <button onclick="ajukanRiwayat('DATA_KARTU')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm shadow transition"><i class="fas fa-plus mr-1"></i> Tambah Kartu</button>
                             </div>
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left text-sm whitespace-nowrap">
@@ -356,9 +484,8 @@
                     <div class="card rounded-lg shadow-md p-6">
                         <div class="flex justify-between mb-4 flex-col md:flex-row gap-2">
                             <div class="flex flex-col md:flex-row gap-2 w-full md:w-auto">
-                                <input type="text" id="search-pegawai" placeholder="Cari Nama / NIP / NIN..." class="border p-2 rounded w-full md:w-64 text-black" onkeyup="filterTablePegawai()">
-                                <!-- FILTER BARU: STATUS KEPEGAWAIAN -->
-                                <select id="filter-status-asn" class="border p-2 rounded w-full md:w-48 text-black" onchange="filterTablePegawai()">
+                                <input type="text" id="search-pegawai" placeholder="Cari Nama / NIP / NIN..." class="border border-gray-300 p-2 rounded w-full md:w-64 text-black focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" onkeyup="filterTablePegawai()">
+                                <select id="filter-status-asn" class="border border-gray-300 p-2 rounded w-full md:w-48 text-black focus:outline-none focus:border-blue-500" onchange="filterTablePegawai()">
                                     <option value="">Semua Status ASN</option>
                                     <option value="PNS">PNS</option>
                                     <option value="PPPK">PPPK</option>
@@ -367,14 +494,14 @@
                                 </select>
                             </div>
                             <div class="flex flex-wrap gap-2">
-                                <button onclick="openExportModal()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 shadow whitespace-nowrap"><i class="fas fa-file-export mr-2"></i> Custom Download</button>
-                                <button onclick="exportToExcel()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 shadow whitespace-nowrap"><i class="fas fa-file-excel mr-2"></i> Export Semua</button>
+                                <button onclick="openExportModal()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 shadow whitespace-nowrap transition"><i class="fas fa-file-export mr-2"></i> Custom Download</button>
+                                <button onclick="exportToExcel()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 shadow whitespace-nowrap transition"><i class="fas fa-file-excel mr-2"></i> Export Semua</button>
                             </div>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm whitespace-nowrap" id="table-pegawai">
                                 <thead class="bg-gray-200 text-black">
-                                    <tr><th class="p-3">NIP / NIN</th><th class="p-3">Nama Pegawai</th><th class="p-3">Jabatan</th><th class="p-3">Jenis ASN</th><th class="p-3">Aksi</th></tr>
+                                    <tr><th class="p-3 rounded-tl">NIP / NIN</th><th class="p-3">Nama Pegawai</th><th class="p-3">Jabatan</th><th class="p-3">Jenis ASN</th><th class="p-3 rounded-tr">Aksi</th></tr>
                                 </thead>
                                 <tbody id="tbody-pegawai"></tbody>
                             </table>
@@ -390,22 +517,22 @@
                 <div id="page-antrian" class="page-content hidden">
                     <div class="card rounded-lg shadow-md p-6">
                         <div class="flex justify-between mb-4 items-center flex-col md:flex-row gap-4">
-                            <h3 class="font-bold text-lg">Daftar Pengajuan Perubahan Data</h3>
+                            <h3 class="font-bold text-lg"><i class="fas fa-tasks text-blue-500 mr-2"></i>Daftar Pengajuan Perubahan Data</h3>
                             <div id="bulk-action-container" class="hidden flex space-x-2">
-                                <button onclick="prosesBulkAntrian('Approved')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-sm shadow"><i class="fas fa-check-double mr-1"></i> Setujui Terpilih</button>
-                                <button onclick="prosesBulkAntrian('Rejected')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-sm shadow"><i class="fas fa-times-circle mr-1"></i> Tolak Terpilih</button>
+                                <button onclick="prosesBulkAntrian('Approved')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-sm shadow transition"><i class="fas fa-check-double mr-1"></i> Setujui Terpilih</button>
+                                <button onclick="prosesBulkAntrian('Rejected')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-sm shadow transition"><i class="fas fa-times-circle mr-1"></i> Tolak Terpilih</button>
                             </div>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm">
                                 <thead class="bg-gray-200 text-black">
                                     <tr>
-                                        <th class="p-2 w-10 text-center"><input type="checkbox" id="cb-select-all" onchange="toggleSelectAllAntrian(this)"></th>
-                                        <th class="p-2">Tgl Ajuan</th>
-                                        <th class="p-2">Nama Pengaju</th>
-                                        <th class="p-2">Target Data</th>
-                                        <th class="p-2 max-w-xs">Nilai Baru</th>
-                                        <th class="p-2">Aksi</th>
+                                        <th class="p-3 w-10 text-center rounded-tl"><input type="checkbox" id="cb-select-all" onchange="toggleSelectAllAntrian(this)"></th>
+                                        <th class="p-3">Tgl Ajuan</th>
+                                        <th class="p-3">Nama Pengaju</th>
+                                        <th class="p-3">Target Data</th>
+                                        <th class="p-3 max-w-xs">Nilai Baru</th>
+                                        <th class="p-3 rounded-tr">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tbody-antrian">
@@ -420,11 +547,20 @@
                 <div id="page-pengaturan" class="page-content hidden">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="card rounded-lg shadow-md p-6">
-                            <h3 class="font-bold text-lg mb-4 border-b pb-2"><i class="fas fa-palette mr-2"></i> Tema Aplikasi</h3>
-                            <div class="flex flex-col space-y-3">
-                                <label class="flex items-center"><input type="radio" name="theme" value="light" onchange="setTheme('light')" class="mr-2"> Light Mode</label>
-                                <label class="flex items-center"><input type="radio" name="theme" value="dark" onchange="setTheme('dark')" class="mr-2"> Dark Mode</label>
-                                <label class="flex items-center"><input type="radio" name="theme" value="teracota" onchange="setTheme('teracota')" class="mr-2"> Teracota</label>
+                            <h3 class="font-bold text-lg mb-4 border-b pb-2"><i class="fas fa-palette text-blue-500 mr-2"></i> Tema Aplikasi</h3>
+                            <div class="flex flex-col space-y-4 mt-4">
+                                <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition">
+                                    <input type="radio" name="theme" value="light" onchange="setTheme('light')" class="w-4 h-4 text-blue-600 border-gray-300"> 
+                                    <span class="ml-3 font-medium">Light Mode (Terang)</span>
+                                </label>
+                                <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition">
+                                    <input type="radio" name="theme" value="dark" onchange="setTheme('dark')" class="w-4 h-4 text-blue-600 border-gray-300"> 
+                                    <span class="ml-3 font-medium">Dark Mode (Gelap)</span>
+                                </label>
+                                <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition">
+                                    <input type="radio" name="theme" value="teracota" onchange="setTheme('teracota')" class="w-4 h-4 text-blue-600 border-gray-300"> 
+                                    <span class="ml-3 font-medium">Teracota (Coklat Klasik)</span>
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -457,10 +593,10 @@
                 
                 <!-- Tombol Transfer -->
                 <div class="flex flex-row md:flex-col justify-center gap-2 items-center py-2 md:py-0">
-                    <button onclick="moveAllExport('right')" class="bg-gray-100 text-gray-700 w-10 h-10 rounded-full hover:bg-gray-200 border border-gray-300 shadow-sm flex items-center justify-center" title="Pindah Semua ke Kanan"><i class="fas fa-angle-double-right"></i></button>
-                    <button onclick="moveSelectedExport('right')" class="bg-blue-100 text-blue-700 w-10 h-10 rounded-full hover:bg-blue-200 border border-blue-300 shadow-sm flex items-center justify-center" title="Pindah ke Kanan"><i class="fas fa-angle-right"></i></button>
-                    <button onclick="moveSelectedExport('left')" class="bg-red-100 text-red-700 w-10 h-10 rounded-full hover:bg-red-200 border border-red-300 shadow-sm flex items-center justify-center" title="Kembalikan ke Kiri"><i class="fas fa-angle-left"></i></button>
-                    <button onclick="moveAllExport('left')" class="bg-gray-100 text-gray-700 w-10 h-10 rounded-full hover:bg-gray-200 border border-gray-300 shadow-sm flex items-center justify-center" title="Kembalikan Semua ke Kiri"><i class="fas fa-angle-double-left"></i></button>
+                    <button onclick="moveAllExport('right')" class="bg-gray-100 text-gray-700 w-10 h-10 rounded-full hover:bg-gray-200 border border-gray-300 shadow-sm flex items-center justify-center transition" title="Pindah Semua ke Kanan"><i class="fas fa-angle-double-right"></i></button>
+                    <button onclick="moveSelectedExport('right')" class="bg-blue-100 text-blue-700 w-10 h-10 rounded-full hover:bg-blue-200 border border-blue-300 shadow-sm flex items-center justify-center transition" title="Pindah ke Kanan"><i class="fas fa-angle-right"></i></button>
+                    <button onclick="moveSelectedExport('left')" class="bg-red-100 text-red-700 w-10 h-10 rounded-full hover:bg-red-200 border border-red-300 shadow-sm flex items-center justify-center transition" title="Kembalikan ke Kiri"><i class="fas fa-angle-left"></i></button>
+                    <button onclick="moveAllExport('left')" class="bg-gray-100 text-gray-700 w-10 h-10 rounded-full hover:bg-gray-200 border border-gray-300 shadow-sm flex items-center justify-center transition" title="Kembalikan Semua ke Kiri"><i class="fas fa-angle-double-left"></i></button>
                 </div>
                 
                 <!-- Kotak Kanan (Target & Urutan) -->
@@ -472,16 +608,16 @@
                         </div>
                         <!-- Tombol Urutan (Up/Down) -->
                         <div class="flex flex-col gap-2 justify-center">
-                            <button onclick="reorderExport('up')" class="bg-gray-100 text-gray-700 w-10 h-10 rounded hover:bg-gray-200 border border-gray-300 shadow-sm flex items-center justify-center" title="Naikkan Urutan"><i class="fas fa-arrow-up"></i></button>
-                            <button onclick="reorderExport('down')" class="bg-gray-100 text-gray-700 w-10 h-10 rounded hover:bg-gray-200 border border-gray-300 shadow-sm flex items-center justify-center" title="Turunkan Urutan"><i class="fas fa-arrow-down"></i></button>
+                            <button onclick="reorderExport('up')" class="bg-gray-100 text-gray-700 w-10 h-10 rounded hover:bg-gray-200 border border-gray-300 shadow-sm flex items-center justify-center transition" title="Naikkan Urutan"><i class="fas fa-arrow-up"></i></button>
+                            <button onclick="reorderExport('down')" class="bg-gray-100 text-gray-700 w-10 h-10 rounded hover:bg-gray-200 border border-gray-300 shadow-sm flex items-center justify-center transition" title="Turunkan Urutan"><i class="fas fa-arrow-down"></i></button>
                         </div>
                     </div>
                 </div>
             </div>
             
             <div class="p-4 border-t border-gray-200 flex justify-end gap-3 bg-gray-50 rounded-b-lg">
-                <button onclick="closeExportModal()" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-100 shadow-sm font-medium">Batal</button>
-                <button onclick="processCustomExport()" class="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700 shadow font-medium flex items-center"><i class="fas fa-download mr-2"></i> Download .xlsx</button>
+                <button onclick="closeExportModal()" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-100 shadow-sm font-medium transition">Batal</button>
+                <button onclick="processCustomExport()" class="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700 shadow font-medium flex items-center transition"><i class="fas fa-download mr-2"></i> Download .xlsx</button>
             </div>
         </div>
     </div>
@@ -490,7 +626,7 @@
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzkUkszNk24nIXJFuAtXnwTKZ_woDhffBGFWNR6ldrUNotKHsbyBjOckOe7-fc0hZgXzg/exec';
         
-        let STATE = { user: null, profile: null, riwayat: {}, identitasLain: null, allPegawai: [], myAntrian: [], filteredPegawai: [], currentPage: 1, rowsPerPage: 15 };
+        let STATE = { user: null, profile: null, riwayat: {}, identitasLain: null, allPegawai: [], myAntrian: [], allAntrianGlobal: [], filteredPegawai: [], currentPage: 1, rowsPerPage: 15 };
 
         const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true, didOpen: (toast) => { toast.addEventListener('mouseenter', Swal.stopTimer); toast.addEventListener('mouseleave', Swal.resumeTimer); } });
 
@@ -505,32 +641,41 @@
         };
 
         function handleRouting() {
-            let hash = window.location.hash.substring(1) || 'profil';
-            if (['data-pegawai', 'antrian', 'pengaturan'].includes(hash) && !['admin', 'superadmin'].includes(STATE.user?.role)) { hash = 'profil'; window.location.hash = hash; return; }
+            let hash = window.location.hash.substring(1) || 'beranda';
+            if (['data-pegawai', 'antrian', 'pengaturan'].includes(hash) && !['admin', 'superadmin'].includes(STATE.user?.role)) { hash = 'beranda'; window.location.hash = hash; return; }
             document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
 
-            let pageId = 'dashboard'; 
-            if (['data-pegawai', 'antrian', 'pengaturan'].includes(hash)) { pageId = hash; }
+            let pageId = hash; 
+            // Group profile tabs under page-profil-container
+            if (['profil', 'pendidikan', 'pangkat', 'jabatan', 'kompetensi', 'kgb', 'keluarga', 'identitas'].includes(hash)) { 
+                pageId = 'profil-container'; 
+            }
 
-            document.getElementById('page-' + pageId).classList.remove('hidden');
+            const targetPage = document.getElementById('page-' + pageId);
+            if(targetPage) targetPage.classList.remove('hidden');
 
-            const titles = { 'profil':'Profil Utama', 'pendidikan':'Pendidikan', 'pangkat':'Pangkat / Gol', 'jabatan':'Jabatan', 'kompetensi': 'Pengembangan Kompetensi', 'kgb':'KGB', 'keluarga':'Data Keluarga', 'identitas':'Identitas Lain & Kartu', 'data-pegawai':'Data Pegawai', 'antrian':'Antrian Update', 'pengaturan':'Pengaturan' };
-            document.getElementById('page-title').innerText = titles[hash] || 'Profil Saya';
+            const titles = { 'beranda': 'Beranda Utama', 'profil':'Profil Utama', 'pendidikan':'Pendidikan', 'pangkat':'Pangkat / Gol', 'jabatan':'Jabatan', 'kompetensi': 'Pengembangan Kompetensi', 'kgb':'KGB', 'keluarga':'Data Keluarga', 'identitas':'Identitas Lain & Kartu', 'data-pegawai':'Data Pegawai', 'antrian':'Antrian Update', 'pengaturan':'Pengaturan' };
+            document.getElementById('page-title').innerText = titles[hash] || 'SIMPEG KOESMA';
 
-            if (pageId === 'dashboard') {
+            if (pageId === 'profil-container') {
                 document.querySelectorAll('.user-tab-content').forEach(el => el.classList.add('hidden'));
                 const targetTab = document.getElementById('tab-' + hash);
                 if (targetTab) targetTab.classList.remove('hidden');
             }
 
-            document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('bg-gray-700', 'bg-opacity-50'));
+            document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('bg-gray-700', 'bg-opacity-50', 'border-l-4', 'border-blue-400'));
             const activeNav = document.getElementById('nav-tab-' + hash) || document.getElementById('menu-' + hash);
-            if(activeNav) activeNav.classList.add('bg-gray-700', 'bg-opacity-50');
+            if(activeNav) {
+                activeNav.classList.add('bg-gray-700', 'bg-opacity-50', 'border-l-4', 'border-blue-400');
+            }
 
             if(window.innerWidth < 768 && !document.getElementById('sidebar').classList.contains('hidden')) { toggleSidebar(); }
 
+            // Route Specific Actions
+            if(hash === 'beranda') renderDashboard();
             if(hash === 'data-pegawai') fetchAllPegawai();
             if(hash === 'antrian') fetchAllAntrian();
+            
             sessionStorage.setItem('simpeg_active_hash', hash);
         }
 
@@ -607,15 +752,142 @@
             document.getElementById('login-page').style.display = 'none'; document.getElementById('app-container').style.display = 'flex';
             document.getElementById('user-info-name').innerText = STATE.user.nip; document.getElementById('user-info-role').innerText = STATE.user.role;
             if (['admin', 'superadmin'].includes(STATE.user.role)) { document.getElementById('admin-menu-section').classList.remove('hidden'); }
-            await fetchProfile();
+            
+            await fetchProfile(); // Profile & User Antrian loaded here
+            
             const urlHash = window.location.hash.substring(1);
             const savedHash = sessionStorage.getItem('simpeg_active_hash');
-            if (!urlHash) { window.location.hash = savedHash || 'profil'; } else { handleRouting(); }
+            if (!urlHash) { window.location.hash = savedHash || 'beranda'; } else { handleRouting(); }
             showLoader(false);
         }
 
         // ==========================================
-        // DATA FETCHING & RENDERING
+        // DASHBOARD LOGIC (NEW)
+        // ==========================================
+        async function renderDashboard() {
+            if (['admin', 'superadmin'].includes(STATE.user.role)) {
+                document.getElementById('dashboard-user').classList.add('hidden');
+                document.getElementById('dashboard-admin').classList.remove('hidden');
+                await renderAdminDashboard();
+            } else {
+                document.getElementById('dashboard-admin').classList.add('hidden');
+                document.getElementById('dashboard-user').classList.remove('hidden');
+                renderUserDashboard();
+            }
+        }
+
+        function renderUserDashboard() {
+            if (!STATE.profile) return;
+            const p = STATE.profile;
+            const fullName = (p.Gelar_Depan ? p.Gelar_Depan + ' ' : '') + p.Nama_Lengkap + (p.Gelar_Belakang ? ', ' + p.Gelar_Belakang : '');
+            
+            document.getElementById('dash-user-name').innerText = p.Nama_Lengkap || 'Pegawai';
+            document.getElementById('dash-user-jabatan').innerText = `${p.Jabatan_Terakhir || '-'} | ${p.Unit_Kerja || '-'}`;
+            document.getElementById('dash-user-status').innerText = p.Status_Pegawai || 'Aktif';
+            document.getElementById('dash-user-asn').innerText = p.Jenis_ASN || '-';
+            
+            const pendingAntrian = STATE.myAntrian ? STATE.myAntrian.filter(a => a.Status === 'Pending').length : 0;
+            document.getElementById('dash-user-antrian').innerText = pendingAntrian;
+
+            // Hitung JP Diklat
+            let totalJP = 0;
+            if (STATE.riwayat.kompetensi) {
+                STATE.riwayat.kompetensi.forEach(k => {
+                    const jp = parseInt(k.Jumlah_JP);
+                    if (!isNaN(jp)) totalJP += jp;
+                });
+            }
+            document.getElementById('dash-user-jp').innerText = totalJP;
+
+            // Mini Timeline
+            const tlContainer = document.getElementById('dash-user-timeline');
+            tlContainer.innerHTML = '';
+            if (!STATE.myAntrian || STATE.myAntrian.length === 0) {
+                tlContainer.innerHTML = '<p class="text-sm text-center text-gray-500 py-4 italic">Belum ada aktivitas pengajuan.</p>';
+            } else {
+                const recent = STATE.myAntrian.slice().reverse().slice(0, 3); // Ambil 3 terakhir
+                recent.forEach(a => {
+                    let icon = 'fa-clock text-yellow-500'; let bg = 'bg-yellow-50';
+                    if(a.Status === 'Approved') { icon = 'fa-check-circle text-green-500'; bg = 'bg-green-50'; }
+                    if(a.Status === 'Rejected') { icon = 'fa-times-circle text-red-500'; bg = 'bg-red-50'; }
+                    
+                    const tgl = new Date(a.Tgl_Pengajuan).toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'});
+                    tlContainer.innerHTML += `
+                        <div class="flex items-center p-3 border border-gray-100 rounded-lg ${bg}">
+                            <i class="fas ${icon} text-lg w-8 text-center"></i>
+                            <div class="ml-2 flex-1 overflow-hidden">
+                                <p class="text-sm font-bold truncate">${a.Sheet_Tujuan.replace(/_/g, ' ')}</p>
+                                <p class="text-xs text-gray-600 truncate">${a.Kolom_Tujuan.replace(/_/g, ' ')}: ${String(a.Nilai_Baru).substring(0,30)}</p>
+                            </div>
+                            <span class="text-xs text-gray-400 whitespace-nowrap ml-2">${tgl}</span>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        async function renderAdminDashboard() {
+            showLoader(true);
+            try {
+                // Background fetch if empty
+                if(STATE.allPegawai.length === 0) {
+                    const res = await apiCall({ action: 'getAllData', role: STATE.user.role });
+                    STATE.allPegawai = res.data || [];
+                }
+                if(STATE.allAntrianGlobal.length === 0) {
+                    const resQ = await apiCall({ action: 'getAllAntrian', role: STATE.user.role });
+                    STATE.allAntrianGlobal = resQ.data || [];
+                }
+
+                // Hitung KPI
+                const total = STATE.allPegawai.length;
+                const pns = STATE.allPegawai.filter(p => p.Jenis_ASN === 'PNS').length;
+                const pppk = STATE.allPegawai.filter(p => p.Jenis_ASN === 'PPPK').length;
+                const pendingQ = STATE.allAntrianGlobal.filter(a => a.Status === 'Pending');
+
+                document.getElementById('dash-admin-total').innerText = total;
+                document.getElementById('dash-admin-pns').innerText = pns;
+                document.getElementById('dash-admin-pppk').innerText = pppk;
+                document.getElementById('dash-admin-antrian').innerText = pendingQ.length;
+
+                // Update Badge Sidebar
+                const badge = document.getElementById('badge-antrian');
+                if(pendingQ.length > 0) {
+                    badge.innerText = pendingQ.length;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+
+                // Render Mini Table Antrian
+                const tbody = document.getElementById('dash-admin-table-antrian');
+                tbody.innerHTML = '';
+                if(pendingQ.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-center p-4 opacity-70 italic text-gray-500">Tidak ada pengajuan pending.</td></tr>';
+                } else {
+                    const recentPending = pendingQ.slice(0, 5); // 5 terlama/terbaru
+                    recentPending.forEach(a => {
+                        const tgl = new Date(a.Tgl_Pengajuan).toLocaleDateString('id-ID', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
+                        tbody.innerHTML += `
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="p-2 whitespace-nowrap">${tgl}</td>
+                                <td class="p-2 font-medium">${a.Nama_Pengaju}<br><span class="text-[10px] text-gray-500">${a.NIP}</span></td>
+                                <td class="p-2 text-xs">${a.Sheet_Tujuan.replace(/_/g, ' ')}</td>
+                                <td class="p-2">
+                                    <button onclick="window.location.hash='antrian'" class="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 transition">Proses</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+            } catch(e) {
+                console.error("Error Dashboard Admin", e);
+            }
+            showLoader(false);
+        }
+
+        // ==========================================
+        // DATA FETCHING & RENDERING (PROFIL)
         // ==========================================
         async function fetchProfile() {
             try {
@@ -762,7 +1034,7 @@
                     }
                     
                     const tgl = new Date(a.Tgl_Pengajuan).toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
-                    tbody.innerHTML += `<tr class="border-b border-gray-300 hover:bg-gray-50"><td class="p-2 whitespace-nowrap align-top">${tgl}</td><td class="p-2 font-medium text-blue-600 align-top">${a.Kolom_Tujuan.replace(/_/g, ' ')}</td><td class="p-2 max-w-xs truncate align-top" title="${a.Nilai_Baru}">${a.Nilai_Baru}</td><td class="p-2 align-top"><span class="px-2 py-1 ${statusColor} rounded text-xs whitespace-nowrap inline-block">${statusIcon}</span>${textAlasan}</td></tr>`;
+                    tbody.innerHTML += `<tr class="border-b border-gray-100 hover:bg-gray-50"><td class="p-3 whitespace-nowrap align-top">${tgl}</td><td class="p-3 font-medium text-blue-600 align-top">${a.Kolom_Tujuan.replace(/_/g, ' ')}</td><td class="p-3 max-w-xs truncate align-top" title="${a.Nilai_Baru}">${a.Nilai_Baru}</td><td class="p-3 align-top"><span class="px-2 py-1 ${statusColor} rounded text-xs whitespace-nowrap inline-block">${statusIcon}</span>${textAlasan}</td></tr>`;
                 });
             } catch (err) { console.error(err); }
         }
@@ -798,7 +1070,7 @@
                     let roleBadge = '';
                     if (STATE.user.role === 'superadmin' && p.Role) {
                         let rColor = p.Role === 'superadmin' ? 'bg-purple-100 text-purple-800' : (p.Role === 'admin' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600');
-                        roleBadge = `<br><span class="px-2 py-0.5 ${rColor} rounded text-[10px] font-bold mt-1 inline-block uppercase"><i class="fas fa-user-shield mr-1"></i> ${p.Role}</span>`;
+                        roleBadge = `<br><span class="px-2 py-0.5 ${rColor} rounded text-[10px] font-bold mt-1 inline-block uppercase shadow-sm"><i class="fas fa-user-shield mr-1"></i> ${p.Role}</span>`;
                     }
 
                     let tr = document.createElement('tr'); tr.className = 'border-b border-gray-300 hover:bg-gray-100 hover:text-black transition';
@@ -1030,7 +1302,16 @@
         async function fetchAllAntrian() {
             if (!['admin', 'superadmin'].includes(STATE.user.role)) return;
             showLoader();
-            try { const res = await apiCall({ action: 'getAllAntrian', role: STATE.user.role }); renderTableAntrian(res.data); } catch(e) { Swal.fire('Error', e.message, 'error'); }
+            try { 
+                const res = await apiCall({ action: 'getAllAntrian', role: STATE.user.role }); 
+                STATE.allAntrianGlobal = res.data || [];
+                renderTableAntrian(STATE.allAntrianGlobal); 
+                
+                // Update badge if any
+                const pendingCount = STATE.allAntrianGlobal.filter(a => a.Status === 'Pending').length;
+                const badge = document.getElementById('badge-antrian');
+                if(pendingCount > 0) { badge.innerText = pendingCount; badge.classList.remove('hidden'); } else { badge.classList.add('hidden'); }
+            } catch(e) { Swal.fire('Error', e.message, 'error'); }
             showLoader(false);
         }
 
@@ -1045,10 +1326,10 @@
                 let displayNilai = a.Nilai_Baru !== undefined && a.Nilai_Baru !== null ? String(a.Nilai_Baru) : '';
                 
                 if(displayNilai.startsWith('data:image/')) { displayNilai = `<img src="${displayNilai}" class="w-16 h-16 object-cover rounded cursor-pointer shadow border border-gray-300" onclick="Swal.fire({imageUrl: '${displayNilai}', imageWidth: 400, showConfirmButton: false})" title="Klik untuk memperbesar">`; } 
-                else if(displayNilai.includes('http') && displayNilai.includes('drive')) { displayNilai += ` <br><a href="${displayNilai.split(' | ').pop()}" target="_blank" class="text-blue-500 underline text-xs">Lihat File Upload</a>`; }
+                else if(displayNilai.includes('http') && displayNilai.includes('drive')) { displayNilai += ` <br><a href="${displayNilai.split(' | ').pop()}" target="_blank" class="text-blue-500 underline text-xs"><i class="fas fa-paperclip"></i> Lihat File Upload</a>`; }
 
                 let tr = document.createElement('tr'); tr.className = 'border-b border-gray-300 hover:bg-gray-50';
-                tr.innerHTML = `<td class="p-2 text-center"><input type="checkbox" class="cb-antrian" value="${a.ID_Antrian}" onchange="checkBulkActionVisibility()"></td><td class="p-2 whitespace-nowrap">${tgl}</td><td class="p-2 font-bold">${a.Nama_Pengaju} <br><span class="text-xs text-gray-500 font-normal">NIP/NIN: ${a.NIP}</span></td><td class="p-2 text-blue-600 font-medium">${a.Kolom_Tujuan.replace(/_/g, ' ')}</td><td class="p-2 max-w-xs break-words">${displayNilai}</td><td class="p-2 whitespace-nowrap"><button onclick="prosesAntrian('${a.ID_Antrian}', 'Approved')" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs mr-1 shadow"><i class="fas fa-check"></i> Setuju</button><button onclick="prosesAntrian('${a.ID_Antrian}', 'Rejected')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs shadow"><i class="fas fa-times"></i> Tolak</button></td>`;
+                tr.innerHTML = `<td class="p-3 text-center"><input type="checkbox" class="cb-antrian" value="${a.ID_Antrian}" onchange="checkBulkActionVisibility()"></td><td class="p-3 whitespace-nowrap">${tgl}</td><td class="p-3 font-bold">${a.Nama_Pengaju} <br><span class="text-xs text-gray-500 font-normal">NIP/NIN: ${a.NIP}</span></td><td class="p-3 text-blue-600 font-medium">${a.Kolom_Tujuan.replace(/_/g, ' ')}</td><td class="p-3 max-w-xs break-words">${displayNilai}</td><td class="p-3 whitespace-nowrap"><button onclick="prosesAntrian('${a.ID_Antrian}', 'Approved')" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs mr-1 shadow transition"><i class="fas fa-check"></i> Setuju</button><button onclick="prosesAntrian('${a.ID_Antrian}', 'Rejected')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs shadow transition"><i class="fas fa-times"></i> Tolak</button></td>`;
                 tbody.appendChild(tr);
             });
             document.getElementById('cb-select-all').checked = false; checkBulkActionVisibility();
@@ -1098,6 +1379,9 @@
             try {
                 const res = await apiCall({ action: 'processBulkAntrian', ids: ids, action_type: action_type, alasan_tolak: alasan_tolak });
                 Toast.fire({ icon: 'success', title: res.message }); document.getElementById('cb-select-all').checked = false; checkBulkActionVisibility(); fetchAllAntrian(); 
+                
+                // Refresh admin dashboard after actions
+                if(STATE.allPegawai.length > 0) { STATE.allPegawai = []; }
             } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
             showLoader(false);
         }
@@ -1132,6 +1416,8 @@
             try {
                 const res = await apiCall({ action: 'processAntrian', id_antrian: id_antrian, action_type: action_type, alasan_tolak: alasan_tolak });
                 Toast.fire({ icon: 'success', title: res.message }); fetchAllAntrian(); 
+                // Refresh admin dashboard background data
+                if(STATE.allPegawai.length > 0) { STATE.allPegawai = []; }
             } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
             showLoader(false);
         }
@@ -1285,7 +1571,7 @@
                     try {
                         await apiCall({ action: 'submitUpdate', executorRole: STATE.user.role, nip_target: STATE.user.nip, sheet_target: sheet, kolom_target: kolom, nilai_baru: newAlamat });
                         Toast.fire({ icon: 'success', title: 'Pengajuan perubahan berhasil dikirim.' });
-                        if(['admin','superadmin'].includes(STATE.user.role)) { fetchProfile(); } else { await fetchMyAntrian(); updateProfileUI(); }
+                        if(['admin','superadmin'].includes(STATE.user.role)) { fetchProfile(); } else { await fetchMyAntrian(); updateProfileUI(); renderDashboard(); }
                     } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
                     showLoader(false);
                 }
@@ -1324,7 +1610,7 @@
                 try {
                     await apiCall({ action: 'submitUpdate', executorRole: STATE.user.role, nip_target: STATE.user.nip, sheet_target: sheet, kolom_target: kolom, nilai_baru: finalVal });
                     Toast.fire({ icon: 'success', title: 'Pengajuan perubahan berhasil dikirim.' });
-                    if(['admin','superadmin'].includes(STATE.user.role)) { fetchProfile(); } else { await fetchMyAntrian(); updateProfileUI(); }
+                    if(['admin','superadmin'].includes(STATE.user.role)) { fetchProfile(); } else { await fetchMyAntrian(); updateProfileUI(); renderDashboard(); }
                 } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
                 showLoader(false);
             }
@@ -1424,7 +1710,7 @@
                     try {
                         await apiCall({ action: 'submitUpdate', executorRole: STATE.user.role, nip_target: STATE.user.nip, sheet_target: sheet, baris_target: idData, kolom_target: selectedKolom, nilai_baru: newVal });
                         Toast.fire({ icon: 'success', title: 'Perubahan berhasil masuk antrian.' });
-                        if(['admin','superadmin'].includes(STATE.user.role)) { fetchProfile(); } else { await fetchMyAntrian(); renderSemuaRiwayat(); }
+                        if(['admin','superadmin'].includes(STATE.user.role)) { fetchProfile(); } else { await fetchMyAntrian(); renderSemuaRiwayat(); renderDashboard(); }
                     } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
                     showLoader(false);
                 }
@@ -1691,7 +1977,7 @@
                             sheet_target: sheet, kolom_target: 'Pengajuan Data Baru', nilai_baru: nilaiKeluarga
                         });
                         Toast.fire({ icon: 'success', title: 'Pengajuan data masuk antrian.' });
-                        if(['admin','superadmin'].includes(STATE.user.role)) { fetchProfile(); } else { fetchMyAntrian(); }
+                        if(['admin','superadmin'].includes(STATE.user.role)) { fetchProfile(); } else { fetchMyAntrian(); renderDashboard(); }
                     } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
                     showLoader(false);
                 } else if (formValues.length > 0) {
@@ -1703,7 +1989,7 @@
                             sheet_target: sheet, kolom_target: 'Pengajuan Data Baru', nilai_baru: nilaiGabungan
                         });
                         Toast.fire({ icon: 'success', title: 'Pengajuan data masuk antrian.' });
-                        if(['admin','superadmin'].includes(STATE.user.role)) { fetchProfile(); } else { fetchMyAntrian(); }
+                        if(['admin','superadmin'].includes(STATE.user.role)) { fetchProfile(); } else { fetchMyAntrian(); renderDashboard(); }
                     } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
                     showLoader(false);
                 }
