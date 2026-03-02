@@ -577,6 +577,23 @@
                 <!-- Page: Pengaturan -->
                 <div id="page-pengaturan" class="page-content hidden">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        
+                        <!-- Mode Maintenance (Hanya Superadmin) -->
+                        <div id="card-maintenance" class="card rounded-lg shadow-md p-6 hidden border-t-4 border-red-500 relative overflow-hidden">
+                            <i class="fas fa-tools absolute -right-4 -bottom-4 text-9xl opacity-5 text-red-500"></i>
+                            <h3 class="font-bold text-lg mb-2 text-red-600"><i class="fas fa-hard-hat mr-2"></i> Mode Maintenance</h3>
+                            <p class="text-sm text-gray-600 mb-5 relative z-10">Jika mode ini diaktifkan, <b>hanya Superadmin</b> yang dapat login ke dalam sistem. Pegawai dan Admin biasa akan diblokir sementara waktu untuk proses pemeliharaan server.</p>
+                            
+                            <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-200 relative z-10">
+                                <span class="text-sm font-bold text-gray-700">Status Server:</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                  <input type="checkbox" id="toggle-maintenance" class="sr-only peer" onchange="toggleMaintenanceMode(this)">
+                                  <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                  <span class="ml-3 text-sm font-bold w-24" id="text-maintenance-status">OFF</span>
+                                </label>
+                            </div>
+                        </div>
+
                         <div class="card rounded-lg shadow-md p-6">
                             <h3 class="font-bold text-lg mb-4 border-b pb-2"><i class="fas fa-palette text-blue-500 mr-2"></i> Tema Aplikasi</h3>
                             <div class="flex flex-col space-y-4 mt-4">
@@ -721,6 +738,7 @@
             if(hash === 'beranda') await renderDashboard();
             if(hash === 'data-pegawai') await fetchAllPegawai();
             if(hash === 'antrian') await fetchAllAntrian();
+            if(hash === 'pengaturan') await fetchSettings(); // Tarik status pengaturan
             
             sessionStorage.setItem('simpeg_active_hash', hash);
         }
@@ -758,7 +776,7 @@
         function showLoader(show=true) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; }
 
         // ==========================================
-        // AUTHENTICATION
+        // AUTHENTICATION & SETTINGS
         // ==========================================
 
         async function handleCredentialResponse(response) {
@@ -881,6 +899,66 @@
                     Swal.fire('Gagal Registrasi', err.message, 'error'); 
                 }
             }
+        }
+
+        async function fetchSettings() {
+            if (STATE.user && STATE.user.role === 'superadmin') {
+                document.getElementById('card-maintenance').classList.remove('hidden');
+                try {
+                    const res = await apiCall({ action: 'getSettings', role: STATE.user.role });
+                    const toggle = document.getElementById('toggle-maintenance');
+                    const textObj = document.getElementById('text-maintenance-status');
+                    toggle.checked = res.maintenance;
+                    
+                    if (res.maintenance) {
+                        textObj.innerText = 'ON (Aktif)';
+                        textObj.classList.add('text-red-600');
+                        textObj.classList.remove('text-gray-500');
+                    } else {
+                        textObj.innerText = 'OFF';
+                        textObj.classList.remove('text-red-600');
+                        textObj.classList.add('text-gray-500');
+                    }
+                } catch (e) { console.error('Gagal memuat pengaturan', e); }
+            }
+        }
+
+        async function toggleMaintenanceMode(cb) {
+            const isON = cb.checked;
+            const textObj = document.getElementById('text-maintenance-status');
+            
+            const { isConfirmed } = await Swal.fire({
+                title: 'Konfirmasi Perubahan Server',
+                text: `Anda yakin ingin mengubah Mode Maintenance menjadi ${isON ? 'ON (Sistem Ditutup untuk user)' : 'OFF (Sistem Dibuka)'}?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Ubah',
+                confirmButtonColor: isON ? '#e74c3c' : '#27ae60'
+            });
+
+            if (!isConfirmed) {
+                cb.checked = !isON; 
+                return;
+            }
+
+            showLoader(true);
+            try {
+                const res = await apiCall({ action: 'toggleMaintenance', role: STATE.user.role, status: isON });
+                
+                if (isON) {
+                    textObj.innerText = 'ON (Aktif)';
+                    textObj.classList.add('text-red-600'); textObj.classList.remove('text-gray-500');
+                } else {
+                    textObj.innerText = 'OFF';
+                    textObj.classList.remove('text-red-600'); textObj.classList.add('text-gray-500');
+                }
+                
+                Toast.fire({icon: 'success', title: res.message});
+            } catch(e) {
+                cb.checked = !isON;
+                Swal.fire('Gagal', e.message, 'error');
+            }
+            showLoader(false);
         }
 
         function logout() {
@@ -2503,9 +2581,38 @@
         }
 
         async function apiCall(payload) {
+            // Sisipkan role ke dalam payload jika session user tersedia untuk backend pengecekan maintenance
+            if (STATE.user && !payload.role) { payload.role = STATE.user.role; }
+            
             const response = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
             const data = await response.json();
-            if (data.status === 'error') throw new Error(data.message);
+            
+            if (data.status === 'error') {
+                // Intersep Error Maintenance
+                if (data.message.includes("MAINTENANCE")) {
+                    // Jika ada sesi yang aktif, putuskan dan keluarkan pengguna
+                    if (STATE.user) {
+                        localStorage.removeItem('simpeg_user'); 
+                        sessionStorage.removeItem('simpeg_active_hash'); 
+                        STATE.user = null;
+                        document.getElementById('app-container').style.display = 'none'; 
+                        document.getElementById('login-page').style.display = 'flex';
+                    }
+                    
+                    Swal.fire({
+                        title: 'Sistem Dalam Perbaikan',
+                        html: '<p class="text-sm mt-2 text-gray-600">Mohon maaf, sistem aplikasi SIMPEG saat ini sedang ditutup untuk <b>perbaikan dan pemeliharaan (Maintenance)</b> oleh Administrator.</p><p class="text-sm font-bold mt-2">Silakan coba kembali beberapa saat lagi.</p>',
+                        icon: 'warning',
+                        confirmButtonText: 'Baik, Mengerti',
+                        confirmButtonColor: '#e74c3c',
+                        allowOutsideClick: false
+                    });
+                    
+                    // Hentikan eksekusi script selanjutnya
+                    throw new Error("Maintenance Mode Intercepted");
+                }
+                throw new Error(data.message);
+            }
             return data;
         }
 
