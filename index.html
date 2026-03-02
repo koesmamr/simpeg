@@ -755,8 +755,8 @@
                         Swal.showValidationMessage('NIK dan No. WhatsApp wajib diisi!');
                         return false;
                     }
-                    if (nik.length !== 18) {
-                        Swal.showValidationMessage('NIK harus terdiri dari tepat 18 angka!');
+                    if (nik.length !== 16) {
+                        Swal.showValidationMessage('NIK harus terdiri dari tepat 16 angka!');
                         return false;
                     }
                     return { nik: nik, noWa: wa };
@@ -2419,4 +2419,5 @@
     </script>
 </body>
 </html>
+
 
