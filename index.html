@@ -768,11 +768,67 @@
                 showLoader();
                 try {
                     const res = await apiCall({ action: 'linkNik', token: token, nik: formValues.nik, no_wa: formValues.noWa, role: role });
-                    Swal.fire('Sukses', res.message, 'success');
-                    STATE.user = res.user; localStorage.setItem('simpeg_user', JSON.stringify(STATE.user)); showApp();
+                    showLoader(false);
+                    
+                    if (res.status === 'register_needed') {
+                        promptRegisterNew(res.data.email, res.data.nik, res.data.no_wa, token);
+                    } else {
+                        Swal.fire('Sukses', res.message, 'success');
+                        STATE.user = res.user; localStorage.setItem('simpeg_user', JSON.stringify(STATE.user)); showApp();
+                    }
                 } catch (err) { 
                     showLoader(false); 
                     Swal.fire('Gagal Menautkan', err.message, 'error'); 
+                }
+            }
+        }
+
+        async function promptRegisterNew(email, nik, wa, token) {
+             const { value: regValues } = await Swal.fire({
+                title: 'Registrasi Pegawai Baru',
+                html: `
+                    <div class="text-sm text-gray-600 mb-4">Data NIK Anda belum terdaftar. Silakan masukkan Nama Lengkap Anda untuk mendaftar:</div>
+                    <div class="text-left w-[85%] mx-auto mb-1"><label class="text-xs font-bold text-gray-500 uppercase">Nama Lengkap (Sesuai KTP)</label></div>
+                    <input id="swal-reg-nama" class="swal2-input !w-[85%] !mx-auto !mt-0" placeholder="Nama Lengkap" type="text">
+                    
+                    <div class="text-left w-[85%] mx-auto mb-1 mt-3"><label class="text-xs font-bold text-gray-500 uppercase">NIK</label></div>
+                    <input id="swal-reg-nik" class="swal2-input !w-[85%] !mx-auto !mt-0 bg-gray-100 text-gray-500" value="${nik}" readonly>
+                    
+                    <div class="text-left w-[85%] mx-auto mb-1 mt-3"><label class="text-xs font-bold text-gray-500 uppercase">No. WhatsApp</label></div>
+                    <input id="swal-reg-wa" class="swal2-input !w-[85%] !mx-auto !mt-0 bg-gray-100 text-gray-500" value="${wa}" readonly>
+                    
+                    <div class="text-left w-[85%] mx-auto mb-1 mt-3"><label class="text-xs font-bold text-gray-500 uppercase">Email SSO</label></div>
+                    <input id="swal-reg-email" class="swal2-input !w-[85%] !mx-auto !mt-0 bg-gray-100 text-gray-500" value="${email}" readonly>
+                `,
+                focusConfirm: false,
+                allowOutsideClick: false,
+                showCancelButton: true,
+                confirmButtonText: 'Kirim Pendaftaran',
+                cancelButtonText: 'Batal',
+                preConfirm: () => {
+                    const nama = document.getElementById('swal-reg-nama').value.trim();
+                    if (!nama) {
+                        Swal.showValidationMessage('Nama Lengkap wajib diisi!');
+                        return false;
+                    }
+                    return { nama: nama, nik: nik, noWa: wa };
+                }
+            });
+
+            if (regValues) {
+                showLoader();
+                try {
+                    const res = await apiCall({ action: 'registerNewUser', token: token, nama: regValues.nama, nik: regValues.nik, no_wa: regValues.noWa });
+                    showLoader(false);
+                    Swal.fire({
+                        title: 'Pendaftaran Terkirim!',
+                        text: res.message,
+                        icon: 'success',
+                        confirmButtonText: 'Tutup'
+                    });
+                } catch (err) { 
+                    showLoader(false); 
+                    Swal.fire('Gagal Registrasi', err.message, 'error'); 
                 }
             }
         }
