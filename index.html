@@ -314,6 +314,7 @@
                                 <table class="w-full text-sm">
                                     <tr class="border-b border-gray-100 hover:bg-gray-50"><td class="py-3 px-2 opacity-75 w-1/3">NIK (Identitas Utama)</td><td id="p-nik-personal" class="py-3 font-bold text-blue-600">-</td><td class="text-right w-8"></td></tr>
                                     <tr class="border-b border-gray-100 hover:bg-gray-50"><td class="py-3 px-2 opacity-75">NIP / NIN</td><td id="p-nipnin" class="py-3 font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'NIP_NIN')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50"><td class="py-3 px-2 opacity-75">Email SSO</td><td id="p-emailsso" class="py-3 font-medium text-blue-500">-</td><td class="text-right"></td></tr>
                                     <tr class="border-b border-gray-100 hover:bg-gray-50"><td class="py-3 px-2 opacity-75 w-1/3">Tempat Lahir</td><td id="p-tempatlahir" class="py-3 font-medium">-</td><td class="text-right w-8"><button onclick="editField('PROFIL', 'Tempat_Lahir')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
                                     <tr class="border-b border-gray-100 hover:bg-gray-50"><td class="py-3 px-2 opacity-75 w-1/3">Tanggal Lahir</td><td id="p-tgllahir" class="py-3 font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'Tgl_Lahir')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
                                     <tr class="border-b border-gray-100 hover:bg-gray-50"><td class="py-3 px-2 opacity-75">Jenis Kelamin</td><td id="p-jk" class="py-3 font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'Jenis_Kelamin')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
@@ -973,6 +974,7 @@
         function updateProfileUI() {
             document.getElementById('p-nik-personal').innerHTML = STATE.profile.NIK || '-';
             document.getElementById('p-nipnin').innerHTML = getFieldHTML('NIP_NIN', STATE.profile.NIP_NIN);
+            document.getElementById('p-emailsso').innerHTML = STATE.profile.Email_SSO || '-';
             document.getElementById('p-tempatlahir').innerHTML = getFieldHTML('Tempat_Lahir', STATE.profile.Tempat_Lahir);
             document.getElementById('p-tgllahir').innerHTML = getFieldHTML('Tgl_Lahir', STATE.profile.Tgl_Lahir ? new Date(STATE.profile.Tgl_Lahir).toLocaleDateString('id-ID') : '');
             document.getElementById('p-jk').innerHTML = getFieldHTML('Jenis_Kelamin', STATE.profile.Jenis_Kelamin);
@@ -1276,6 +1278,7 @@
                         <h4 class="font-bold text-md mb-2 text-blue-600 border-b pb-1"><i class="fas fa-id-card mr-2"></i>Data Personal & Karir</h4>
                         <table class="w-full mb-5 text-gray-700">
                             <tr><td class="w-1/3 py-1 opacity-75">NIP / NIN</td><td class="font-medium">${p.NIP_NIN || '-'}</td></tr>
+                            <tr><td class="w-1/3 py-1 opacity-75">Email SSO</td><td class="font-medium text-blue-500">${p.Email_SSO || '-'}</td></tr>
                             <tr><td class="w-1/3 py-1 opacity-75">Status Kepeg.</td><td class="font-medium">${p.Jenis_ASN || '-'}</td></tr>
                             <tr><td class="py-1 opacity-75">Pangkat/Gol</td><td class="font-medium">${p.Pangkat_Golongan || '-'}</td></tr>
                             <tr><td class="py-1 opacity-75">Unit Kerja</td><td class="font-medium">${p.Unit_Kerja || '-'}</td></tr>
@@ -2046,7 +2049,6 @@
                 const img = new Image();
                 img.onload = async function() {
                     const canvas = document.createElement('canvas');
-                    // Tingkatkan resolusi batas dari 400x400 menjadi 800x800 agar kualitas source lebih baik untuk di-print
                     const MAX_WIDTH = 800; const MAX_HEIGHT = 800;
                     let width = img.width; let height = img.height;
 
@@ -2054,7 +2056,6 @@
                     else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
                     
                     canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
-                    // Tingkatkan kualitas kompresi jpeg dari 0.7 ke 0.85
                     const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
 
                     showLoader();
@@ -2362,6 +2363,7 @@
                 <h4 style="background-color:#f0f0f0; padding:8px; margin:10px 0; border:1px solid #ddd; font-size:14px;">I. KETERANGAN PERORANGAN</h4>
                 <table style="width:100%; border-collapse:collapse; font-size:12px; margin-bottom:15px;">
                     <tr><td style="width:30%; padding:5px; border:1px solid #ddd;">NIK (Identitas Utama)</td><td style="padding:5px; border:1px solid #ddd;">${p.NIK || '-'}</td></tr>
+                    <tr><td style="padding:5px; border:1px solid #ddd;">Email SSO</td><td style="padding:5px; border:1px solid #ddd;">${p.Email_SSO || '-'}</td></tr>
                     <tr><td style="padding:5px; border:1px solid #ddd;">Tempat, Tanggal Lahir</td><td style="padding:5px; border:1px solid #ddd;">${p.Tempat_Lahir || '-'}, ${formatDate(p.Tgl_Lahir)}</td></tr>
                     <tr><td style="padding:5px; border:1px solid #ddd;">Jenis Kelamin</td><td style="padding:5px; border:1px solid #ddd;">${p.Jenis_Kelamin || '-'}</td></tr>
                     <tr><td style="padding:5px; border:1px solid #ddd;">Agama</td><td style="padding:5px; border:1px solid #ddd;">${p.Agama || '-'}</td></tr>
@@ -2408,7 +2410,6 @@
             `;
 
             const cleanFileName = `CV_${namaLengkap.replace(/[^a-zA-Z0-9 ]/g, "").trim()}.pdf`;
-            // Tingkatkan scale dari 2 menjadi 4 untuk resolusi canvas yang jauh lebih tinggi dan tajam
             const opt = { margin: 10, filename: cleanFileName, image: { type: 'jpeg', quality: 1 }, html2canvas: { scale: 4, useCORS: true, letterRendering: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
             html2pdf().set(opt).from(cvContainer).save().then(() => { showLoader(false); }).catch(err => { showLoader(false); Swal.fire('Error', 'Gagal mencetak PDF: ' + err.message, 'error'); });
         }
