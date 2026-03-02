@@ -135,6 +135,8 @@
                     <h2 id="page-title" class="font-bold text-xl">Beranda</h2>
                 </div>
                 <div class="flex items-center">
+                    <!-- Tombol Refresh Data -->
+                    <button onclick="refreshCurrentPage(true)" class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 text-sm rounded shadow mr-2 transition"><i class="fas fa-sync-alt mr-1"></i> Refresh</button>
                     <button onclick="exportMyData()" id="btn-export-pdf" class="btn-primary px-3 py-1 text-sm rounded shadow"><i class="fas fa-file-pdf mr-1"></i> Cetak CV</button>
                 </div>
             </header>
@@ -673,7 +675,7 @@
             window.addEventListener('hashchange', () => { if(STATE.user) handleRouting(); });
         };
 
-        function handleRouting() {
+        async function handleRouting() {
             let hash = window.location.hash.substring(1) || 'beranda';
             if (['data-pegawai', 'antrian', 'pengaturan'].includes(hash) && !['admin', 'superadmin'].includes(STATE.user?.role)) { hash = 'beranda'; window.location.hash = hash; return; }
             document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
@@ -703,11 +705,37 @@
 
             if(window.innerWidth < 768 && !document.getElementById('sidebar').classList.contains('hidden')) { toggleSidebar(); }
 
-            if(hash === 'beranda') renderDashboard();
-            if(hash === 'data-pegawai') fetchAllPegawai();
-            if(hash === 'antrian') fetchAllAntrian();
+            if(hash === 'beranda') await renderDashboard();
+            if(hash === 'data-pegawai') await fetchAllPegawai();
+            if(hash === 'antrian') await fetchAllAntrian();
             
             sessionStorage.setItem('simpeg_active_hash', hash);
+        }
+
+        // --- FUNGSI REFRESH HALAMAN SENTRAL ---
+        async function refreshCurrentPage(showToast = false) {
+            showLoader(true);
+            
+            // 1. Bersihkan semua bendera & cache lokal agar dipaksa tarik data baru
+            isRiwayatFetched = false;
+            STATE.allPegawai = [];
+            STATE.allAntrianGlobal = [];
+            STATE.myAntrian = [];
+            
+            // 2. Refresh profil utama
+            if (STATE.user) {
+                try {
+                    await fetchProfile(); 
+                } catch(e) {}
+            }
+
+            // 3. Render ulang berdasarkan halaman yang terbuka
+            await handleRouting();
+            
+            showLoader(false);
+            if(showToast) {
+                Toast.fire({ icon: 'success', title: 'Data berhasil diperbarui' });
+            }
         }
 
         function initParticles() { particlesJS("particles-js", { "particles": {"number": {"value": 80},"color": {"value": "#ffffff"},"shape": {"type": "circle"},"opacity": {"value": 0.5},"size": {"value": 3},"line_linked": {"enable": true, "distance": 150, "color": "#ffffff", "opacity": 0.4, "width": 1},"move": {"enable": true, "speed": 2}}, "interactivity": {"events": {"onhover": {"enable": true, "mode": "grab"}}} }); }
@@ -998,7 +1026,7 @@
                     updateProfileUI();
                     fetchRiwayatLazily();
                 }
-            } catch (err) { console.error(err); Swal.fire('Error', 'Gagal memuat profil', 'error'); }
+            } catch (err) { console.error(err); }
         }
 
         async function fetchRiwayatLazily() {
@@ -1144,7 +1172,6 @@
 
         async function fetchAllPegawai() {
             if(STATE.allPegawai.length > 0) { renderTablePegawai(); return; } 
-            showLoader();
             try {
                 const res = await apiCall({ action: 'getAllData', role: STATE.user.role });
                 STATE.allPegawai = res.data;
@@ -1155,7 +1182,6 @@
                 });
                 STATE.filteredPegawai = [...STATE.allPegawai]; STATE.currentPage = 1; renderTablePegawai();
             } catch(e) { Swal.fire('Error', e.message, 'error'); }
-            showLoader(false);
         }
 
         function renderTablePegawai() {
@@ -1290,13 +1316,11 @@
                 const { value: newVal } = await Swal.fire(swalConfig);
 
                 if (newVal !== undefined && newVal !== currentVal && newVal !== '') {
-                    showLoader();
                     try {
                         await apiCall({ action: 'submitUpdate', executorRole: STATE.user.role, nik_target: nik, sheet_target: targetSheet, kolom_target: targetKolom, nilai_baru: newVal });
-                        Toast.fire({ icon: 'success', title: 'Data berhasil diperbarui.' }); 
-                        STATE.allPegawai = []; fetchAllPegawai();
+                        // Refresh halaman secara menyeluruh
+                        await refreshCurrentPage();
                     } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
-                    showLoader(false);
                 }
             }
         }
@@ -1407,7 +1431,6 @@
         // ==========================================
         async function fetchAllAntrian() {
             if (!['admin', 'superadmin'].includes(STATE.user.role)) return;
-            showLoader();
             try { 
                 const res = await apiCall({ action: 'getAllAntrian', role: STATE.user.role }); 
                 STATE.allAntrianGlobal = res.data || [];
@@ -1416,8 +1439,7 @@
                 const pendingCount = STATE.allAntrianGlobal.filter(a => a.Status === 'Pending').length;
                 const badge = document.getElementById('badge-antrian');
                 if(pendingCount > 0) { badge.innerText = pendingCount; badge.classList.remove('hidden'); } else { badge.classList.add('hidden'); }
-            } catch(e) { Swal.fire('Error', e.message, 'error'); }
-            showLoader(false);
+            } catch(e) { console.error('Error load antrian:', e); }
         }
 
         function renderTableAntrian(data) {
@@ -1480,14 +1502,10 @@
                 if (!isConfirmed) return;
             }
 
-            showLoader();
             try {
-                const res = await apiCall({ action: 'processBulkAntrian', ids: ids, action_type: action_type, alasan_tolak: alasan_tolak });
-                Toast.fire({ icon: 'success', title: res.message }); document.getElementById('cb-select-all').checked = false; checkBulkActionVisibility(); fetchAllAntrian(); 
-                
-                if(STATE.allPegawai.length > 0) { STATE.allPegawai = []; }
+                await apiCall({ action: 'processBulkAntrian', ids: ids, action_type: action_type, alasan_tolak: alasan_tolak });
+                await refreshCurrentPage(); // Refresh global data & UI
             } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
-            showLoader(false);
         }
 
         async function prosesAntrian(id_antrian, action_type) {
@@ -1516,13 +1534,10 @@
                 if (!isConfirmed) return;
             }
 
-            showLoader();
             try {
-                const res = await apiCall({ action: 'processAntrian', id_antrian: id_antrian, action_type: action_type, alasan_tolak: alasan_tolak });
-                Toast.fire({ icon: 'success', title: res.message }); fetchAllAntrian(); 
-                if(STATE.allPegawai.length > 0) { STATE.allPegawai = []; }
+                await apiCall({ action: 'processAntrian', id_antrian: id_antrian, action_type: action_type, alasan_tolak: alasan_tolak });
+                await refreshCurrentPage(); // Mengganti load parsial dengan Refresh Tersentralisasi
             } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
-            showLoader(false);
         }
 
         // ==========================================
@@ -1670,13 +1685,10 @@
                 });
 
                 if (newAlamat && newAlamat !== currentValue) {
-                    showLoader();
                     try {
                         await apiCall({ action: 'submitUpdate', executorRole: STATE.user.role, nik_target: STATE.user.nik, sheet_target: sheet, kolom_target: kolom, nilai_baru: newAlamat });
-                        Toast.fire({ icon: 'success', title: 'Pengajuan perubahan berhasil dikirim.' });
-                        if(['admin','superadmin'].includes(STATE.user.role)) { fetchProfile(); } else { await fetchMyAntrian(); updateProfileUI(); renderDashboard(); }
+                        await refreshCurrentPage(); // Refresh data UI terbaru
                     } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
-                    showLoader(false);
                 }
                 return; 
             }
@@ -1701,13 +1713,10 @@
                     if (finalVal.startsWith('0')) { finalVal = '62' + finalVal.slice(1); } else if (finalVal.startsWith('8')) { finalVal = '62' + finalVal; } else if (!finalVal.startsWith('62')) { finalVal = '62' + finalVal; }
                 }
 
-                showLoader();
                 try {
                     await apiCall({ action: 'submitUpdate', executorRole: STATE.user.role, nik_target: STATE.user.nik, sheet_target: sheet, kolom_target: kolom, nilai_baru: finalVal });
-                    Toast.fire({ icon: 'success', title: 'Pengajuan perubahan berhasil dikirim.' });
-                    if(['admin','superadmin'].includes(STATE.user.role)) { fetchProfile(); } else { await fetchMyAntrian(); updateProfileUI(); renderDashboard(); }
+                    await refreshCurrentPage(); // Refresh data UI
                 } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
-                showLoader(false);
             }
         }
 
@@ -1801,17 +1810,10 @@
                 const { value: newVal } = await Swal.fire(swalConfig);
 
                 if (newVal !== undefined && newVal !== rowData[selectedKolom] && newVal !== '') {
-                    showLoader();
                     try {
                         await apiCall({ action: 'submitUpdate', executorRole: STATE.user.role, nik_target: STATE.user.nik, sheet_target: sheet, baris_target: idData, kolom_target: selectedKolom, nilai_baru: newVal });
-                        Toast.fire({ icon: 'success', title: 'Perubahan berhasil masuk antrian.' });
-                        if(['admin','superadmin'].includes(STATE.user.role)) { 
-                            isRiwayatFetched = false; await fetchProfile(); await fetchRiwayatLazily(); 
-                        } else { 
-                            await fetchMyAntrian(); isRiwayatFetched = false; await fetchRiwayatLazily(); renderDashboard(); 
-                        }
+                        await refreshCurrentPage(); // Update Data
                     } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
-                    showLoader(false);
                 }
             }
         }
@@ -2061,7 +2063,6 @@
 
             if (formValues) {
                 if (formValues.isCombo) {
-                    showLoader();
                     try {
                         if (formValues.kkData) {
                             const nilaiKK = ['Kartu Keluarga', formValues.kkData.nomor, formValues.kkData.url].join(' | ');
@@ -2075,30 +2076,17 @@
                             action: 'submitUpdate', executorRole: STATE.user.role, nik_target: STATE.user.nik,
                             sheet_target: sheet, kolom_target: 'Pengajuan Data Baru', nilai_baru: nilaiKeluarga
                         });
-                        Toast.fire({ icon: 'success', title: 'Pengajuan data masuk antrian.' });
-                        if(['admin','superadmin'].includes(STATE.user.role)) { 
-                            isRiwayatFetched = false; await fetchProfile(); await fetchRiwayatLazily(); 
-                        } else { 
-                            await fetchMyAntrian(); isRiwayatFetched = false; await fetchRiwayatLazily(); renderDashboard(); 
-                        }
+                        await refreshCurrentPage(); // Refresh data otomatis
                     } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
-                    showLoader(false);
                 } else if (formValues.length > 0) {
                     const nilaiGabungan = formValues.join(' | ');
-                    showLoader();
                     try {
-                        const res = await apiCall({
+                        await apiCall({
                             action: 'submitUpdate', executorRole: STATE.user.role, nik_target: STATE.user.nik,
                             sheet_target: sheet, kolom_target: 'Pengajuan Data Baru', nilai_baru: nilaiGabungan
                         });
-                        Toast.fire({ icon: 'success', title: 'Pengajuan data masuk antrian.' });
-                        if(['admin','superadmin'].includes(STATE.user.role)) { 
-                            isRiwayatFetched = false; await fetchProfile(); await fetchRiwayatLazily(); 
-                        } else { 
-                            await fetchMyAntrian(); isRiwayatFetched = false; await fetchRiwayatLazily(); renderDashboard(); 
-                        }
+                        await refreshCurrentPage(); // Refresh data otomatis
                     } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
-                    showLoader(false);
                 }
             }
         }
@@ -2125,7 +2113,6 @@
 
                     showLoader();
                     try {
-                        // FIX: Upload foto ke Google Drive terlebih dahulu
                         const resFile = await apiCall({
                             action: 'uploadFile', 
                             nik: STATE.user.nik, 
@@ -2135,7 +2122,6 @@
                             filename: `FOTO_PROFIL_${STATE.user.nik}_${new Date().getTime()}.jpg`
                         });
 
-                        // Submit URL Drive ke antrian (bukan teks Base64 yang rawan limit)
                         await apiCall({ 
                             action: 'submitUpdate', 
                             executorRole: STATE.user.role, 
@@ -2145,9 +2131,7 @@
                             nilai_baru: resFile.fileUrl 
                         });
                         
-                        document.getElementById('profile-img').src = resFile.fileUrl; 
-                        if(STATE.profile) STATE.profile.URL_Foto_Profil = resFile.fileUrl;
-                        Toast.fire({ icon: 'success', title: 'Foto profil berhasil diajukan / diperbarui.' });
+                        await refreshCurrentPage(); // Update Data
                     } catch(err) { Swal.fire('Error', err.message, 'error'); }
                     showLoader(false);
                 };
