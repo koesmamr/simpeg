@@ -681,8 +681,7 @@
 
         // --- FUNGSI KONVERSI URL FOTO DRIVE ---
         function getDirectImageUrl(url) {
-            if (!url) return 'https://via.placeholder.com/150';
-            // Jika formatnya adalah halaman viewer (foto lama), ubah menjadi direct link
+            if (!url || url === '-' || String(url).trim() === '') return null;
             if (url.includes('drive.google.com/file/d/')) {
                 const match = url.match(/\/d\/(.+?)\//);
                 if (match && match[1]) {
@@ -1113,9 +1112,13 @@
                     
                     document.getElementById('p-status').innerText = STATE.profile.Status_Pegawai || 'AKTIF';
                     
-                    // TERAPKAN KONVERSI URL FOTO DI PROFIL UTAMA
-                    if(STATE.profile.URL_Foto_Profil) { 
-                        document.getElementById('profile-img').src = getDirectImageUrl(STATE.profile.URL_Foto_Profil); 
+                    // TERAPKAN KONVERSI URL FOTO DI PROFIL UTAMA & BASE64 FETCH
+                    const driveUrl = getDirectImageUrl(STATE.profile.URL_Foto_Profil);
+                    if(driveUrl) { 
+                        document.getElementById('profile-img').src = driveUrl; 
+                        apiCall({ action: 'getFileBase64', url: driveUrl }).then(resBase64 => {
+                            if (resBase64.status === 'success') document.getElementById('profile-img').src = resBase64.base64;
+                        }).catch(e => console.log('Gagal fetch base64 profile', e));
                     }
 
                     updateProfileUI();
@@ -1442,8 +1445,18 @@
                 };
 
                 const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID') : '-';
-                // TERAPKAN KONVERSI URL FOTO DI MODAL ADMIN
-                const urlFoto = getDirectImageUrl(p.URL_Foto_Profil);
+                
+                // AMBIL BASE64 FOTO UNTUK MODAL ADMIN (Menghindari Pemblokiran Google Drive)
+                const urlFotoDrive = getDirectImageUrl(p.URL_Foto_Profil);
+                let base64Foto = 'https://via.placeholder.com/150';
+                if (urlFotoDrive) {
+                    try {
+                        const resFoto = await apiCall({ action: 'getFileBase64', url: urlFotoDrive });
+                        if (resFoto.status === 'success') base64Foto = resFoto.base64;
+                    } catch(e) { console.log('Gagal fetch foto base64', e); }
+                }
+                const urlFoto = base64Foto;
+                
                 const namaLengkap = (p.Gelar_Depan ? p.Gelar_Depan + ' ' : '') + (p.Nama_Lengkap || '-') + (p.Gelar_Belakang ? ', ' + p.Gelar_Belakang : '');
 
                 let html = `
@@ -2457,7 +2470,18 @@
                 await fetchRiwayatLazily();
             }
             
-            generateAndDownloadCV(STATE.profile, STATE.riwayat, STATE.identitasLain);
+            // AMBIL BASE64 FOTO UNTUK PDF USER
+            const urlFotoDrive = getDirectImageUrl(STATE.profile.URL_Foto_Profil);
+            let base64Foto = 'https://via.placeholder.com/150';
+            if (urlFotoDrive) {
+                try {
+                    const resFoto = await apiCall({ action: 'getFileBase64', url: urlFotoDrive });
+                    if (resFoto.status === 'success') base64Foto = resFoto.base64;
+                } catch(e) { console.log('Gagal fetch foto base64', e); }
+            }
+            
+            const profileCopy = {...STATE.profile, URL_Foto_Profil_Base64: base64Foto};
+            generateAndDownloadCV(profileCopy, STATE.riwayat, STATE.identitasLain);
         }
 
         async function cetakCVPegawai(nik) {
@@ -2476,6 +2500,17 @@
                     keluarga: resRiwayat.data_keluarga || []
                 };
                 
+                // AMBIL BASE64 FOTO UNTUK PDF ADMIN
+                const urlFotoDrive = getDirectImageUrl(resMain.data.URL_Foto_Profil);
+                let base64Foto = 'https://via.placeholder.com/150';
+                if (urlFotoDrive) {
+                    try {
+                        const resFoto = await apiCall({ action: 'getFileBase64', url: urlFotoDrive });
+                        if (resFoto.status === 'success') base64Foto = resFoto.base64;
+                    } catch(e) { console.log('Gagal fetch foto base64', e); }
+                }
+                resMain.data.URL_Foto_Profil_Base64 = base64Foto;
+                
                 const identitas = (resMain.identitas_lain && resMain.identitas_lain.length > 0) ? resMain.identitas_lain[0] : {};
                 generateAndDownloadCV(resMain.data, riwayatData, identitas);
             } catch (e) {
@@ -2489,8 +2524,10 @@
             cvContainer.style.padding = '20px'; cvContainer.style.fontFamily = 'Arial, sans-serif'; cvContainer.style.color = '#000'; cvContainer.style.backgroundColor = '#fff';
 
             const namaLengkap = (p.Gelar_Depan ? p.Gelar_Depan + ' ' : '') + (p.Nama_Lengkap || '-') + (p.Gelar_Belakang ? ', ' + p.Gelar_Belakang : '');
-            // TERAPKAN KONVERSI URL FOTO DI PDF
-            const urlFoto = getDirectImageUrl(p.URL_Foto_Profil);
+            
+            // TERAPKAN URL FOTO BASE64 DI PDF
+            const urlFoto = p.URL_Foto_Profil_Base64 || 'https://via.placeholder.com/150';
+            
             const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID') : '-';
 
             const tbodyPend = r.pendidikan?.length ? r.pendidikan.map(x => `<tr><td style="padding:8px; border:1px solid #ddd;">${x.Jenjang||'-'}</td><td style="padding:8px; border:1px solid #ddd;">${x.Instansi||'-'}</td><td style="padding:8px; border:1px solid #ddd;">${x.Jurusan||'-'}</td><td style="padding:8px; border:1px solid #ddd;">${x.Thn_Lulus||'-'}</td><td style="padding:8px; border:1px solid #ddd;">${x.No_Ijazah||'-'}</td><td style="padding:8px; border:1px solid #ddd;">${formatDate(x.Tgl_Ijazah)}</td><td style="padding:8px; border:1px solid #ddd;">${x.Pendidikan_Terakhir||'-'}</td></tr>`).join('') : `<tr><td colspan="7" style="padding:8px; border:1px solid #ddd; text-align:center;">Tidak ada data</td></tr>`;
