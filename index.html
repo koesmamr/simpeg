@@ -725,7 +725,16 @@
             try {
                 const res = await apiCall({ action: 'login', token: response.credential });
                 
-                if (res.needNik) {
+                if (res.status === 'pending_verification') {
+                    showLoader(false);
+                    Swal.fire({
+                        title: 'Proses Verifikasi',
+                        html: res.message,
+                        icon: 'info',
+                        confirmButtonText: 'Terima Kasih',
+                        confirmButtonColor: '#3498db'
+                    });
+                } else if (res.needNik) {
                     showLoader(false);
                     promptLinkNIK(res.email, res.role, response.credential);
                 } else {
