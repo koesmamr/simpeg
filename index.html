@@ -2775,8 +2775,7 @@
                 <table style="width:100%; margin-bottom:20px;">
                     <tr>
                         <td style="width:130px; vertical-align:top;">
-                            <div style="width:110px; height:140px; border:2px solid #333; background-color:#f0f0f0; background-image: url('${urlFoto}'); background-size: cover; background-position: center top; background-repeat: no-repeat;">
-                            </div>
+                            <img src="${urlFoto}" style="width:110px; height:140px; border:2px solid #333; background-color:#f0f0f0; object-fit: cover; object-position: center top; display: block;" alt="Foto Profil">
                         </td>
                         <td style="vertical-align:top; padding-left:15px;">
                             <h3 style="margin:0 0 10px 0; font-size:18px; text-transform:uppercase;">${namaLengkap}</h3>
@@ -2844,8 +2843,8 @@
             const opt = { 
                 margin: 10, 
                 filename: cleanFileName, 
-                image: { type: 'jpeg', quality: 0.95 }, 
-                html2canvas: { scale: 2, useCORS: true, letterRendering: true }, 
+                image: { type: 'jpeg', quality: 0.85 }, 
+                html2canvas: { scale: 3, useCORS: true, letterRendering: true }, 
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true } 
             };
             html2pdf().set(opt).from(cvContainer).save().then(() => { showLoader(false); }).catch(err => { showLoader(false); Swal.fire('Error', 'Gagal mencetak PDF: ' + err.message, 'error'); });
