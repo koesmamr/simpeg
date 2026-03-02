@@ -1251,9 +1251,20 @@
             try {
                 const res = await apiCall({ action: 'getUserAntrian', nik: STATE.user.nik });
                 STATE.myAntrian = res.data || [];
+                
+                // --- FIX: Format tanggal ISO string (misal: 1990-08-17T17:00:00.000Z) agar mudah dibaca ---
+                STATE.myAntrian.forEach(a => {
+                    if (a.Nilai_Baru && typeof a.Nilai_Baru === 'string') {
+                        a.Nilai_Baru = a.Nilai_Baru.replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/g, match => {
+                            const d = new Date(match);
+                            return isNaN(d.getTime()) ? match : d.toLocaleDateString('id-ID', {day:'2-digit', month:'long', year:'numeric'});
+                        });
+                    }
+                });
+                
                 const tbody = document.getElementById('tbody-my-antrian'); tbody.innerHTML = '';
-                if(!res.data || res.data.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="text-center p-4 opacity-70">Belum ada pengajuan perubahan data.</td></tr>'; return; }
-                res.data.reverse().forEach(a => {
+                if(!STATE.myAntrian || STATE.myAntrian.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="text-center p-4 opacity-70">Belum ada pengajuan perubahan data.</td></tr>'; return; }
+                STATE.myAntrian.slice().reverse().forEach(a => {
                     let statusColor = 'bg-yellow-100 text-yellow-800'; let statusIcon = '<i class="fas fa-clock"></i> Pending';
                     let textAlasan = '';
                     
@@ -1545,6 +1556,17 @@
             try { 
                 const res = await apiCall({ action: 'getAllAntrian', role: STATE.user.role }); 
                 STATE.allAntrianGlobal = res.data || [];
+                
+                // --- FIX: Format tanggal ISO string (misal: 1990-08-17T17:00:00.000Z) agar mudah dibaca ---
+                STATE.allAntrianGlobal.forEach(a => {
+                    if (a.Nilai_Baru && typeof a.Nilai_Baru === 'string') {
+                        a.Nilai_Baru = a.Nilai_Baru.replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/g, match => {
+                            const d = new Date(match);
+                            return isNaN(d.getTime()) ? match : d.toLocaleDateString('id-ID', {day:'2-digit', month:'long', year:'numeric'});
+                        });
+                    }
+                });
+
                 renderTableAntrian(STATE.allAntrianGlobal); 
                 
                 const pendingCount = STATE.allAntrianGlobal.filter(a => a.Status === 'Pending').length;
