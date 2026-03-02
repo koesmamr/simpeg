@@ -2125,9 +2125,29 @@
 
                     showLoader();
                     try {
-                        await apiCall({ action: 'submitUpdate', executorRole: STATE.user.role, nik_target: STATE.user.nik, sheet_target: 'PROFIL', kolom_target: 'URL_Foto_Profil', nilai_baru: compressedBase64 });
-                        document.getElementById('profile-img').src = compressedBase64; if(STATE.profile) STATE.profile.URL_Foto_Profil = compressedBase64;
-                        Toast.fire({ icon: 'success', title: 'Foto profil diperbarui.' });
+                        // FIX: Upload foto ke Google Drive terlebih dahulu
+                        const resFile = await apiCall({
+                            action: 'uploadFile', 
+                            nik: STATE.user.nik, 
+                            nama: STATE.profile.Nama_Lengkap,
+                            fileBase64: compressedBase64, 
+                            mimeType: 'image/jpeg', 
+                            filename: `FOTO_PROFIL_${STATE.user.nik}_${new Date().getTime()}.jpg`
+                        });
+
+                        // Submit URL Drive ke antrian (bukan teks Base64 yang rawan limit)
+                        await apiCall({ 
+                            action: 'submitUpdate', 
+                            executorRole: STATE.user.role, 
+                            nik_target: STATE.user.nik, 
+                            sheet_target: 'PROFIL', 
+                            kolom_target: 'URL_Foto_Profil', 
+                            nilai_baru: resFile.fileUrl 
+                        });
+                        
+                        document.getElementById('profile-img').src = resFile.fileUrl; 
+                        if(STATE.profile) STATE.profile.URL_Foto_Profil = resFile.fileUrl;
+                        Toast.fire({ icon: 'success', title: 'Foto profil berhasil diajukan / diperbarui.' });
                     } catch(err) { Swal.fire('Error', err.message, 'error'); }
                     showLoader(false);
                 };
