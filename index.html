@@ -662,6 +662,19 @@
 
         const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true, didOpen: (toast) => { toast.addEventListener('mouseenter', Swal.stopTimer); toast.addEventListener('mouseleave', Swal.resumeTimer); } });
 
+        // --- FUNGSI KONVERSI URL FOTO DRIVE ---
+        function getDirectImageUrl(url) {
+            if (!url) return 'https://via.placeholder.com/150';
+            // Jika formatnya adalah halaman viewer (foto lama), ubah menjadi direct link
+            if (url.includes('drive.google.com/file/d/')) {
+                const match = url.match(/\/d\/(.+?)\//);
+                if (match && match[1]) {
+                    return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+                }
+            }
+            return url;
+        }
+
         // ==========================================
         // ROUTING & THEME INIT
         // ==========================================
@@ -1021,7 +1034,11 @@
                     document.getElementById('p-unit').innerText = STATE.profile.Unit_Kerja || '-';
                     
                     document.getElementById('p-status').innerText = STATE.profile.Status_Pegawai || 'AKTIF';
-                    if(STATE.profile.URL_Foto_Profil) { document.getElementById('profile-img').src = STATE.profile.URL_Foto_Profil; }
+                    
+                    // TERAPKAN KONVERSI URL FOTO DI PROFIL UTAMA
+                    if(STATE.profile.URL_Foto_Profil) { 
+                        document.getElementById('profile-img').src = getDirectImageUrl(STATE.profile.URL_Foto_Profil); 
+                    }
 
                     updateProfileUI();
                     fetchRiwayatLazily();
@@ -1347,7 +1364,8 @@
                 };
 
                 const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID') : '-';
-                const urlFoto = p.URL_Foto_Profil || 'https://via.placeholder.com/150';
+                // TERAPKAN KONVERSI URL FOTO DI MODAL ADMIN
+                const urlFoto = getDirectImageUrl(p.URL_Foto_Profil);
                 const namaLengkap = (p.Gelar_Depan ? p.Gelar_Depan + ' ' : '') + (p.Nama_Lengkap || '-') + (p.Gelar_Belakang ? ', ' + p.Gelar_Belakang : '');
 
                 let html = `
@@ -2393,7 +2411,8 @@
             cvContainer.style.padding = '20px'; cvContainer.style.fontFamily = 'Arial, sans-serif'; cvContainer.style.color = '#000'; cvContainer.style.backgroundColor = '#fff';
 
             const namaLengkap = (p.Gelar_Depan ? p.Gelar_Depan + ' ' : '') + (p.Nama_Lengkap || '-') + (p.Gelar_Belakang ? ', ' + p.Gelar_Belakang : '');
-            const urlFoto = p.URL_Foto_Profil || 'https://via.placeholder.com/150';
+            // TERAPKAN KONVERSI URL FOTO DI PDF
+            const urlFoto = getDirectImageUrl(p.URL_Foto_Profil);
             const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID') : '-';
 
             const tbodyPend = r.pendidikan?.length ? r.pendidikan.map(x => `<tr><td style="padding:8px; border:1px solid #ddd;">${x.Jenjang||'-'}</td><td style="padding:8px; border:1px solid #ddd;">${x.Instansi||'-'}</td><td style="padding:8px; border:1px solid #ddd;">${x.Jurusan||'-'}</td><td style="padding:8px; border:1px solid #ddd;">${x.Thn_Lulus||'-'}</td><td style="padding:8px; border:1px solid #ddd;">${x.No_Ijazah||'-'}</td><td style="padding:8px; border:1px solid #ddd;">${formatDate(x.Tgl_Ijazah)}</td><td style="padding:8px; border:1px solid #ddd;">${x.Pendidikan_Terakhir||'-'}</td></tr>`).join('') : `<tr><td colspan="7" style="padding:8px; border:1px solid #ddd; text-align:center;">Tidak ada data</td></tr>`;
