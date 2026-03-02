@@ -1748,7 +1748,13 @@
         };
 
         async function editField(sheet, kolom) {
-            let currentValue = (sheet === 'IDENTITAS_LAIN') ? (STATE.identitasLain[kolom] || '') : (STATE.profile[kolom] || '');
+            // FIX: Penanganan aman (Safe Check) agar tidak crash jika data profil di database masih null/kosong
+            let currentValue = '';
+            if (sheet === 'IDENTITAS_LAIN') {
+                currentValue = (STATE.identitasLain && STATE.identitasLain[kolom]) ? STATE.identitasLain[kolom] : '';
+            } else {
+                currentValue = (STATE.profile && STATE.profile[kolom]) ? STATE.profile[kolom] : '';
+            }
             
             if (kolom === 'Alamat_Domisili') {
                 const kecOptions = Object.keys(DATA_WILAYAH_TUBAN).sort().map(k => `<option value="${k}">${k}</option>`).join('');
@@ -1952,7 +1958,16 @@
             if (kolom === 'Jenjang_Pendidikan') { inputType = 'select'; inputOptions = { 'SD /sederajat': 'SD /sederajat', 'SMP /sederajat': 'SMP /sederajat', 'SMA /sederajat': 'SMA /sederajat', 'D1': 'D1', 'D2': 'D2', 'D3': 'D3', 'D4': 'D4', 'Strata 1': 'Strata 1', 'Strata 2': 'Strata 2', 'Strata 3': 'Strata 3' }; } 
             else if (kolom === 'Jenis_Kelamin') { inputType = 'select'; inputOptions = { 'Laki-laki': 'Laki-laki', 'Perempuan': 'Perempuan' }; } 
             else if (kolom === 'Jenis_ASN') { inputType = 'select'; inputOptions = { 'PNS': 'PNS', 'PPPK': 'PPPK', 'Tenaga Kontrak': 'Tenaga Kontrak', 'Tenaga Kegiatan': 'Tenaga Kegiatan' }; } 
-            else if (kolom === 'Tgl_Lahir') { inputType = 'date'; }
+            else if (kolom === 'Tgl_Lahir') { 
+                inputType = 'date'; 
+                // FIX: Ekstrak format Tanggal agar bisa dirender oleh kalender SweetAlert
+                if (currentValue && typeof currentValue === 'string' && currentValue.includes('T')) {
+                    currentValue = currentValue.split('T')[0];
+                } else if (currentValue && !isNaN(Date.parse(currentValue))) {
+                    const d = new Date(currentValue);
+                    currentValue = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, '0') + "-" + String(d.getDate()).padStart(2, '0');
+                }
+            }
             else if (kolom === 'No_NPWP' || kolom === 'No_BPJS' || kolom === 'No_TASPEN') { inputType = 'number'; } 
 
             const swalConfig = { title: `Ubah ${kolom.replace(/_/g,' ')}`, input: inputType, inputValue: currentValue, showCancelButton: true };
