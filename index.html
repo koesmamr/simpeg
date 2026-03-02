@@ -2046,14 +2046,16 @@
                 const img = new Image();
                 img.onload = async function() {
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 400; const MAX_HEIGHT = 400;
+                    // Tingkatkan resolusi batas dari 400x400 menjadi 800x800 agar kualitas source lebih baik untuk di-print
+                    const MAX_WIDTH = 800; const MAX_HEIGHT = 800;
                     let width = img.width; let height = img.height;
 
                     if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } } 
                     else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
                     
                     canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
-                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                    // Tingkatkan kualitas kompresi jpeg dari 0.7 ke 0.85
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
 
                     showLoader();
                     try {
@@ -2341,7 +2343,9 @@
                 <table style="width:100%; margin-bottom:20px;">
                     <tr>
                         <td style="width:130px; vertical-align:top;">
-                            <div style="width:110px; height:140px; border:2px solid #333; background-image: url('${urlFoto}'); background-size: cover; background-position: center top; background-repeat: no-repeat;"></div>
+                            <div style="width:110px; height:140px; border:2px solid #333; overflow:hidden; background-color:#f0f0f0;">
+                                <img src="${urlFoto}" style="width:100%; height:100%; object-fit:cover; object-position:center top; display:block;" crossorigin="anonymous">
+                            </div>
                         </td>
                         <td style="vertical-align:top; padding-left:15px;">
                             <h3 style="margin:0 0 10px 0; font-size:18px; text-transform:uppercase;">${namaLengkap}</h3>
@@ -2405,7 +2409,8 @@
             `;
 
             const cleanFileName = `CV_${namaLengkap.replace(/[^a-zA-Z0-9 ]/g, "").trim()}.pdf`;
-            const opt = { margin: 10, filename: cleanFileName, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+            // Tingkatkan scale dari 2 menjadi 4 untuk resolusi canvas yang jauh lebih tinggi dan tajam
+            const opt = { margin: 10, filename: cleanFileName, image: { type: 'jpeg', quality: 1 }, html2canvas: { scale: 4, useCORS: true, letterRendering: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
             html2pdf().set(opt).from(cvContainer).save().then(() => { showLoader(false); }).catch(err => { showLoader(false); Swal.fire('Error', 'Gagal mencetak PDF: ' + err.message, 'error'); });
         }
 
@@ -2419,5 +2424,3 @@
     </script>
 </body>
 </html>
-
-
