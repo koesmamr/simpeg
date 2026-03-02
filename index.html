@@ -331,6 +331,7 @@
                                     <tr class="border-b border-gray-100 hover:bg-gray-50"><td class="py-3 px-2 opacity-75 w-1/3">Status Kepeg.</td><td id="p-jasn" class="py-3 font-medium">-</td><td class="text-right w-8"><button onclick="editField('PROFIL', 'Jenis_ASN')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
                                     <tr class="border-b border-gray-100 hover:bg-gray-50"><td class="py-3 px-2 opacity-75">Pangkat/Gol</td><td id="p-pangkat" class="py-3 font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'Pangkat_Golongan')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
                                     <tr class="border-b border-gray-100 hover:bg-gray-50"><td class="py-3 px-2 opacity-75">Jabatan Terakhir</td><td id="p-jabatan" class="py-3 font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'Jabatan_Terakhir')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50"><td class="py-3 px-2 opacity-75">Unit Kerja</td><td id="p-unit-detail" class="py-3 font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'Unit_Kerja')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
                                     <tr class="hover:bg-gray-50"><td class="py-3 px-2 opacity-75">Pendidikan</td><td id="p-pendidikan" class="py-3 font-medium">-</td><td class="text-right"><button onclick="editField('PROFIL', 'Jenjang_Pendidikan')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button></td></tr>
                                 </table>
                             </div>
@@ -1175,6 +1176,7 @@
             document.getElementById('p-jasn').innerHTML = getFieldHTML('Jenis_ASN', STATE.profile.Jenis_ASN);
             document.getElementById('p-pangkat').innerHTML = getFieldHTML('Pangkat_Golongan', STATE.profile.Pangkat_Golongan);
             document.getElementById('p-jabatan').innerHTML = getFieldHTML('Jabatan_Terakhir', STATE.profile.Jabatan_Terakhir);
+            document.getElementById('p-unit-detail').innerHTML = getFieldHTML('Unit_Kerja', STATE.profile.Unit_Kerja);
             document.getElementById('p-pendidikan').innerHTML = getFieldHTML('Jenjang_Pendidikan', STATE.profile.Jenjang_Pendidikan);
 
             document.getElementById('p-npwp').innerHTML = getFieldHTML('No_NPWP', STATE.identitasLain.No_NPWP);
@@ -1796,10 +1798,53 @@
                 if (newAlamat && newAlamat !== currentValue) {
                     try {
                         await apiCall({ action: 'submitUpdate', executorRole: STATE.user.role, nik_target: STATE.user.nik, sheet_target: sheet, kolom_target: kolom, nilai_baru: newAlamat });
-                        await refreshCurrentPage(); // Refresh data UI terbaru
+                        await refreshCurrentPage(true); // Refresh data UI terbaru
                     } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
                 }
                 return; 
+            }
+
+            if (kolom === 'Unit_Kerja') {
+                const { value: newUnit } = await Swal.fire({
+                    title: 'Ajukan Ubah Unit Kerja',
+                    html: `
+                        <select id="swal-unit" class="swal2-select w-full m-0 text-sm" onchange="document.getElementById('div-unit-lainnya').style.display = this.value === 'LAINNYA' ? 'block' : 'none'">
+                            <option value="" disabled selected>-- Pilih Unit Kerja Saat Ini --</option>
+                            <option value="BAGIAN KEUANGAN">BAGIAN KEUANGAN</option>
+                            <option value="BAGIAN ADMINISTRASI DAN UMUM">BAGIAN ADMINISTRASI DAN UMUM</option>
+                            <option value="LAINNYA">Lainnya (Ketik Manual)...</option>
+                        </select>
+                        <div id="div-unit-lainnya" style="display:none;" class="mt-3 w-full">
+                            <input id="swal-unit-lainnya" class="swal2-input text-sm m-0 w-full" placeholder="Ketik Nama Bidang/Bagian/Ruangan">
+                        </div>
+                    `,
+                    focusConfirm: false,
+                    showCancelButton: true,
+                    confirmButtonText: 'Ajukan',
+                    preConfirm: () => {
+                        let unit = document.getElementById('swal-unit').value;
+                        if (!unit) {
+                            Swal.showValidationMessage('Silakan pilih Unit Kerja!');
+                            return false;
+                        }
+                        if (unit === 'LAINNYA') {
+                            unit = document.getElementById('swal-unit-lainnya').value.trim();
+                            if (!unit) {
+                                Swal.showValidationMessage('Nama Unit Kerja wajib diketik manual!');
+                                return false;
+                            }
+                        }
+                        return unit;
+                    }
+                });
+
+                if (newUnit && newUnit !== currentValue) {
+                    try {
+                        await apiCall({ action: 'submitUpdate', executorRole: STATE.user.role, nik_target: STATE.user.nik, sheet_target: sheet, kolom_target: kolom, nilai_baru: newUnit });
+                        await refreshCurrentPage(true); 
+                    } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
+                }
+                return;
             }
 
             let inputType = 'text'; let inputOptions = {}; 
