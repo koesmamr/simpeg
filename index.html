@@ -1522,6 +1522,15 @@
                         </table>
                 `;
 
+                const makeFileLink = (url, label="Lihat File") => {
+                    if (!url || url === '-' || url.trim() === '') return '';
+                    let icon = 'fa-file-pdf';
+                    if (url.toLowerCase().match(/\.(jpg|jpeg|png|webp|gif)$/) || url.includes('id=')) {
+                        icon = 'fa-paperclip'; 
+                    }
+                    return `<div class="mt-2"><a href="${url}" target="_blank" class="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs hover:bg-blue-200 transition inline-flex items-center"><i class="fas ${icon} mr-1"></i> ${label}</a></div>`;
+                };
+
                 const buildList = (title, icon, data, mapFn) => {
                     let section = `<h4 class="font-bold text-md mb-2 text-blue-600 border-b pb-1 mt-4"><i class="fas ${icon} mr-2"></i>${title}</h4>`;
                     if(data.length === 0) {
@@ -1536,11 +1545,13 @@
                     return section;
                 };
 
-                html += buildList('Riwayat Pendidikan', 'fa-graduation-cap', r.pendidikan, x => `<div class="font-bold">${x.Jenjang} - ${x.Jurusan||'-'}</div><div class="text-xs text-gray-600">${x.Instansi} (Lulus: ${x.Thn_Lulus||'-'})</div>`);
-                html += buildList('Riwayat Pangkat', 'fa-medal', r.pangkat, x => `<div class="font-bold">${x.Pangkat_Gol}</div><div class="text-xs text-gray-600">No. SK: ${x.No_SK||'-'} | TMT: ${formatDate(x.TMT)}</div>`);
-                html += buildList('Riwayat Jabatan', 'fa-briefcase', r.jabatan, x => `<div class="font-bold">${x.Jabatan}</div><div class="text-xs text-gray-600">Unit: ${x.Unit_Kerja||'-'} | TMT: ${formatDate(x.TMT_Pelantikan)}</div>`);
-                html += buildList('Pengembangan Kompetensi', 'fa-certificate', r.kompetensi, x => `<div class="font-bold">${x.Nama_Diklat}</div><div class="text-xs text-gray-600">Pelaksanaan: ${formatDate(x.Tgl_Mulai)} | Penyelenggara: ${x.Penyelenggara||'-'}</div>`);
+                html += buildList('Riwayat Pendidikan', 'fa-graduation-cap', r.pendidikan, x => `<div class="font-bold">${x.Jenjang} - ${x.Jurusan||'-'}</div><div class="text-xs text-gray-600">${x.Instansi} (Lulus: ${x.Thn_Lulus||'-'})</div>${makeFileLink(x.File_Ijazah, 'Lihat Ijazah')}`);
+                html += buildList('Riwayat Pangkat', 'fa-medal', r.pangkat, x => `<div class="font-bold">${x.Pangkat_Gol}</div><div class="text-xs text-gray-600">No. SK: ${x.No_SK||'-'} | TMT: ${formatDate(x.TMT)}</div>${makeFileLink(x.File_SK, 'Lihat SK Pangkat')}`);
+                html += buildList('Riwayat Jabatan', 'fa-briefcase', r.jabatan, x => `<div class="font-bold">${x.Jabatan}</div><div class="text-xs text-gray-600">Unit: ${x.Unit_Kerja||'-'} | TMT: ${formatDate(x.TMT_Pelantikan)}</div>${makeFileLink(x.File_SK, 'Lihat SK Jabatan')}`);
+                html += buildList('Pengembangan Kompetensi', 'fa-certificate', r.kompetensi, x => `<div class="font-bold">${x.Nama_Diklat}</div><div class="text-xs text-gray-600">Pelaksanaan: ${formatDate(x.Tgl_Mulai)} | Penyelenggara: ${x.Penyelenggara||'-'}</div>${makeFileLink(x.File_Sertifikat, 'Lihat Sertifikat')}`);
+                html += buildList('Riwayat KGB', 'fa-money-bill-wave', r.kgb, x => `<div class="font-bold">Golongan: ${x.Golongan}</div><div class="text-xs text-gray-600">No. SK KGB: ${x.No_SK_KGB||'-'} | TMT: ${formatDate(x.TMT_KGB)}<br>Gaji Baru: ${x.Gaji_Pokok_Baru||'-'}</div>${makeFileLink(x.File_SK_KGB, 'Lihat SK KGB')}`);
                 html += buildList('Data Keluarga', 'fa-users', r.keluarga, x => `<div class="font-bold">${x.Nama} (${x.Status_Keluarga})</div><div class="text-xs text-gray-600">NIK: ${x.NIK_Keluarga||'-'} | L/P: ${x['L/P']||'-'}</div>`);
+                html += buildList('Data Dokumen / Kartu', 'fa-id-badge', r.kartu, x => `<div class="font-bold">${x.Jenis_Kartu}</div><div class="text-xs text-gray-600">No. Kartu: ${x.Nomor_Kartu||'-'}</div>${makeFileLink(x.File_Kartu, 'Lihat Dokumen')}`);
                 
                 html += `</div>`; 
 
@@ -2878,16 +2889,13 @@
         }
 
         async function apiCall(payload) {
-            // Sisipkan role ke dalam payload jika session user tersedia untuk backend pengecekan maintenance
             if (STATE.user && !payload.role) { payload.role = STATE.user.role; }
             
             const response = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
             const data = await response.json();
             
             if (data.status === 'error') {
-                // Intersep Error Maintenance
                 if (data.message.includes("MAINTENANCE")) {
-                    // Jika ada sesi yang aktif, putuskan dan keluarkan pengguna
                     if (STATE.user) {
                         localStorage.removeItem('simpeg_user'); 
                         sessionStorage.removeItem('simpeg_active_hash'); 
@@ -2905,7 +2913,6 @@
                         allowOutsideClick: false
                     });
                     
-                    // Hentikan eksekusi script selanjutnya
                     throw new Error("Maintenance Mode Intercepted");
                 }
                 throw new Error(data.message);
