@@ -49,6 +49,7 @@
         .card { background-color: var(--bg-card); color: var(--text-main); }
         .btn-primary { background-color: var(--primary); color: white; }
         .btn-primary:hover { opacity: 0.9; }
+        .bg-body-color { background-color: var(--bg-body); } /* Helper untuk elemen pseudo/absolut */
 
         /* Particles Layer */
         #particles-js { position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: -1; background-color: #2c3e50; }
@@ -102,7 +103,7 @@
                 <div class="text-xs uppercase opacity-50 px-3 mt-2 mb-1">Menu Utama</div>
                 <div id="nav-tab-beranda" class="sidebar-item p-3 rounded mb-1 flex items-center bg-gray-700 bg-opacity-50" onclick="window.location.hash='beranda'"><i class="fas fa-home mr-3 w-5"></i> Beranda</div>
                 
-                <div class="text-xs uppercase opacity-50 px-3 mt-4 mb-1">Data Pegawai</div>
+                <div class="text-xs uppercase opacity-50 px-3 mt-4 mb-1">Data Pegawai (Personal)</div>
                 <div id="nav-tab-profil" class="sidebar-item p-3 rounded mb-1 flex items-center" onclick="window.location.hash='profil'"><i class="fas fa-id-card mr-3 w-5"></i> Profil Utama</div>
                 <div id="nav-tab-pendidikan" class="sidebar-item p-3 rounded mb-1 flex items-center" onclick="window.location.hash='pendidikan'"><i class="fas fa-graduation-cap mr-3 w-5"></i> Pendidikan</div>
                 <div id="nav-tab-pangkat" class="sidebar-item p-3 rounded mb-1 flex items-center" onclick="window.location.hash='pangkat'"><i class="fas fa-medal mr-3 w-5"></i> Pangkat / Gol</div>
@@ -147,14 +148,14 @@
                 <!-- PAGE: BERANDA / DASHBOARD BARU -->
                 <div id="page-beranda" class="page-content">
                     
-                    <!-- Dashboard USER -->
+                    <!-- Dashboard USER (AREA PERSONAL UNTUK SEMUA STAF TERMASUK ADMIN) -->
                     <div id="dashboard-user" class="hidden">
                         <div class="bg-gradient-to-r from-blue-600 to-blue-400 rounded-lg shadow-lg p-6 mb-6 text-white relative overflow-hidden">
                             <i class="fas fa-id-badge absolute -right-4 -bottom-4 text-9xl opacity-10"></i>
-                            <h2 class="text-2xl font-bold mb-1">Selamat datang kembali, <span id="dash-user-name">Pegawai</span>!</h2>
+                            <h2 class="text-2xl font-bold mb-1">Area Personal: Selamat datang, <span id="dash-user-name">Pegawai</span>!</h2>
                             <p class="opacity-90 mb-4" id="dash-user-jabatan">Jabatan - Unit Kerja</p>
                             <div class="flex space-x-3">
-                                <button onclick="window.location.hash='profil'" class="bg-white text-blue-600 px-4 py-2 rounded shadow font-medium text-sm hover:bg-gray-100 transition"><i class="fas fa-user-edit mr-1"></i> Lihat Profil Saya</button>
+                                <button onclick="window.location.hash='profil'" class="bg-white text-blue-600 px-4 py-2 rounded shadow font-medium text-sm hover:bg-gray-100 transition"><i class="fas fa-user-edit mr-1"></i> Lengkapi Profil Saya</button>
                             </div>
                         </div>
 
@@ -173,9 +174,9 @@
                             <div class="card rounded-lg shadow p-5 border-l-4 border-yellow-500 cursor-pointer hover:bg-gray-50 transition" onclick="window.location.hash='profil'">
                                 <div class="flex justify-between items-start">
                                     <div>
-                                        <p class="text-xs text-gray-500 uppercase font-bold">Pengajuan Data (Pending)</p>
+                                        <p class="text-xs text-gray-500 uppercase font-bold">Pengajuan Data Saya</p>
                                         <h3 class="text-2xl font-bold mt-1" id="dash-user-antrian">0</h3>
-                                        <p class="text-sm mt-1 text-yellow-600 font-medium">Menunggu Verifikasi Admin</p>
+                                        <p class="text-sm mt-1 text-yellow-600 font-medium">Menunggu Verifikasi</p>
                                     </div>
                                     <div class="bg-yellow-100 text-yellow-600 p-3 rounded-full"><i class="fas fa-clock text-xl"></i></div>
                                 </div>
@@ -193,8 +194,9 @@
                             </div>
                         </div>
 
-                        <div class="card rounded-lg shadow-md p-6">
-                            <h3 class="font-bold text-lg mb-4 border-b pb-2"><i class="fas fa-history text-blue-500 mr-2"></i>Aktivitas Pengajuan Terakhir</h3>
+                        <!-- Riwayat log (hanya jika ada) -->
+                        <div id="dash-user-log-container" class="card rounded-lg shadow-md p-6 mb-8 hidden">
+                            <h3 class="font-bold text-lg mb-4 border-b pb-2"><i class="fas fa-history text-blue-500 mr-2"></i>Aktivitas Pengajuan Pribadi Terakhir</h3>
                             <div id="dash-user-timeline" class="space-y-4">
                                 <p class="text-sm text-center text-gray-500 py-4">Memuat data...</p>
                             </div>
@@ -204,12 +206,19 @@
                         </div>
                     </div>
 
-                    <!-- Dashboard ADMIN -->
+                    <!-- Dashboard ADMIN (KHUSUS ADMIN & SUPERADMIN) -->
                     <div id="dashboard-admin" class="hidden">
+                        
+                        <!-- Pemisah Visual untuk Admin -->
+                        <div class="flex items-center justify-center mt-6 mb-8 relative">
+                            <hr class="w-full border-gray-300">
+                            <span class="absolute bg-body-color px-4 text-gray-500 font-bold text-xs tracking-widest uppercase rounded-full border border-gray-200 shadow-sm"><i class="fas fa-shield-alt text-red-500 mr-1"></i> Area Administrator</span>
+                        </div>
+
                         <div class="bg-gradient-to-r from-gray-800 to-gray-600 rounded-lg shadow-lg p-6 mb-6 text-white relative overflow-hidden">
-                            <i class="fas fa-shield-alt absolute -right-4 -bottom-4 text-9xl opacity-10"></i>
-                            <h2 class="text-2xl font-bold mb-1">Beranda Administrator</h2>
-                            <p class="opacity-90">Pantau statistik kepegawaian dan proses antrian pembaruan data yang masuk.</p>
+                            <i class="fas fa-users-cog absolute -right-4 -bottom-4 text-9xl opacity-10"></i>
+                            <h2 class="text-2xl font-bold mb-1">Dashboard Administrator</h2>
+                            <p class="opacity-90">Pantau statistik kepegawaian dan proses antrian pembaruan data yang masuk dari para pegawai.</p>
                         </div>
 
                         <!-- KARTU KPI STATISTIK -->
@@ -265,7 +274,7 @@
 
                         <div class="card rounded-lg shadow-md p-6">
                             <div class="flex justify-between items-center mb-4 border-b pb-2">
-                                <h3 class="font-bold text-lg"><i class="fas fa-exclamation-circle text-red-500 mr-2"></i>Prioritas: Antrian Terbaru</h3>
+                                <h3 class="font-bold text-lg"><i class="fas fa-exclamation-circle text-red-500 mr-2"></i>Prioritas: Antrian Pegawai Terbaru</h3>
                                 <button onclick="window.location.hash='antrian'" class="text-sm bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1 rounded transition font-medium">Lihat Semua Antrian <i class="fas fa-arrow-right text-xs ml-1"></i></button>
                             </div>
                             <div class="overflow-x-auto">
@@ -337,7 +346,7 @@
                             </div>
                         </div>
                         <div class="card rounded-lg shadow-md p-6 mt-6">
-                            <h4 class="font-bold text-lg mb-4 border-b pb-2 border-gray-200"><i class="fas fa-history mr-2 text-yellow-500"></i> Riwayat Pengajuan Perubahan Data (Log)</h4>
+                            <h4 class="font-bold text-lg mb-4 border-b pb-2 border-gray-200"><i class="fas fa-history mr-2 text-yellow-500"></i> Riwayat Pengajuan Perubahan Data Pribadi</h4>
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left text-sm">
                                     <thead class="bg-gray-100 text-black">
@@ -738,7 +747,7 @@
             if(hash === 'beranda') await renderDashboard();
             if(hash === 'data-pegawai') await fetchAllPegawai();
             if(hash === 'antrian') await fetchAllAntrian();
-            if(hash === 'pengaturan') await fetchSettings(); // Tarik status pengaturan
+            if(hash === 'pengaturan') await fetchSettings(); 
             
             sessionStorage.setItem('simpeg_active_hash', hash);
         }
@@ -986,17 +995,20 @@
         }
 
         // ==========================================
-        // DASHBOARD LOGIC 
+        // DASHBOARD LOGIC (PEMBARUAN)
         // ==========================================
         async function renderDashboard() {
+            // SELALU TAMPILKAN DASHBOARD PERSONAL UNTUK SEMUA ROLE
+            // (Karena Admin & Superadmin juga staf yang perlu isi data pribadi)
+            document.getElementById('dashboard-user').classList.remove('hidden');
+            renderUserDashboard();
+
+            // TAMPILKAN DASHBOARD ADMINISTRATOR HANYA UNTUK ADMIN/SUPERADMIN
             if (['admin', 'superadmin'].includes(STATE.user.role)) {
-                document.getElementById('dashboard-user').classList.add('hidden');
                 document.getElementById('dashboard-admin').classList.remove('hidden');
                 await renderAdminDashboard();
             } else {
                 document.getElementById('dashboard-admin').classList.add('hidden');
-                document.getElementById('dashboard-user').classList.remove('hidden');
-                renderUserDashboard();
             }
         }
 
@@ -1023,9 +1035,12 @@
 
             const tlContainer = document.getElementById('dash-user-timeline');
             tlContainer.innerHTML = '';
+            
+            // Tampilkan log riwayat hanya jika ada (agar tidak memenuhi layar admin)
             if (!STATE.myAntrian || STATE.myAntrian.length === 0) {
-                tlContainer.innerHTML = '<p class="text-sm text-center text-gray-500 py-4 italic">Belum ada aktivitas pengajuan.</p>';
+                document.getElementById('dash-user-log-container').classList.add('hidden');
             } else {
+                document.getElementById('dash-user-log-container').classList.remove('hidden');
                 const recent = STATE.myAntrian.slice().reverse().slice(0, 3);
                 recent.forEach(a => {
                     let icon = 'fa-clock text-yellow-500'; let bg = 'bg-yellow-50';
@@ -1144,7 +1159,7 @@
                 renderSemuaRiwayat();
                 
                 if (window.location.hash.substring(1) === 'beranda' || window.location.hash === '') {
-                    renderUserDashboard();
+                    renderUserDashboard(); // Refresh stats on dashboard
                 }
             } catch(e) { console.error('Gagal load riwayat', e); }
         }
@@ -1252,7 +1267,6 @@
                 const res = await apiCall({ action: 'getUserAntrian', nik: STATE.user.nik });
                 STATE.myAntrian = res.data || [];
                 
-                // --- FIX: Format tanggal ISO string (misal: 1990-08-17T17:00:00.000Z) agar mudah dibaca ---
                 STATE.myAntrian.forEach(a => {
                     if (a.Nilai_Baru && typeof a.Nilai_Baru === 'string') {
                         a.Nilai_Baru = a.Nilai_Baru.replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/g, match => {
@@ -1429,7 +1443,6 @@
                 if (newVal !== undefined && newVal !== currentVal && newVal !== '') {
                     try {
                         await apiCall({ action: 'submitUpdate', executorRole: STATE.user.role, nik_target: nik, sheet_target: targetSheet, kolom_target: targetKolom, nilai_baru: newVal });
-                        // Refresh halaman secara menyeluruh
                         await refreshCurrentPage();
                     } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
                 }
@@ -1459,7 +1472,6 @@
 
                 const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID') : '-';
                 
-                // AMBIL BASE64 FOTO UNTUK MODAL ADMIN (Menghindari Pemblokiran Google Drive)
                 const urlFotoDrive = getDirectImageUrl(p.URL_Foto_Profil);
                 let base64Foto = 'https://via.placeholder.com/150';
                 if (urlFotoDrive) {
@@ -1557,7 +1569,6 @@
                 const res = await apiCall({ action: 'getAllAntrian', role: STATE.user.role }); 
                 STATE.allAntrianGlobal = res.data || [];
                 
-                // --- FIX: Format tanggal ISO string (misal: 1990-08-17T17:00:00.000Z) agar mudah dibaca ---
                 STATE.allAntrianGlobal.forEach(a => {
                     if (a.Nilai_Baru && typeof a.Nilai_Baru === 'string') {
                         a.Nilai_Baru = a.Nilai_Baru.replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/g, match => {
@@ -1637,7 +1648,7 @@
 
             try {
                 await apiCall({ action: 'processBulkAntrian', ids: ids, action_type: action_type, alasan_tolak: alasan_tolak });
-                await refreshCurrentPage(); // Refresh global data & UI
+                await refreshCurrentPage();
             } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
         }
 
@@ -1669,7 +1680,7 @@
 
             try {
                 await apiCall({ action: 'processAntrian', id_antrian: id_antrian, action_type: action_type, alasan_tolak: alasan_tolak });
-                await refreshCurrentPage(); // Mengganti load parsial dengan Refresh Tersentralisasi
+                await refreshCurrentPage(); 
             } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
         }
 
@@ -1748,7 +1759,6 @@
         };
 
         async function editField(sheet, kolom) {
-            // FIX: Penanganan aman (Safe Check) agar tidak crash jika data profil di database masih null/kosong
             let currentValue = '';
             if (sheet === 'IDENTITAS_LAIN') {
                 currentValue = (STATE.identitasLain && STATE.identitasLain[kolom]) ? STATE.identitasLain[kolom] : '';
@@ -1826,7 +1836,7 @@
                 if (newAlamat && newAlamat !== currentValue) {
                     try {
                         await apiCall({ action: 'submitUpdate', executorRole: STATE.user.role, nik_target: STATE.user.nik, sheet_target: sheet, kolom_target: kolom, nilai_baru: newAlamat });
-                        await refreshCurrentPage(true); // Refresh data UI terbaru
+                        await refreshCurrentPage(true); 
                     } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
                 }
                 return; 
@@ -1960,7 +1970,6 @@
             else if (kolom === 'Jenis_ASN') { inputType = 'select'; inputOptions = { 'PNS': 'PNS', 'PPPK': 'PPPK', 'Tenaga Kontrak': 'Tenaga Kontrak', 'Tenaga Kegiatan': 'Tenaga Kegiatan' }; } 
             else if (kolom === 'Tgl_Lahir') { 
                 inputType = 'date'; 
-                // FIX: Ekstrak format Tanggal agar bisa dirender oleh kalender SweetAlert
                 if (currentValue && typeof currentValue === 'string' && currentValue.includes('T')) {
                     currentValue = currentValue.split('T')[0];
                 } else if (currentValue && !isNaN(Date.parse(currentValue))) {
@@ -1984,7 +1993,7 @@
 
                 try {
                     await apiCall({ action: 'submitUpdate', executorRole: STATE.user.role, nik_target: STATE.user.nik, sheet_target: sheet, kolom_target: kolom, nilai_baru: finalVal });
-                    await refreshCurrentPage(); // Refresh data UI
+                    await refreshCurrentPage(); 
                 } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
             }
         }
@@ -1993,7 +2002,7 @@
             const menuOptions = {
                 'RIWAYAT_PENDIDIKAN': { 'Jenjang': 'Jenjang Pendidikan', 'Instansi': 'Instansi / Kampus', 'Jurusan': 'Jurusan', 'Thn_Lulus': 'Tahun Lulus', 'No_Ijazah': 'Nomor Ijazah', 'Tgl_Ijazah': 'Tanggal Ijazah', 'Pendidikan_Terakhir': 'Pendidikan Terakhir? (Ya/Tidak)', 'File_Ijazah': 'File PDF Ijazah' },
                 'RIWAYAT_PANGKAT': { 'Pangkat_Gol': 'Pangkat/Golongan', 'No_SK': 'Nomor SK', 'TMT': 'TMT Pangkat', 'Tgl_SK': 'Tanggal SK', 'Masa_Kerja_Thn': 'Masa Kerja (Tahun)', 'Masa_Kerja_Bln': 'Masa Kerja (Bulan)', 'Pangkat_Sekarang': 'Pangkat/Gol Sekarang? (Ya/Tidak)', 'File_SK': 'File PDF SK' },
-                'RIWAYAT_JABATAN': { 'Jenis_Jabatan': 'Jenis Jabatan', 'Jabatan': 'Nama Jabatan', 'Eselon': 'Eselon', 'Unit_Kerja': 'Unit Kerja', 'TMT_Pelantikan': 'TMT Pelantikan', 'Jabatan_Sekarang': 'Jabatan Sekarang? (Ya/Tidak)', 'File_SK': 'File PDF SK' },
+                'RIWAYAT_JABATAN': { 'Jenis_Jabatan': 'Jenis Jabatan', 'Jabatan': 'Nama Jabatan', 'Eselon': 'Eselon', 'Unit Kerja': 'Unit Kerja', 'TMT_Pelantikan': 'TMT Pelantikan', 'Jabatan_Sekarang': 'Jabatan Sekarang? (Ya/Tidak)', 'File_SK': 'File PDF SK' },
                 'RIWAYAT_KOMPETENSI': { 'Jenis_Diklat': 'Jenis Diklat', 'Nama_Diklat': 'Nama Diklat', 'Tgl_Mulai': 'Tgl Mulai Diklat', 'Tgl_Selesai': 'Tgl Selesai Diklat', 'Jumlah_JP': 'Jumlah JP', 'Penyelenggara': 'Penyelenggara', 'Sumber_Anggaran': 'Sumber Anggaran', 'No_Sertifikat': 'No Sertifikat', 'File_Sertifikat': 'File PDF Sertifikat' },
                 'RIWAYAT_KGB': { 'Golongan': 'Golongan KGB', 'No_SK_KGB': 'Nomor SK KGB', 'TMT_KGB': 'TMT KGB', 'Tanggal_KGB': 'Tanggal SK KGB', 'Masa_Kerja_Tahun': 'Masa Kerja (Tahun)', 'Masa_Kerja_Bulan': 'Masa Kerja (Bulan)', 'Gaji_Pokok_Baru': 'Gaji Pokok Baru', 'Dasar_KGB': 'KGB Berdasarkan', 'File_SK_KGB': 'File PDF SK KGB' },
                 'DATA_KELUARGA': { 'NIK_Keluarga': 'NIK', 'Nama': 'Nama Anggota', 'L/P': 'Jenis Kelamin (L/P)', 'Status_Keluarga': 'Status Keluarga', 'Tmp_Tgl_Lahir': 'Tempat & Tgl Lahir', 'Agama': 'Agama', 'Tunjangan': 'Dapat Tunjangan?' },
@@ -2041,13 +2050,9 @@
                     swalConfig.inputValue = rowData[selectedKolom] || '';
                 }
 
-                if (selectedKolom === 'NIK_Keluarga' || (sheet === 'DATA_KARTU' && selectedKolom === 'Nomor_Kartu' && rowData['Jenis_Kartu'] === 'KTP')) {
+                if (selectedKolom === 'NIK_Keluarga') {
                     swalConfig.inputValidator = (value) => {
-                        if (rowData['Jenis_Kartu'] === 'KTP' && selectedKolom === 'Nomor_Kartu') {
-                            if (!value || !/^\d{16}$/.test(value)) {
-                                return 'Nomor NIK KTP harus terdiri dari tepat 16 angka!';
-                            }
-                        } else if (!value || value.length !== 16) {
+                        if (!value || value.length !== 16) {
                             return 'NIK harus terdiri dari tepat 16 angka!';
                         }
                     };
@@ -2085,7 +2090,7 @@
                 if (newVal !== undefined && newVal !== rowData[selectedKolom] && newVal !== '') {
                     try {
                         await apiCall({ action: 'submitUpdate', executorRole: STATE.user.role, nik_target: STATE.user.nik, sheet_target: sheet, baris_target: idData, kolom_target: selectedKolom, nilai_baru: newVal });
-                        await refreshCurrentPage(); // Update Data
+                        await refreshCurrentPage(); 
                     } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
                 }
             }
@@ -2287,9 +2292,7 @@
                     <div id="div-kartu-lainnya" style="display:none;" class="mt-2 w-full">
                         <input id="swal-kartu-lainnya" class="swal2-input text-sm m-0 w-full" placeholder="Ketik Nama Kartu">
                     </div>
-                    
-                    <!-- DIGANTI MENJADI TYPE TEXT AGAR BISA MENGINPUT GARIS MIRING / TITIK UNTUK KARTU LAINNYA -->
-                    <input id="swal-nomor-kartu" class="swal2-input text-sm m-0 mt-3 w-full" type="text" placeholder="Nomor Kartu (Cth: 123/AB.45)">
+                    <input id="swal-nomor-kartu" class="swal2-input text-sm m-0 mt-3 w-full" type="text" placeholder="Nomor Kartu/Dokumen (Bisa pakai titik/garis miring)">
                     
                     <div class="text-left mt-4 px-1"><label class="text-sm font-bold text-gray-700">File Dokumen Kartu (PDF atau Image, Maks 7MB):</label></div>
                     <input type="file" id="swal-file" class="swal2-file text-sm" accept="application/pdf, image/*">
@@ -2327,11 +2330,9 @@
                         const nomor = document.getElementById('swal-nomor-kartu')?.value;
                         if (!nomor) { Swal.showValidationMessage('Nomor Kartu wajib diisi!'); return false; }
                         
-                        // VALIDASI TAMBAHAN JIKA JENISNYA KTP (Dipaksa 16 Angka meskipun form sudah jadi text)
-                        if (jenis === 'KTP') {
-                            if (!/^\d{16}$/.test(nomor)) {
-                                Swal.showValidationMessage('Nomor NIK KTP harus terdiri dari tepat 16 angka saja!'); return false;
-                            }
+                        // Validasi khusus KTP tetap dicek 16 digit meskipun input bertipe text
+                        if (jenis === 'KTP' && !/^\d{16}$/.test(nomor)) {
+                            Swal.showValidationMessage('Nomor NIK KTP harus terdiri dari tepat 16 angka!'); return false;
                         }
 
                         vals = [jenis, nomor];
@@ -2437,7 +2438,7 @@
                             action: 'submitUpdate', executorRole: STATE.user.role, nik_target: STATE.user.nik,
                             sheet_target: sheet, kolom_target: 'Pengajuan Data Baru', nilai_baru: nilaiKeluarga
                         });
-                        await refreshCurrentPage(); // Refresh data otomatis
+                        await refreshCurrentPage(); 
                     } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
                 } else if (formValues.length > 0) {
                     const nilaiGabungan = formValues.join(' | ');
@@ -2446,7 +2447,7 @@
                             action: 'submitUpdate', executorRole: STATE.user.role, nik_target: STATE.user.nik,
                             sheet_target: sheet, kolom_target: 'Pengajuan Data Baru', nilai_baru: nilaiGabungan
                         });
-                        await refreshCurrentPage(); // Refresh data otomatis
+                        await refreshCurrentPage(); 
                     } catch(e) { Swal.fire('Gagal', e.message, 'error'); }
                 }
             }
@@ -2492,7 +2493,7 @@
                             nilai_baru: resFile.fileUrl 
                         });
                         
-                        await refreshCurrentPage(); // Update Data
+                        await refreshCurrentPage(); 
                     } catch(err) { Swal.fire('Error', err.message, 'error'); }
                     showLoader(false);
                 };
