@@ -2025,7 +2025,7 @@
                 
                 if (selectedKolom.includes('Tgl_') || selectedKolom.includes('Tanggal_') || selectedKolom.includes('TMT')) { inputType = 'date'; }
                 if (selectedKolom.includes('File_')) { inputType = 'file'; } 
-                if (selectedKolom.includes('Masa_Kerja') || selectedKolom === 'Gaji_Pokok_Baru' || selectedKolom === 'NIK_Keluarga' || (sheet === 'DATA_KARTU' && selectedKolom === 'Nomor_Kartu' && rowData['Jenis_Kartu'] === 'KTP')) { inputType = 'number'; } 
+                if (selectedKolom.includes('Masa_Kerja') || selectedKolom === 'Gaji_Pokok_Baru' || selectedKolom === 'NIK_Keluarga') { inputType = 'number'; } 
 
                 const swalConfig = { title: `Ubah ${kolomOptions[selectedKolom]}`, input: inputType, showCancelButton: true };
                 
@@ -2043,7 +2043,11 @@
 
                 if (selectedKolom === 'NIK_Keluarga' || (sheet === 'DATA_KARTU' && selectedKolom === 'Nomor_Kartu' && rowData['Jenis_Kartu'] === 'KTP')) {
                     swalConfig.inputValidator = (value) => {
-                        if (!value || value.length !== 16) {
+                        if (rowData['Jenis_Kartu'] === 'KTP' && selectedKolom === 'Nomor_Kartu') {
+                            if (!value || !/^\d{16}$/.test(value)) {
+                                return 'Nomor NIK KTP harus terdiri dari tepat 16 angka!';
+                            }
+                        } else if (!value || value.length !== 16) {
                             return 'NIK harus terdiri dari tepat 16 angka!';
                         }
                     };
@@ -2283,7 +2287,9 @@
                     <div id="div-kartu-lainnya" style="display:none;" class="mt-2 w-full">
                         <input id="swal-kartu-lainnya" class="swal2-input text-sm m-0 w-full" placeholder="Ketik Nama Kartu">
                     </div>
-                    <input id="swal-nomor-kartu" class="swal2-input text-sm m-0 mt-3 w-full" type="text" placeholder="Nomor Kartu (Gunakan angka untuk KTP)">
+                    
+                    <!-- DIGANTI MENJADI TYPE TEXT AGAR BISA MENGINPUT GARIS MIRING / TITIK UNTUK KARTU LAINNYA -->
+                    <input id="swal-nomor-kartu" class="swal2-input text-sm m-0 mt-3 w-full" type="text" placeholder="Nomor Kartu (Cth: 123/AB.45)">
                     
                     <div class="text-left mt-4 px-1"><label class="text-sm font-bold text-gray-700">File Dokumen Kartu (PDF atau Image, Maks 7MB):</label></div>
                     <input type="file" id="swal-file" class="swal2-file text-sm" accept="application/pdf, image/*">
@@ -2321,8 +2327,11 @@
                         const nomor = document.getElementById('swal-nomor-kartu')?.value;
                         if (!nomor) { Swal.showValidationMessage('Nomor Kartu wajib diisi!'); return false; }
                         
-                        if (jenis === 'KTP' && nomor.length !== 16) {
-                            Swal.showValidationMessage('Nomor NIK KTP harus terdiri dari tepat 16 angka!'); return false;
+                        // VALIDASI TAMBAHAN JIKA JENISNYA KTP (Dipaksa 16 Angka meskipun form sudah jadi text)
+                        if (jenis === 'KTP') {
+                            if (!/^\d{16}$/.test(nomor)) {
+                                Swal.showValidationMessage('Nomor NIK KTP harus terdiri dari tepat 16 angka saja!'); return false;
+                            }
                         }
 
                         vals = [jenis, nomor];
@@ -2906,4 +2915,3 @@
     </script>
 </body>
 </html>
-
