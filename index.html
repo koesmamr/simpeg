@@ -2002,7 +2002,7 @@
             const menuOptions = {
                 'RIWAYAT_PENDIDIKAN': { 'Jenjang': 'Jenjang Pendidikan', 'Instansi': 'Instansi / Kampus', 'Jurusan': 'Jurusan', 'Thn_Lulus': 'Tahun Lulus', 'No_Ijazah': 'Nomor Ijazah', 'Tgl_Ijazah': 'Tanggal Ijazah', 'Pendidikan_Terakhir': 'Pendidikan Terakhir? (Ya/Tidak)', 'File_Ijazah': 'File PDF Ijazah' },
                 'RIWAYAT_PANGKAT': { 'Pangkat_Gol': 'Pangkat/Golongan', 'No_SK': 'Nomor SK', 'TMT': 'TMT Pangkat', 'Tgl_SK': 'Tanggal SK', 'Masa_Kerja_Thn': 'Masa Kerja (Tahun)', 'Masa_Kerja_Bln': 'Masa Kerja (Bulan)', 'Pangkat_Sekarang': 'Pangkat/Gol Sekarang? (Ya/Tidak)', 'File_SK': 'File PDF SK' },
-                'RIWAYAT_JABATAN': { 'Jenis_Jabatan': 'Jenis Jabatan', 'Jabatan': 'Nama Jabatan', 'Eselon': 'Eselon', 'Unit Kerja': 'Unit Kerja', 'TMT_Pelantikan': 'TMT Pelantikan', 'Jabatan_Sekarang': 'Jabatan Sekarang? (Ya/Tidak)', 'File_SK': 'File PDF SK' },
+                'RIWAYAT_JABATAN': { 'Jenis_Jabatan': 'Jenis Jabatan', 'Jabatan': 'Nama Jabatan', 'Eselon': 'Eselon', 'Unit_Kerja': 'Unit Kerja', 'TMT_Pelantikan': 'TMT Pelantikan', 'Jabatan_Sekarang': 'Jabatan Sekarang? (Ya/Tidak)', 'File_SK': 'File PDF SK' },
                 'RIWAYAT_KOMPETENSI': { 'Jenis_Diklat': 'Jenis Diklat', 'Nama_Diklat': 'Nama Diklat', 'Tgl_Mulai': 'Tgl Mulai Diklat', 'Tgl_Selesai': 'Tgl Selesai Diklat', 'Jumlah_JP': 'Jumlah JP', 'Penyelenggara': 'Penyelenggara', 'Sumber_Anggaran': 'Sumber Anggaran', 'No_Sertifikat': 'No Sertifikat', 'File_Sertifikat': 'File PDF Sertifikat' },
                 'RIWAYAT_KGB': { 'Golongan': 'Golongan KGB', 'No_SK_KGB': 'Nomor SK KGB', 'TMT_KGB': 'TMT KGB', 'Tanggal_KGB': 'Tanggal SK KGB', 'Masa_Kerja_Tahun': 'Masa Kerja (Tahun)', 'Masa_Kerja_Bulan': 'Masa Kerja (Bulan)', 'Gaji_Pokok_Baru': 'Gaji Pokok Baru', 'Dasar_KGB': 'KGB Berdasarkan', 'File_SK_KGB': 'File PDF SK KGB' },
                 'DATA_KELUARGA': { 'NIK_Keluarga': 'NIK', 'Nama': 'Nama Anggota', 'L/P': 'Jenis Kelamin (L/P)', 'Status_Keluarga': 'Status Keluarga', 'Tmp_Tgl_Lahir': 'Tempat & Tgl Lahir', 'Agama': 'Agama', 'Tunjangan': 'Dapat Tunjangan?' },
@@ -2077,7 +2077,7 @@
                         Swal.showLoading();
                         try {
                             const resFile = await apiCall({
-                                action: 'uploadFile', nik: STATE.user.nik, nama: STATE.profile.Nama_Lengkap,
+                                action: 'uploadFile', nik: STATE.user.nik, nama: STATE.profile?.Nama_Lengkap || 'Pegawai',
                                 fileBase64: base64File, mimeType: file.type, filename: `UPDATE_${selectedKolom}_${STATE.user.nik}_${new Date().getTime()}.${file.name.split('.').pop()}`
                             });
                             return resFile.fileUrl; 
@@ -2358,7 +2358,7 @@
                             Swal.showLoading();
                             try {
                                 const resFile = await apiCall({
-                                    action: 'uploadFile', nik: STATE.user.nik, nama: STATE.profile.Nama_Lengkap,
+                                    action: 'uploadFile', nik: STATE.user.nik, nama: STATE.profile?.Nama_Lengkap || 'Pegawai',
                                     fileBase64: base64File, mimeType: fileKK.type, filename: `DOK_KARTU_KK_${STATE.user.nik}_${new Date().getTime()}.${fileKK.name.split('.').pop()}`
                                 });
                                 kkData = { nomor: noKK, url: resFile.fileUrl };
@@ -2413,7 +2413,7 @@
                             if(sheet === 'DATA_KARTU') fNamePrefix = 'DOK_KARTU'; 
                             
                             const resFile = await apiCall({
-                                action: 'uploadFile', nik: STATE.user.nik, nama: STATE.profile.Nama_Lengkap,
+                                action: 'uploadFile', nik: STATE.user.nik, nama: STATE.profile?.Nama_Lengkap || 'Pegawai',
                                 fileBase64: base64File, mimeType: file.type, filename: `${fNamePrefix}_${STATE.user.nik}_${new Date().getTime()}.${file.name.split('.').pop()}`
                             });
                             vals.push(resFile.fileUrl); 
@@ -2478,7 +2478,7 @@
                         const resFile = await apiCall({
                             action: 'uploadFile', 
                             nik: STATE.user.nik, 
-                            nama: STATE.profile.Nama_Lengkap,
+                            nama: STATE.profile?.Nama_Lengkap || 'Pegawai',
                             fileBase64: compressedBase64, 
                             mimeType: 'image/jpeg', 
                             filename: `FOTO_PROFIL_${STATE.user.nik}_${new Date().getTime()}.jpg`
