@@ -1524,36 +1524,10 @@
                     return section;
                 };
 
-                html += buildList('Riwayat Pendidikan', 'fa-graduation-cap', r.pendidikan, x => {
-                    let btnFile = (x.File_Ijazah && x.File_Ijazah !== '-') ? `<a href="${x.File_Ijazah}" target="_blank" class="mt-1 inline-block bg-blue-100 text-blue-700 px-2 py-1 rounded text-[10px] font-bold hover:bg-blue-200 transition"><i class="fas fa-file-pdf"></i> Lihat Ijazah</a>` : '';
-                    return `<div class="font-bold">${x.Jenjang} - ${x.Jurusan||'-'}</div><div class="text-xs text-gray-600 mb-1">${x.Instansi} (Lulus: ${x.Thn_Lulus||'-'})</div>${btnFile}`;
-                });
-                
-                html += buildList('Riwayat Pangkat', 'fa-medal', r.pangkat, x => {
-                    let btnFile = (x.File_SK && x.File_SK !== '-') ? `<a href="${x.File_SK}" target="_blank" class="mt-1 inline-block bg-blue-100 text-blue-700 px-2 py-1 rounded text-[10px] font-bold hover:bg-blue-200 transition"><i class="fas fa-file-pdf"></i> Lihat SK</a>` : '';
-                    return `<div class="font-bold">${x.Pangkat_Gol}</div><div class="text-xs text-gray-600 mb-1">No. SK: ${x.No_SK||'-'} | TMT: ${formatDate(x.TMT)}</div>${btnFile}`;
-                });
-                
-                html += buildList('Riwayat Jabatan', 'fa-briefcase', r.jabatan, x => {
-                    let btnFile = (x.File_SK && x.File_SK !== '-') ? `<a href="${x.File_SK}" target="_blank" class="mt-1 inline-block bg-blue-100 text-blue-700 px-2 py-1 rounded text-[10px] font-bold hover:bg-blue-200 transition"><i class="fas fa-file-pdf"></i> Lihat SK</a>` : '';
-                    return `<div class="font-bold">${x.Jabatan}</div><div class="text-xs text-gray-600 mb-1">Unit: ${x.Unit_Kerja||'-'} | TMT: ${formatDate(x.TMT_Pelantikan)}</div>${btnFile}`;
-                });
-                
-                html += buildList('Pengembangan Kompetensi', 'fa-certificate', r.kompetensi, x => {
-                    let btnFile = (x.File_Sertifikat && x.File_Sertifikat !== '-') ? `<a href="${x.File_Sertifikat}" target="_blank" class="mt-1 inline-block bg-blue-100 text-blue-700 px-2 py-1 rounded text-[10px] font-bold hover:bg-blue-200 transition"><i class="fas fa-file-pdf"></i> Lihat Sertifikat</a>` : '';
-                    return `<div class="font-bold">${x.Nama_Diklat}</div><div class="text-xs text-gray-600 mb-1">Pelaksanaan: ${formatDate(x.Tgl_Mulai)} | Penyelenggara: ${x.Penyelenggara||'-'}</div>${btnFile}`;
-                });
-
-                html += buildList('Riwayat KGB', 'fa-money-bill-wave', r.kgb, x => {
-                    let btnFile = (x.File_SK_KGB && x.File_SK_KGB !== '-') ? `<a href="${x.File_SK_KGB}" target="_blank" class="mt-1 inline-block bg-blue-100 text-blue-700 px-2 py-1 rounded text-[10px] font-bold hover:bg-blue-200 transition"><i class="fas fa-file-pdf"></i> Lihat SK KGB</a>` : '';
-                    return `<div class="font-bold">Gol: ${x.Golongan} - Gaji: ${x.Gaji_Pokok_Baru||'-'}</div><div class="text-xs text-gray-600 mb-1">TMT: ${formatDate(x.TMT_KGB)} | Dasar: ${x.Dasar_KGB||'-'}</div>${btnFile}`;
-                });
-
-                html += buildList('Dokumen Kartu', 'fa-id-badge', r.kartu, x => {
-                    let btnFile = (x.File_Kartu && x.File_Kartu !== '-') ? `<a href="${x.File_Kartu}" target="_blank" class="mt-1 inline-block bg-blue-100 text-blue-700 px-2 py-1 rounded text-[10px] font-bold hover:bg-blue-200 transition"><i class="fas fa-paperclip"></i> Lihat Dokumen</a>` : '';
-                    return `<div class="font-bold">${x.Jenis_Kartu}</div><div class="text-xs text-gray-600 mb-1">Nomor: ${x.Nomor_Kartu||'-'}</div>${btnFile}`;
-                });
-                
+                html += buildList('Riwayat Pendidikan', 'fa-graduation-cap', r.pendidikan, x => `<div class="font-bold">${x.Jenjang} - ${x.Jurusan||'-'}</div><div class="text-xs text-gray-600">${x.Instansi} (Lulus: ${x.Thn_Lulus||'-'})</div>`);
+                html += buildList('Riwayat Pangkat', 'fa-medal', r.pangkat, x => `<div class="font-bold">${x.Pangkat_Gol}</div><div class="text-xs text-gray-600">No. SK: ${x.No_SK||'-'} | TMT: ${formatDate(x.TMT)}</div>`);
+                html += buildList('Riwayat Jabatan', 'fa-briefcase', r.jabatan, x => `<div class="font-bold">${x.Jabatan}</div><div class="text-xs text-gray-600">Unit: ${x.Unit_Kerja||'-'} | TMT: ${formatDate(x.TMT_Pelantikan)}</div>`);
+                html += buildList('Pengembangan Kompetensi', 'fa-certificate', r.kompetensi, x => `<div class="font-bold">${x.Nama_Diklat}</div><div class="text-xs text-gray-600">Pelaksanaan: ${formatDate(x.Tgl_Mulai)} | Penyelenggara: ${x.Penyelenggara||'-'}</div>`);
                 html += buildList('Data Keluarga', 'fa-users', r.keluarga, x => `<div class="font-bold">${x.Nama} (${x.Status_Keluarga})</div><div class="text-xs text-gray-600">NIK: ${x.NIK_Keluarga||'-'} | L/P: ${x['L/P']||'-'}</div>`);
                 
                 html += `</div>`; 
@@ -2309,7 +2283,7 @@
                     <div id="div-kartu-lainnya" style="display:none;" class="mt-2 w-full">
                         <input id="swal-kartu-lainnya" class="swal2-input text-sm m-0 w-full" placeholder="Ketik Nama Kartu">
                     </div>
-                    <input id="swal-nomor-kartu" class="swal2-input text-sm m-0 mt-3 w-full" type="text" placeholder="Nomor Kartu (Bisa angka/huruf/titik/tanda hubung)">
+                    <input id="swal-nomor-kartu" class="swal2-input text-sm m-0 mt-3 w-full" type="number" placeholder="Nomor Kartu (Gunakan angka untuk KTP)">
                     
                     <div class="text-left mt-4 px-1"><label class="text-sm font-bold text-gray-700">File Dokumen Kartu (PDF atau Image, Maks 7MB):</label></div>
                     <input type="file" id="swal-file" class="swal2-file text-sm" accept="application/pdf, image/*">
@@ -2882,33 +2856,28 @@
                 </table>
             `;
 
-            const cleanFileName = `CV_${namaLengkap.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
-            
-            const opt = {
-                margin:       10,
-                filename:     cleanFileName,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            const cleanFileName = `CV_${namaLengkap.replace(/[^a-zA-Z0-9 ]/g, "").trim()}.pdf`;
+            const opt = { 
+                margin: 10, 
+                filename: cleanFileName, 
+                image: { type: 'jpeg', quality: 0.85 }, 
+                html2canvas: { scale: 3, useCORS: true, letterRendering: true }, 
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true } 
             };
-
-            html2pdf().set(opt).from(cvContainer).save().then(() => {
-                showLoader(false);
-            });
+            html2pdf().set(opt).from(cvContainer).save().then(() => { showLoader(false); }).catch(err => { showLoader(false); Swal.fire('Error', 'Gagal mencetak PDF: ' + err.message, 'error'); });
         }
 
-        // ==========================================
-        // API CALL WRAPPER
-        // ==========================================
         async function apiCall(payload) {
-            const formData = new URLSearchParams();
-            for (const key in payload) { formData.append(key, payload[key]); }
-
-            const response = await fetch(SCRIPT_URL, { method: 'POST', body: formData });
+            // Sisipkan role ke dalam payload jika session user tersedia untuk backend pengecekan maintenance
+            if (STATE.user && !payload.role) { payload.role = STATE.user.role; }
+            
+            const response = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
             const data = await response.json();
             
             if (data.status === 'error') {
-                if (data.message && data.message.includes("MAINTENANCE")) {
+                // Intersep Error Maintenance
+                if (data.message.includes("MAINTENANCE")) {
+                    // Jika ada sesi yang aktif, putuskan dan keluarkan pengguna
                     if (STATE.user) {
                         localStorage.removeItem('simpeg_user'); 
                         sessionStorage.removeItem('simpeg_active_hash'); 
@@ -2916,6 +2885,7 @@
                         document.getElementById('app-container').style.display = 'none'; 
                         document.getElementById('login-page').style.display = 'flex';
                     }
+                    
                     Swal.fire({
                         title: 'Sistem Dalam Perbaikan',
                         html: '<p class="text-sm mt-2 text-gray-600">Mohon maaf, sistem aplikasi SIMPEG saat ini sedang ditutup untuk <b>perbaikan dan pemeliharaan (Maintenance)</b> oleh Administrator.</p><p class="text-sm font-bold mt-2">Silakan coba kembali beberapa saat lagi.</p>',
@@ -2924,6 +2894,8 @@
                         confirmButtonColor: '#e74c3c',
                         allowOutsideClick: false
                     });
+                    
+                    // Hentikan eksekusi script selanjutnya
                     throw new Error("Maintenance Mode Intercepted");
                 }
                 throw new Error(data.message);
