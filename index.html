@@ -1324,7 +1324,7 @@
             }
         }
 
-        function renderTablePegawai() {
+function renderTablePegawai() {
             const tbody = document.getElementById('tbody-pegawai'); tbody.innerHTML = '';
             const data = STATE.filteredPegawai; const totalData = data.length; const totalPages = Math.ceil(totalData / STATE.rowsPerPage);
             if (STATE.currentPage < 1) STATE.currentPage = 1; if (STATE.currentPage > totalPages && totalPages > 0) STATE.currentPage = totalPages;
@@ -1343,7 +1343,7 @@
                     }
 
                     let tr = document.createElement('tr'); tr.className = 'border-b border-gray-300 hover:bg-gray-100 hover:text-black transition';
-                    tr.innerHTML = `<td class="p-3">${p.NIK}</td><td class="p-3 font-medium">${p.Nama_Lengkap} ${roleBadge}</td><td class="p-3">${p.Jabatan_Terakhir || '-'}</td><td class="p-3 font-semibold text-gray-600 text-xs">${p.Jenis_ASN || '-'}</td><td class="p-3 flex gap-1.5"><button onclick="viewPegawaiAdmin('${p.NIK}')" class="text-green-600 hover:bg-green-200 bg-green-50 w-8 h-8 flex items-center justify-center rounded border border-green-200 shadow-sm transition" title="Lihat Detail"><i class="fas fa-eye"></i></button><button onclick="editPegawaiAdmin('${p.NIK}')" class="text-blue-600 hover:bg-blue-200 bg-blue-50 w-8 h-8 flex items-center justify-center rounded border border-blue-200 shadow-sm transition" title="Edit Data"><i class="fas fa-edit"></i></button><button onclick="cetakCVPegawai('${p.NIK}')" class="text-red-600 hover:bg-red-200 bg-red-50 w-8 h-8 flex items-center justify-center rounded border border-red-200 shadow-sm transition" title="Cetak CV (PDF)"><i class="fas fa-file-pdf"></i></button></td>`;
+                    tr.innerHTML = `<td class="p-3">${p.NIK}</td><td class="p-3 font-medium"><a href="javascript:void(0)" onclick="viewPegawaiAdmin('${p.NIK}')" class="font-bold text-blue-600 hover:text-blue-800 hover:underline transition" title="Lihat Detail Profil">${p.Nama_Lengkap}</a> ${roleBadge}</td><td class="p-3">${p.Jabatan_Terakhir || '-'}</td><td class="p-3 font-semibold text-gray-600 text-xs">${p.Jenis_ASN || '-'}</td><td class="p-3 flex gap-1.5"><button onclick="editPegawaiAdmin('${p.NIK}')" class="text-blue-600 hover:bg-blue-200 bg-blue-50 w-8 h-8 flex items-center justify-center rounded border border-blue-200 shadow-sm transition" title="Edit Data"><i class="fas fa-edit"></i></button><button onclick="cetakCVPegawai('${p.NIK}')" class="text-red-600 hover:bg-red-200 bg-red-50 w-8 h-8 flex items-center justify-center rounded border border-red-200 shadow-sm transition" title="Cetak CV (PDF)"><i class="fas fa-file-pdf"></i></button></td>`;
                     tbody.appendChild(tr);
                 });
             }
