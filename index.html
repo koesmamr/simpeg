@@ -2370,6 +2370,18 @@ function renderTablePegawai() {
                     }
                     return;
                 }
+				if (newUnit && newUnit !== currentValue) {
+                    try {
+                        await apiCall({ action: 'submitUpdate', executorRole: STATE.user.role, nik_target: STATE.user.nik, sheet_target: sheet, kolom_target: kolom, nilai_baru: newUnit });
+                        await refreshCurrentPage(true); 
+                    } catch(e) { 
+                        if (e.message !== "Maintenance Mode Intercepted") {
+                            Swal.fire('Gagal', e.message, 'error'); 
+                        }
+                    }
+                }
+                return;
+            }
 
                 let inputType = 'text'; let inputOptions = {};
                 
