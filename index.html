@@ -2145,55 +2145,89 @@ function renderTablePegawai() {
                     title: 'Ajukan Ubah Ruangan',
                     html: `
                         <select id="swal-ruangan" class="swal2-select w-full m-0 text-sm" onchange="document.getElementById('div-ruangan-lainnya').style.display = this.value === 'LAINNYA' ? 'block' : 'none'">
-                            <option value="" disabled selected>-- Pilih Ruangan Saat Ini --</option>
-                            <optgroup label="Rawat Intensif & Ruangan">
-                                <option value="HCU">HCU</option>
-                                <option value="ICCU">ICCU</option>
-                                <option value="ICU">ICU</option>
-                                <option value="RUANG ANGGREK/DAHLIA">RUANG ANGGREK/DAHLIA</option>
-                                <option value="RUANG ANYELIR/MELATI">RUANG ANYELIR/MELATI</option>
-                                <option value="RUANG BOUGENVILLE">RUANG BOUGENVILLE</option>
-                                <option value="RUANG FLAMBOYAN">RUANG FLAMBOYAN</option>
-                                <option value="RUANG LILY">RUANG LILY</option>
-                                <option value="RUANG MAWAR/ASTER">RUANG MAWAR/ASTER</option>
-                                <option value="RUANG TERATAI/ASOKA">RUANG TERATAI/ASOKA</option>
-                            </optgroup>
-                            <optgroup label="Poliklinik">
-                                <option value="POLI ANAK">POLI ANAK</option>
-                                <option value="POLI BEDAH">POLI BEDAH</option>
-                                <option value="POLI BEDAH SYARAF">POLI BEDAH SYARAF</option>
-                                <option value="POLI EEG">POLI EEG</option>
-                                <option value="POLI EKSKUTIF">POLI EKSKUTIF</option>
-                                <option value="POLI ENDOSKOPI">POLI ENDOSKOPI</option>
-                                <option value="POLI ESWL">POLI ESWL</option>
-                                <option value="POLI GERIATRI">POLI GERIATRI</option>
-                                <option value="POLI GIGI">POLI GIGI</option>
-                                <option value="POLI JANTUNG">POLI JANTUNG</option>
-                                <option value="POLI JIWA">POLI JIWA</option>
-                                <option value="POLI KIR">POLI KIR</option>
-                                <option value="POLI KULIT DAN KELAMIN">POLI KULIT DAN KELAMIN</option>
-                                <option value="POLI MATA">POLI MATA</option>
-                                <option value="POLI OBSGYN">POLI OBSGYN</option>
-                                <option value="POLI ORTHOPEDI">POLI ORTHOPEDI</option>
-                                <option value="POLI PARU">POLI PARU</option>
-                                <option value="POLI PENYAKIT DALAM">POLI PENYAKIT DALAM</option>
-                                <option value="POLI SYARAF">POLI SYARAF</option>
-                                <option value="POLI TB">POLI TB</option>
-                                <option value="POLI THT">POLI THT</option>
-                                <option value="POLI TMS">POLI TMS</option>
-                                <option value="POLI UMUM">POLI UMUM</option>
-                                <option value="POLI UROLOGI">POLI UROLOGI</option>
-                                <option value="POLI VCT">POLI VCT</option>
-                            </optgroup>
-                            <optgroup label="Instalasi & Unit Lainnya">
-                                <option value="IGD">IGD</option>
-                                <option value="IBS">IBS</option>
-                                <option value="LABORATORIUM">LABORATORIUM</option>
-                                <option value="RADIOLOGI">RADIOLOGI</option>
-                                <option value="FARMASI">FARMASI</option>
-                                <option value="LAINNYA" class="font-bold text-blue-600">Lainnya (Ketik Manual)...</option>
-                            </optgroup>
-                        </select>
+                        <option value="" disabled selected>-- Pilih Unit Kerja (Bidang/Bagian/Ruangan) --</option>
+                        <optgroup label="Manajemen & Administrasi (Bidang/Bagian)">
+                            <option value="BAGIAN ADMINISTRASI DAN UMUM">BAGIAN ADMINISTRASI DAN UMUM</option>
+                            <option value="BAGIAN KEUANGAN">BAGIAN KEUANGAN</option>
+                            <option value="BAGIAN PROGPEL">BAGIAN PROGPEL</option>
+                            <option value="BIDANG KEPERAWATAN">BIDANG KEPERAWATAN</option>
+                            <option value="BIDANG PELAYANAN MEDIK">BIDANG PELAYANAN MEDIK</option>
+                            <option value="BIDANG PELAYANAN PENUNJANG">BIDANG PELAYANAN PENUNJANG</option>
+                        </optgroup>
+                        <optgroup label="Komite & Satuan">
+                            <option value="KOMITE KEPERAWATAN">KOMITE KEPERAWATAN</option>
+                            <option value="KOMITE KESEHATAN DAN KESELAMATAN KERJA">KOMITE KESEHATAN DAN KESELAMATAN KERJA</option>
+                            <option value="KOMITE MEDIK">KOMITE MEDIK</option>
+                            <option value="KOMITE PPI">KOMITE PPI</option>
+                            <option value="SATUAN PEMERIKSAAN INTERNAL">SATUAN PEMERIKSAAN INTERNAL</option>
+                        </optgroup>
+                        <optgroup label="Instalasi">
+                            <option value="INSTALASI BEDAH SENTRAL">INSTALASI BEDAH SENTRAL</option>
+                            <option value="INSTALASI DIAGNOSTIK DAN INTERVENSI KORDIOVASKULER">INSTALASI DIAGNOSTIK DAN INTERVENSI KORDIOVASKULER</option>
+                            <option value="INSTALASI FARMASI">INSTALASI FARMASI</option>
+                            <option value="INSTALASI FORENSIK DAN MEDIKOLEGAL">INSTALASI FORENSIK DAN MEDIKOLEGAL</option>
+                            <option value="INSTALASI GAWAT DARURAT">INSTALASI GAWAT DARURAT</option>
+                            <option value="INSTALASI GIZI">INSTALASI GIZI</option>
+                            <option value="INSTALASI HEMODIALISA">INSTALASI HEMODIALISA</option>
+                            <option value="INSTALASI LABORATORIUM">INSTALASI LABORATORIUM</option>
+                            <option value="INSTALASI MATERNAL DAN PERINATAL">INSTALASI MATERNAL DAN PERINATAL</option>
+                            <option value="INSTALASI PEMELIHARAAN SARANA">INSTALASI PEMELIHARAAN SARANA</option>
+                            <option value="INSTALASI PENYEHATAN LINGKUNGAN">INSTALASI PENYEHATAN LINGKUNGAN</option>
+                            <option value="INSTALASI PKRS">INSTALASI PKRS</option>
+                            <option value="INSTALASI RADIOLOGI">INSTALASI RADIOLOGI</option>
+                            <option value="INSTALASI REHABILITASI MEDIK">INSTALASI REHABILITASI MEDIK</option>
+                            <option value="INSTALASI REKAM MEDIK">INSTALASI REKAM MEDIK</option>
+                            <option value="INSTALASI SIM RS">INSTALASI SIM RS</option>
+                        </optgroup>
+                        <optgroup label="Rawat Intensif & Ruangan">
+                            <option value="HCU">HCU</option>
+                            <option value="ICCU">ICCU</option>
+                            <option value="ICU">ICU</option>
+                            <option value="RUANG ANGGREK/DAHLIA">RUANG ANGGREK/DAHLIA</option>
+                            <option value="RUANG ANYELIR/MELATI">RUANG ANYELIR/MELATI</option>
+                            <option value="RUANG BOUGENVILLE">RUANG BOUGENVILLE</option>
+                            <option value="RUANG FLAMBOYAN">RUANG FLAMBOYAN</option>
+                            <option value="RUANG LILY">RUANG LILY</option>
+                            <option value="RUANG MAWAR/ASTER">RUANG MAWAR/ASTER</option>
+                            <option value="RUANG TERATAI/ASOKA">RUANG TERATAI/ASOKA</option>
+                        </optgroup>
+                        <optgroup label="Poliklinik">
+                            <option value="POLI ANAK">POLI ANAK</option>
+                            <option value="POLI BEDAH">POLI BEDAH</option>
+                            <option value="POLI BEDAH SYARAF">POLI BEDAH SYARAF</option>
+                            <option value="POLI EEG">POLI EEG</option>
+                            <option value="POLI EKSKUTIF">POLI EKSKUTIF</option>
+                            <option value="POLI ENDOSKOPI">POLI ENDOSKOPI</option>
+                            <option value="POLI ESWL">POLI ESWL</option>
+                            <option value="POLI GERIATRI">POLI GERIATRI</option>
+                            <option value="POLI GIGI">POLI GIGI</option>
+                            <option value="POLI JANTUNG">POLI JANTUNG</option>
+                            <option value="POLI JIWA">POLI JIWA</option>
+                            <option value="POLI KIR">POLI KIR</option>
+                            <option value="POLI KULIT DAN KELAMIN">POLI KULIT DAN KELAMIN</option>
+                            <option value="POLI MATA">POLI MATA</option>
+                            <option value="POLI OBSGYN">POLI OBSGYN</option>
+                            <option value="POLI ORTHOPEDI">POLI ORTHOPEDI</option>
+                            <option value="POLI PARU">POLI PARU</option>
+                            <option value="POLI PENYAKIT DALAM">POLI PENYAKIT DALAM</option>
+                            <option value="POLI SYARAF">POLI SYARAF</option>
+                            <option value="POLI TB">POLI TB</option>
+                            <option value="POLI THT">POLI THT</option>
+                            <option value="POLI TMS">POLI TMS</option>
+                            <option value="POLI UMUM">POLI UMUM</option>
+                            <option value="POLI UROLOGI">POLI UROLOGI</option>
+                            <option value="POLI VCT">POLI VCT</option>
+                        </optgroup>
+                        <optgroup label="Unit Khusus & Lainnya">
+                            <option value="UNIT AMBULAN">UNIT AMBULAN</option>
+                            <option value="UNIT CSSD">UNIT CSSD</option>
+                            <option value="UNIT DIKLAT">UNIT DIKLAT</option>
+                            <option value="UNIT KLAIM DAN PENJAMINAN">UNIT KLAIM DAN PENJAMINAN</option>
+                            <option value="UNIT LOUNDRY">UNIT LOUNDRY</option>
+                            <option value="UNIT PENGADUAN">UNIT PENGADUAN</option>
+                            <option value="LAINNYA" class="font-bold text-blue-600">Lainnya (Ketik Manual)...</option>
+                        </optgroup>
+                    </select>
                         <div id="div-ruangan-lainnya" style="display:none;" class="mt-3 w-full">
                             <input id="swal-ruangan-lainnya" class="swal2-input text-sm m-0 w-full" placeholder="Ketik Nama Ruangan">
                         </div>
