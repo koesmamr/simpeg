@@ -2140,6 +2140,109 @@ function renderTablePegawai() {
                 }
                 return;
             }
+			if (kolom === 'Ruangan') {
+                const { value: newRuangan } = await Swal.fire({
+                    title: 'Ajukan Ubah Ruangan',
+                    html: `
+                        <select id="swal-ruangan" class="swal2-select w-full m-0 text-sm" onchange="document.getElementById('div-ruangan-lainnya').style.display = this.value === 'LAINNYA' ? 'block' : 'none'">
+                            <option value="" disabled selected>-- Pilih Ruangan Saat Ini --</option>
+                            <optgroup label="Rawat Intensif & Ruangan">
+                                <option value="HCU">HCU</option>
+                                <option value="ICCU">ICCU</option>
+                                <option value="ICU">ICU</option>
+                                <option value="RUANG ANGGREK/DAHLIA">RUANG ANGGREK/DAHLIA</option>
+                                <option value="RUANG ANYELIR/MELATI">RUANG ANYELIR/MELATI</option>
+                                <option value="RUANG BOUGENVILLE">RUANG BOUGENVILLE</option>
+                                <option value="RUANG FLAMBOYAN">RUANG FLAMBOYAN</option>
+                                <option value="RUANG LILY">RUANG LILY</option>
+                                <option value="RUANG MAWAR/ASTER">RUANG MAWAR/ASTER</option>
+                                <option value="RUANG TERATAI/ASOKA">RUANG TERATAI/ASOKA</option>
+                            </optgroup>
+                            <optgroup label="Poliklinik">
+                                <option value="POLI ANAK">POLI ANAK</option>
+                                <option value="POLI BEDAH">POLI BEDAH</option>
+                                <option value="POLI BEDAH SYARAF">POLI BEDAH SYARAF</option>
+                                <option value="POLI EEG">POLI EEG</option>
+                                <option value="POLI EKSKUTIF">POLI EKSKUTIF</option>
+                                <option value="POLI ENDOSKOPI">POLI ENDOSKOPI</option>
+                                <option value="POLI ESWL">POLI ESWL</option>
+                                <option value="POLI GERIATRI">POLI GERIATRI</option>
+                                <option value="POLI GIGI">POLI GIGI</option>
+                                <option value="POLI JANTUNG">POLI JANTUNG</option>
+                                <option value="POLI JIWA">POLI JIWA</option>
+                                <option value="POLI KIR">POLI KIR</option>
+                                <option value="POLI KULIT DAN KELAMIN">POLI KULIT DAN KELAMIN</option>
+                                <option value="POLI MATA">POLI MATA</option>
+                                <option value="POLI OBSGYN">POLI OBSGYN</option>
+                                <option value="POLI ORTHOPEDI">POLI ORTHOPEDI</option>
+                                <option value="POLI PARU">POLI PARU</option>
+                                <option value="POLI PENYAKIT DALAM">POLI PENYAKIT DALAM</option>
+                                <option value="POLI SYARAF">POLI SYARAF</option>
+                                <option value="POLI TB">POLI TB</option>
+                                <option value="POLI THT">POLI THT</option>
+                                <option value="POLI TMS">POLI TMS</option>
+                                <option value="POLI UMUM">POLI UMUM</option>
+                                <option value="POLI UROLOGI">POLI UROLOGI</option>
+                                <option value="POLI VCT">POLI VCT</option>
+                            </optgroup>
+                            <optgroup label="Instalasi & Unit Lainnya">
+                                <option value="IGD">IGD</option>
+                                <option value="IBS">IBS</option>
+                                <option value="LABORATORIUM">LABORATORIUM</option>
+                                <option value="RADIOLOGI">RADIOLOGI</option>
+                                <option value="FARMASI">FARMASI</option>
+                                <option value="LAINNYA" class="font-bold text-blue-600">Lainnya (Ketik Manual)...</option>
+                            </optgroup>
+                        </select>
+                        <div id="div-ruangan-lainnya" style="display:none;" class="mt-3 w-full">
+                            <input id="swal-ruangan-lainnya" class="swal2-input text-sm m-0 w-full" placeholder="Ketik Nama Ruangan">
+                        </div>
+                    `,
+                    focusConfirm: false,
+                    showCancelButton: true,
+                    confirmButtonText: 'Ajukan',
+                    didOpen: () => {
+                        const selectEl = document.getElementById('swal-ruangan');
+                        const options = Array.from(selectEl.options).map(o => o.value);
+                        if (currentValue) {
+                            if (options.includes(currentValue)) {
+                                selectEl.value = currentValue;
+                            } else {
+                                selectEl.value = 'LAINNYA';
+                                document.getElementById('div-ruangan-lainnya').style.display = 'block';
+                                document.getElementById('swal-ruangan-lainnya').value = currentValue;
+                            }
+                        }
+                    },
+                    preConfirm: () => {
+                        let ruangan = document.getElementById('swal-ruangan').value;
+                        if (!ruangan) {
+                            Swal.showValidationMessage('Silakan pilih Ruangan!');
+                            return false;
+                        }
+                        if (ruangan === 'LAINNYA') {
+                            ruangan = document.getElementById('swal-ruangan-lainnya').value.trim();
+                            if (!ruangan) {
+                                Swal.showValidationMessage('Nama Ruangan wajib diketik manual!');
+                                return false;
+                            }
+                        }
+                        return ruangan;
+                    }
+                });
+
+                if (newRuangan && newRuangan !== currentValue) {
+                    try {
+                        await apiCall({ action: 'submitUpdate', executorRole: STATE.user.role, nik_target: STATE.user.nik, sheet_target: sheet, kolom_target: kolom, nilai_baru: newRuangan });
+                        await refreshCurrentPage(true); 
+                    } catch(e) { 
+                        if (e.message !== "Maintenance Mode Intercepted") {
+                            Swal.fire('Gagal', e.message, 'error'); 
+                        }
+                    }
+                }
+                return;
+            }
 
             let inputType = 'text'; let inputOptions = {}; 
             
