@@ -1190,7 +1190,7 @@
             return currentValue || '-';
         }
 
-        function updateProfileUI() {
+function updateProfileUI() {
             document.getElementById('p-nik-personal').innerHTML = STATE.profile.NIK || '-';
             document.getElementById('p-nipnin').innerHTML = getFieldHTML('NIP_NIN', STATE.profile.NIP_NIN);
             document.getElementById('p-emailsso').innerHTML = STATE.profile.Email_SSO || '-';
@@ -1204,6 +1204,11 @@
             document.getElementById('p-pangkat').innerHTML = getFieldHTML('Pangkat_Golongan', STATE.profile.Pangkat_Golongan);
             document.getElementById('p-jabatan').innerHTML = getFieldHTML('Jabatan_Terakhir', STATE.profile.Jabatan_Terakhir);
             document.getElementById('p-unit-detail').innerHTML = getFieldHTML('Unit_Kerja', STATE.profile.Unit_Kerja);
+            
+            // --- BARIS UNTUK MEMANGGIL DATA RUANGAN ---
+            document.getElementById('p-ruangan').innerHTML = getFieldHTML('Ruangan', STATE.profile.Ruangan);
+            // ------------------------------------------
+
             document.getElementById('p-pendidikan').innerHTML = getFieldHTML('Jenjang_Pendidikan', STATE.profile.Jenjang_Pendidikan);
 
             document.getElementById('p-npwp').innerHTML = getFieldHTML('No_NPWP', STATE.identitasLain.No_NPWP);
