@@ -526,8 +526,12 @@
                     <div class="card rounded-lg shadow-md p-6">
                         <div class="flex justify-between mb-4 flex-col md:flex-row gap-2">
                             <div class="flex flex-col md:flex-row gap-2 w-full md:w-auto">
-                                <input type="text" id="search-pegawai" placeholder="Cari Nama / NIK..." class="border border-gray-300 p-2 rounded w-full md:w-64 text-black focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" onkeyup="filterTablePegawai()">
-                                <select id="filter-status-asn" class="border border-gray-300 p-2 rounded w-full md:w-48 text-black focus:outline-none focus:border-blue-500" onchange="filterTablePegawai()">
+                                <div class="relative w-full md:w-80">
+                                    <input type="text" id="search-pegawai" placeholder="Cari Nama, NIK, NIP, Jabatan, Unit..." class="border border-gray-300 p-2 pl-9 pr-8 rounded w-full text-black focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm shadow-sm" oninput="debouncedFilterPegawai()">
+                                    <i class="fas fa-search absolute left-3 top-3 text-gray-400 text-sm pointer-events-none"></i>
+                                    <button id="btn-clear-search" onclick="clearSearchPegawai()" class="absolute right-2.5 top-2.5 text-gray-400 hover:text-gray-600 hidden text-sm transition" title="Hapus pencarian"><i class="fas fa-times-circle"></i></button>
+                                </div>
+                                <select id="filter-status-asn" class="border border-gray-300 p-2 rounded w-full md:w-48 text-black focus:outline-none focus:border-blue-500 text-sm shadow-sm" onchange="filterTablePegawai()">
                                     <option value="">Semua Status ASN</option>
                                     <option value="PNS">PNS</option>
                                     <option value="PPPK">PPPK</option>
@@ -1349,8 +1353,12 @@ function renderTablePegawai() {
                         roleBadge = `<br><span class="px-2 py-0.5 ${rColor} rounded text-[10px] font-bold mt-1 inline-block uppercase shadow-sm"><i class="fas fa-user-shield mr-1"></i> ${p.Role}</span>`;
                     }
 
+                    let unitHtml = p.Unit_Kerja ? `<div class="text-[11px] text-gray-500 font-normal">${p.Unit_Kerja}</div>` : '';
+                    let nipHtml = p.NIP_NIN ? `<div class="text-[11px] text-gray-500 font-normal">NIP: ${p.NIP_NIN}</div>` : '';
+                    let namaLengkapText = p.Nama_Lengkap || '-';
+
                     let tr = document.createElement('tr'); tr.className = 'border-b border-gray-300 hover:bg-gray-100 hover:text-black transition';
-                    tr.innerHTML = `<td class="p-3">${p.NIK}</td><td class="p-3 font-medium"><a href="javascript:void(0)" onclick="viewPegawaiAdmin('${p.NIK}')" class="font-bold text-blue-600 hover:text-blue-800 hover:underline transition" title="Lihat Detail Profil">${p.Nama_Lengkap}</a> ${roleBadge}</td><td class="p-3">${p.Jabatan_Terakhir || '-'}</td><td class="p-3 font-semibold text-gray-600 text-xs">${p.Jenis_ASN || '-'}</td><td class="p-3 flex gap-1.5"><button onclick="editPegawaiAdmin('${p.NIK}')" class="text-blue-600 hover:bg-blue-200 bg-blue-50 w-8 h-8 flex items-center justify-center rounded border border-blue-200 shadow-sm transition" title="Edit Data"><i class="fas fa-edit"></i></button><button onclick="cetakCVPegawai('${p.NIK}')" class="text-red-600 hover:bg-red-200 bg-red-50 w-8 h-8 flex items-center justify-center rounded border border-red-200 shadow-sm transition" title="Cetak CV (PDF)"><i class="fas fa-file-pdf"></i></button></td>`;
+                    tr.innerHTML = `<td class="p-3"><span class="font-medium">${p.NIK}</span>${nipHtml}</td><td class="p-3 font-medium"><a href="javascript:void(0)" onclick="viewPegawaiAdmin('${p.NIK}')" class="font-bold text-blue-600 hover:text-blue-800 hover:underline transition" title="Lihat Detail Profil">${namaLengkapText}</a> ${roleBadge}</td><td class="p-3"><div class="font-medium">${p.Jabatan_Terakhir || '-'}</div>${unitHtml}</td><td class="p-3 font-semibold text-gray-600 text-xs">${p.Jenis_ASN || '-'}</td><td class="p-3 flex gap-1.5"><button onclick="editPegawaiAdmin('${p.NIK}')" class="text-blue-600 hover:bg-blue-200 bg-blue-50 w-8 h-8 flex items-center justify-center rounded border border-blue-200 shadow-sm transition" title="Edit Data"><i class="fas fa-edit"></i></button><button onclick="cetakCVPegawai('${p.NIK}')" class="text-red-600 hover:bg-red-200 bg-red-50 w-8 h-8 flex items-center justify-center rounded border border-red-200 shadow-sm transition" title="Cetak CV (PDF)"><i class="fas fa-file-pdf"></i></button></td>`;
                     tbody.appendChild(tr);
                 });
             }
@@ -1365,16 +1373,84 @@ function renderTablePegawai() {
             let btnNext = document.createElement('button'); btnNext.className = `px-3 py-1 border border-gray-300 rounded transition ${STATE.currentPage === totalPages ? 'opacity-50 cursor-not-allowed bg-gray-100 text-gray-400' : 'bg-white hover:bg-gray-200 text-black'}`; btnNext.innerHTML = '<i class="fas fa-chevron-right"></i>'; btnNext.disabled = STATE.currentPage === totalPages; btnNext.onclick = () => { STATE.currentPage++; renderTablePegawai(); }; container.appendChild(btnNext);
         }
 
+        // ==========================================
+        // SMART SEARCH & FILTER LOGIC
+        // ==========================================
+        let filterTimeout = null;
+        function debouncedFilterPegawai() {
+            clearTimeout(filterTimeout);
+            filterTimeout = setTimeout(filterTablePegawai, 150);
+        }
+
+        function clearSearchPegawai() {
+            const input = document.getElementById('search-pegawai');
+            if (input) {
+                input.value = '';
+                const btn = document.getElementById('btn-clear-search');
+                if (btn) btn.classList.add('hidden');
+                filterTablePegawai();
+                input.focus();
+            }
+        }
+
+        function normalizeSearchText(str) {
+            return String(str || '')
+                .toLowerCase()
+                .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
         function filterTablePegawai() {
-            const term = document.getElementById('search-pegawai').value.toLowerCase();
-            const filterAsn = document.getElementById('filter-status-asn').value;
+            const searchInput = document.getElementById('search-pegawai');
+            const rawTerm = (searchInput ? searchInput.value : '').trim();
+            const filterAsn = document.getElementById('filter-status-asn')?.value || '';
+
+            const clearBtn = document.getElementById('btn-clear-search');
+            if (clearBtn) {
+                rawTerm.length > 0 ? clearBtn.classList.remove('hidden') : clearBtn.classList.add('hidden');
+            }
+
+            // Pecah kata kunci menjadi token kata (multi-token search)
+            const searchTokens = rawTerm.toLowerCase().split(/\s+/).filter(t => t.length > 0);
 
             STATE.filteredPegawai = STATE.allPegawai.filter(p => {
-                const matchText = (p.Nama_Lengkap && p.Nama_Lengkap.toLowerCase().includes(term)) || (p.NIK && String(p.NIK).includes(term));
-                const matchAsn = filterAsn === "" || p.Jenis_ASN === filterAsn;
-                return matchText && matchAsn;
+                // Filter dropdown Status ASN
+                if (filterAsn && p.Jenis_ASN !== filterAsn) return false;
+
+                // Jika tidak ada kata kunci, tampilkan semua yang lolos filter dropdown
+                if (searchTokens.length === 0) return true;
+
+                // Bangun gabungan teks seluruh atribut penting pegawai
+                const namaGelar = `${p.Gelar_Depan || ''} ${p.Nama_Lengkap || ''} ${p.Gelar_Belakang || ''}`;
+                const rawCombined = [
+                    p.Nama_Lengkap,
+                    namaGelar,
+                    p.NIK,
+                    p.NIP_NIN,
+                    p.Jabatan_Terakhir,
+                    p.Jenis_Jabatan,
+                    p.Unit_Kerja,
+                    p.Pangkat_Golongan,
+                    p.Jenjang_Pendidikan,
+                    p.Email_SSO,
+                    p.No_HP,
+                    p.Jenis_ASN,
+                    p.Status_Pegawai,
+                    p.Role
+                ].map(v => String(v || '').toLowerCase()).join(' ');
+
+                const normCombined = normalizeSearchText(rawCombined);
+
+                // Multi-token: Setiap kata yang diketik pengguna harus cocok di salah satu atribut pegawai
+                return searchTokens.every(token => {
+                    const normToken = normalizeSearchText(token);
+                    return rawCombined.includes(token) || (normToken && normCombined.includes(normToken));
+                });
             });
-            STATE.currentPage = 1; renderTablePegawai();
+
+            STATE.currentPage = 1; 
+            renderTablePegawai();
         }
 
         async function editPegawaiAdmin(nik) {
