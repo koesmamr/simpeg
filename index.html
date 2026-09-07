@@ -2880,46 +2880,67 @@ function renderTablePegawai() {
         function exportToExcel() {
             if(!STATE.filteredPegawai || STATE.filteredPegawai.length === 0) return Swal.fire('Info', 'Tidak ada data untuk diexport (periksa filter Anda)', 'info');
             
-            const formattedData = STATE.filteredPegawai.map(pegawai => {
-                let obj = {};
-                
-                let namaLengkapDenganGelar = (pegawai.Gelar_Depan ? pegawai.Gelar_Depan + ' ' : '') + 
-                                             (pegawai.Nama_Lengkap || '-') + 
-                                             (pegawai.Gelar_Belakang ? ', ' + pegawai.Gelar_Belakang : '');
-
-                for (let key in pegawai) {
-                    let val = pegawai[key];
-                    let colName = key;
+            showLoader(true);
+            try {
+                const formattedData = STATE.filteredPegawai.map(pegawai => {
+                    let obj = {};
                     
-                    if (key === 'Nama_Lengkap') {
-                        colName = 'Nama_KTP';
-                    }
+                    let namaLengkapDenganGelar = (pegawai.Gelar_Depan ? pegawai.Gelar_Depan + ' ' : '') + 
+                                                 (pegawai.Nama_Lengkap || '-') + 
+                                                 (pegawai.Gelar_Belakang ? ', ' + pegawai.Gelar_Belakang : '');
 
-                    if (val && typeof val === 'string' && val.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)) {
-                        const d = new Date(val);
-                        if (!isNaN(d.getTime())) {
-                            const day = String(d.getDate()).padStart(2, '0');
-                            const month = String(d.getMonth() + 1).padStart(2, '0');
-                            const year = d.getFullYear();
-                            val = `${day}-${month}-${year}`;
+                    for (let key in pegawai) {
+                        let val = pegawai[key];
+                        let colName = key;
+                        
+                        if (key === 'Nama_Lengkap') {
+                            colName = 'Nama_KTP';
+                        }
+
+                        if (val && typeof val === 'string' && val.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)) {
+                            const d = new Date(val);
+                            if (!isNaN(d.getTime())) {
+                                const day = String(d.getDate()).padStart(2, '0');
+                                const month = String(d.getMonth() + 1).padStart(2, '0');
+                                const year = d.getFullYear();
+                                val = `${day}-${month}-${year}`;
+                            }
+                        }
+
+                        // Proteksi batas panjang sel Excel (maksimal 32.767 karakter)
+                        if (typeof val === 'string') {
+                            if (val.startsWith('data:image') || (val.length > 500 && val.includes('base64'))) {
+                                val = '[Gambar Base64]';
+                            } else if (val.length > 32700) {
+                                val = val.substring(0, 32700) + '...';
+                            }
+                        }
+
+                        obj[colName] = val;
+                    }
+                    
+                    const finalObj = {};
+                    for (let k in obj) {
+                        finalObj[k] = obj[k];
+                        if (k === 'Nama_KTP') {
+                            finalObj['Nama_Lengkap'] = namaLengkapDenganGelar;
                         }
                     }
-                    obj[colName] = val;
-                }
-                
-                const finalObj = {};
-                for (let k in obj) {
-                    finalObj[k] = obj[k];
-                    if (k === 'Nama_KTP') {
-                        finalObj['Nama_Lengkap'] = namaLengkapDenganGelar;
-                    }
-                }
 
-                return finalObj;
-            });
+                    return finalObj;
+                });
 
-            const ws = XLSX.utils.json_to_sheet(formattedData); const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Data Pegawai"); XLSX.writeFile(wb, "Data_Pegawai_RSUD_Koesma.xlsx");
+                const ws = XLSX.utils.json_to_sheet(formattedData); 
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Data Pegawai"); 
+                XLSX.writeFile(wb, "Data_Pegawai_RSUD_Koesma.xlsx");
+
+                showLoader(false);
+                Toast.fire({ icon: 'success', title: 'Data pegawai berhasil diexport ke Excel.' });
+            } catch (err) {
+                showLoader(false);
+                Swal.fire('Error', 'Gagal memproses export Excel: ' + err.message, 'error');
+            }
         }
 
         let exportDataKiri = [];
@@ -3061,6 +3082,15 @@ function renderTablePegawai() {
                                 const month = String(d.getMonth() + 1).padStart(2, '0');
                                 const year = d.getFullYear();
                                 val = `${day}-${month}-${year}`;
+                            }
+                        }
+
+                        // Proteksi batas panjang sel Excel (maksimal 32.767 karakter)
+                        if (typeof val === 'string') {
+                            if (val.startsWith('data:image') || (val.length > 500 && val.includes('base64'))) {
+                                val = '[Gambar Base64]';
+                            } else if (val.length > 32700) {
+                                val = val.substring(0, 32700) + '...';
                             }
                         }
                         
