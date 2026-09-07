@@ -707,6 +707,91 @@
             return urlStr;
         }
 
+        // --- HELPER PARSING & FORMATTING TANGGAL ---
+        const MONTH_MAP_ID = {
+            'jan': 0, 'januari': 0, 'january': 0,
+            'feb': 1, 'februari': 1, 'february': 1,
+            'mar': 2, 'maret': 2, 'march': 2,
+            'apr': 3, 'april': 3,
+            'mei': 4, 'may': 4,
+            'jun': 5, 'juni': 5, 'june': 5,
+            'jul': 6, 'juli': 6, 'july': 6,
+            'agu': 7, 'agust': 7, 'agustus': 7, 'aug': 7, 'august': 7,
+            'sep': 8, 'sept': 8, 'september': 8,
+            'okt': 9, 'oktober': 9, 'oct': 9, 'october': 9,
+            'nov': 10, 'nop': 10, 'november': 10, 'nopember': 10,
+            'des': 11, 'desember': 11, 'dec': 11, 'december': 11
+        };
+
+        function parseDateSmart(d) {
+            if (!d || d === '-' || String(d).trim() === '') return null;
+            if (d instanceof Date) return isNaN(d.getTime()) ? null : d;
+            
+            const str = String(d).trim();
+            if (str.toLowerCase() === 'invalid date' || str.toLowerCase() === 'nan') return null;
+
+            if (str.includes('T')) {
+                const parsedIso = new Date(str);
+                if (!isNaN(parsedIso.getTime())) return parsedIso;
+            }
+
+            const dmyMatch = str.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})$/);
+            if (dmyMatch) {
+                const day = parseInt(dmyMatch[1], 10);
+                const month = parseInt(dmyMatch[2], 10) - 1;
+                const year = parseInt(dmyMatch[3], 10);
+                const parsed = new Date(year, month, day);
+                return isNaN(parsed.getTime()) ? null : parsed;
+            }
+
+            const ymdMatch = str.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/);
+            if (ymdMatch) {
+                const year = parseInt(ymdMatch[1], 10);
+                const month = parseInt(ymdMatch[2], 10) - 1;
+                const day = parseInt(ymdMatch[3], 10);
+                const parsed = new Date(year, month, day);
+                return isNaN(parsed.getTime()) ? null : parsed;
+            }
+
+            const textMatch = str.match(/^(\d{1,2})[\s\-_]+([A-Za-z]+)[\s\-_]+(\d{4})$/);
+            if (textMatch) {
+                const day = parseInt(textMatch[1], 10);
+                const mKey = textMatch[2].toLowerCase();
+                if (MONTH_MAP_ID[mKey] !== undefined) {
+                    const parsed = new Date(parseInt(textMatch[3], 10), MONTH_MAP_ID[mKey], day);
+                    return isNaN(parsed.getTime()) ? null : parsed;
+                }
+            }
+
+            const parsed = new Date(str);
+            if (!isNaN(parsed.getTime())) return parsed;
+
+            return null;
+        }
+
+        function formatDate(d, options = null, fallback = '-') {
+            if (typeof options === 'string') {
+                fallback = options;
+                options = null;
+            }
+            if (!d || d === '-' || String(d).trim() === '') return fallback;
+            const parsed = parseDateSmart(d);
+            if (parsed) {
+                return options ? parsed.toLocaleDateString('id-ID', options) : parsed.toLocaleDateString('id-ID');
+            }
+            const rawStr = String(d).trim();
+            return (rawStr.toLowerCase() === 'invalid date' || rawStr === 'nan') ? fallback : rawStr;
+        }
+
+        function formatDateForInput(d) {
+            const parsed = parseDateSmart(d);
+            if (!parsed) return '';
+            const y = parsed.getFullYear();
+            const m = String(parsed.getMonth() + 1).padStart(2, '0');
+            const day = String(parsed.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        }
+
         // ==========================================
         // ROUTING & THEME INIT
         // ==========================================
@@ -1064,7 +1149,7 @@
                     if(a.Status === 'Approved') { icon = 'fa-check-circle text-green-500'; bg = 'bg-green-50'; }
                     if(a.Status === 'Rejected') { icon = 'fa-times-circle text-red-500'; bg = 'bg-red-50'; }
                     
-                    const tgl = new Date(a.Tgl_Pengajuan).toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'});
+                    const tgl = formatDate(a.Tgl_Pengajuan, {day:'2-digit', month:'short', year:'numeric'});
                     tlContainer.innerHTML += `
                         <div class="flex items-center p-3 border border-gray-100 rounded-lg ${bg}">
                             <i class="fas ${icon} text-lg w-8 text-center"></i>
@@ -1107,7 +1192,7 @@
                     tbody.innerHTML = '<tr><td colspan="4" class="text-center p-6 opacity-70 italic text-gray-500 bg-gray-50 rounded-b-lg"><i class="fas fa-check-circle text-green-500 text-xl mb-2 block"></i>Semua pengajuan telah diverifikasi.</td></tr>';
                 } else {
                     recentPending.forEach(a => {
-                        const tgl = new Date(a.Tgl_Pengajuan).toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
+                        const tgl = formatDate(a.Tgl_Pengajuan, {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
                         const labelKategori = a.Sheet_Tujuan.replace(/_/g, ' ');
                         
                         tbody.innerHTML += `
@@ -1200,7 +1285,7 @@ function updateProfileUI() {
             document.getElementById('p-nipnin').innerHTML = getFieldHTML('NIP_NIN', STATE.profile.NIP_NIN);
             document.getElementById('p-emailsso').innerHTML = STATE.profile.Email_SSO || '-';
             document.getElementById('p-tempatlahir').innerHTML = getFieldHTML('Tempat_Lahir', STATE.profile.Tempat_Lahir);
-            document.getElementById('p-tgllahir').innerHTML = getFieldHTML('Tgl_Lahir', STATE.profile.Tgl_Lahir ? new Date(STATE.profile.Tgl_Lahir).toLocaleDateString('id-ID') : '');
+            document.getElementById('p-tgllahir').innerHTML = getFieldHTML('Tgl_Lahir', formatDate(STATE.profile.Tgl_Lahir, ''));
             document.getElementById('p-jk').innerHTML = getFieldHTML('Jenis_Kelamin', STATE.profile.Jenis_Kelamin);
             document.getElementById('p-agama').innerHTML = getFieldHTML('Agama', STATE.profile.Agama);
             document.getElementById('p-alamat').innerHTML = getFieldHTML('Alamat_Domisili', STATE.profile.Alamat_Domisili);
@@ -1226,7 +1311,7 @@ function updateProfileUI() {
             if (STATE.riwayat.pendidikan.length > 0) {
                 STATE.riwayat.pendidikan.forEach(p => {
                     let fileBtn = p.File_Ijazah ? `<a href="${p.File_Ijazah}" target="_blank" class="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs hover:bg-blue-200 whitespace-nowrap"><i class="fas fa-file-pdf"></i> Lihat File</a>` : '-';
-                    tbodyPend.innerHTML += `<tr class="border-b"><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Jenjang', p.Jenjang)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Instansi', p.Instansi)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Jurusan', p.Jurusan)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Thn_Lulus', p.Thn_Lulus)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'No_Ijazah', p.No_Ijazah)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Tgl_Ijazah', p.Tgl_Ijazah ? new Date(p.Tgl_Ijazah).toLocaleDateString('id-ID') : '')}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Pendidikan_Terakhir', p.Pendidikan_Terakhir)}</td><td class="p-2">${fileBtn}</td><td class="p-2 text-center"><button onclick="editRiwayatRow('${p.ID_Data}', 'RIWAYAT_PENDIDIKAN')" class="text-blue-600 hover:text-blue-800 bg-blue-50 px-2 py-1 rounded border border-blue-200 shadow-sm text-xs"><i class="fas fa-edit"></i> Edit</button></td></tr>`;
+                    tbodyPend.innerHTML += `<tr class="border-b"><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Jenjang', p.Jenjang)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Instansi', p.Instansi)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Jurusan', p.Jurusan)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Thn_Lulus', p.Thn_Lulus)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'No_Ijazah', p.No_Ijazah)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Tgl_Ijazah', formatDate(p.Tgl_Ijazah, ''))}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Pendidikan_Terakhir', p.Pendidikan_Terakhir)}</td><td class="p-2">${fileBtn}</td><td class="p-2 text-center"><button onclick="editRiwayatRow('${p.ID_Data}', 'RIWAYAT_PENDIDIKAN')" class="text-blue-600 hover:text-blue-800 bg-blue-50 px-2 py-1 rounded border border-blue-200 shadow-sm text-xs"><i class="fas fa-edit"></i> Edit</button></td></tr>`;
                 });
             } else { tbodyPend.innerHTML = `<tr><td colspan="9" class="text-center p-4 text-gray-500">Belum ada data pendidikan.</td></tr>`; }
 
@@ -1234,7 +1319,7 @@ function updateProfileUI() {
             if (STATE.riwayat.pangkat.length > 0) {
                 STATE.riwayat.pangkat.forEach(p => {
                     let fileBtn = p.File_SK ? `<a href="${p.File_SK}" target="_blank" class="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs hover:bg-blue-200 whitespace-nowrap"><i class="fas fa-file-pdf"></i> Lihat SK</a>` : '-';
-                    tbodyPangkat.innerHTML += `<tr class="border-b"><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Pangkat_Gol', p.Pangkat_Gol)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'No_SK', p.No_SK)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'TMT', p.TMT ? new Date(p.TMT).toLocaleDateString('id-ID') : '')}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Tgl_SK', p.Tgl_SK ? new Date(p.Tgl_SK).toLocaleDateString('id-ID') : '')}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Masa_Kerja_Thn', p.Masa_Kerja_Thn)} Thn, ${getRiwayatFieldHTML(p.ID_Data, 'Masa_Kerja_Bln', p.Masa_Kerja_Bln)} Bln</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Pangkat_Sekarang', p.Pangkat_Sekarang)}</td><td class="p-2">${fileBtn}</td><td class="p-2 text-center"><button onclick="editRiwayatRow('${p.ID_Data}', 'RIWAYAT_PANGKAT')" class="text-blue-600 hover:text-blue-800 bg-blue-50 px-2 py-1 rounded border border-blue-200 shadow-sm text-xs"><i class="fas fa-edit"></i> Edit</button></td></tr>`;
+                    tbodyPangkat.innerHTML += `<tr class="border-b"><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Pangkat_Gol', p.Pangkat_Gol)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'No_SK', p.No_SK)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'TMT', formatDate(p.TMT, ''))}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Tgl_SK', formatDate(p.Tgl_SK, ''))}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Masa_Kerja_Thn', p.Masa_Kerja_Thn)} Thn, ${getRiwayatFieldHTML(p.ID_Data, 'Masa_Kerja_Bln', p.Masa_Kerja_Bln)} Bln</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Pangkat_Sekarang', p.Pangkat_Sekarang)}</td><td class="p-2">${fileBtn}</td><td class="p-2 text-center"><button onclick="editRiwayatRow('${p.ID_Data}', 'RIWAYAT_PANGKAT')" class="text-blue-600 hover:text-blue-800 bg-blue-50 px-2 py-1 rounded border border-blue-200 shadow-sm text-xs"><i class="fas fa-edit"></i> Edit</button></td></tr>`;
                 });
             } else { tbodyPangkat.innerHTML = `<tr><td colspan="8" class="text-center p-4 text-gray-500">Belum ada data pangkat.</td></tr>`; }
 
@@ -1242,7 +1327,7 @@ function updateProfileUI() {
             if (STATE.riwayat.jabatan.length > 0) {
                 STATE.riwayat.jabatan.forEach(p => {
                     let fileBtn = p.File_SK ? `<a href="${p.File_SK}" target="_blank" class="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs hover:bg-blue-200 whitespace-nowrap"><i class="fas fa-file-pdf"></i> Lihat SK</a>` : '-';
-                    tbodyJabatan.innerHTML += `<tr class="border-b"><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Jenis_Jabatan', p.Jenis_Jabatan)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Jabatan', p.Jabatan)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Eselon', p.Eselon)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Unit_Kerja', p.Unit_Kerja)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'TMT_Pelantikan', p.TMT_Pelantikan ? new Date(p.TMT_Pelantikan).toLocaleDateString('id-ID') : '')}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Jabatan_Sekarang', p.Jabatan_Sekarang)}</td><td class="p-2">${fileBtn}</td><td class="p-2 text-center"><button onclick="editRiwayatRow('${p.ID_Data}', 'RIWAYAT_JABATAN')" class="text-blue-600 hover:text-blue-800 bg-blue-50 px-2 py-1 rounded border border-blue-200 shadow-sm text-xs"><i class="fas fa-edit"></i> Edit</button></td></tr>`;
+                    tbodyJabatan.innerHTML += `<tr class="border-b"><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Jenis_Jabatan', p.Jenis_Jabatan)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Jabatan', p.Jabatan)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Eselon', p.Eselon)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Unit_Kerja', p.Unit_Kerja)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'TMT_Pelantikan', formatDate(p.TMT_Pelantikan, ''))}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Jabatan_Sekarang', p.Jabatan_Sekarang)}</td><td class="p-2">${fileBtn}</td><td class="p-2 text-center"><button onclick="editRiwayatRow('${p.ID_Data}', 'RIWAYAT_JABATAN')" class="text-blue-600 hover:text-blue-800 bg-blue-50 px-2 py-1 rounded border border-blue-200 shadow-sm text-xs"><i class="fas fa-edit"></i> Edit</button></td></tr>`;
                 });
             } else { tbodyJabatan.innerHTML = `<tr><td colspan="8" class="text-center p-4 text-gray-500">Belum ada data jabatan.</td></tr>`; }
 
@@ -1250,7 +1335,7 @@ function updateProfileUI() {
             if (STATE.riwayat.kompetensi.length > 0) {
                 STATE.riwayat.kompetensi.forEach(p => {
                     let fileBtn = p.File_Sertifikat ? `<a href="${p.File_Sertifikat}" target="_blank" class="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs hover:bg-blue-200 whitespace-nowrap"><i class="fas fa-file-pdf"></i> Lihat Sertifikat</a>` : '-';
-                    let tglMulai = p.Tgl_Mulai ? new Date(p.Tgl_Mulai).toLocaleDateString('id-ID') : '-'; let tglSelesai = p.Tgl_Selesai ? new Date(p.Tgl_Selesai).toLocaleDateString('id-ID') : '-';
+                    let tglMulai = formatDate(p.Tgl_Mulai); let tglSelesai = formatDate(p.Tgl_Selesai);
                     let pelaksanaanHTML = getRiwayatFieldHTML(p.ID_Data, 'Tgl_Mulai', tglMulai) + ' s/d ' + getRiwayatFieldHTML(p.ID_Data, 'Tgl_Selesai', tglSelesai);
                     tbodyKompetensi.innerHTML += `<tr class="border-b"><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Jenis_Diklat', p.Jenis_Diklat)}</td><td class="p-2 max-w-xs break-words whitespace-normal">${getRiwayatFieldHTML(p.ID_Data, 'Nama_Diklat', p.Nama_Diklat)}</td><td class="p-2 whitespace-nowrap">${pelaksanaanHTML}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Jumlah_JP', p.Jumlah_JP)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Penyelenggara', p.Penyelenggara)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Sumber_Anggaran', p.Sumber_Anggaran)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'No_Sertifikat', p.No_Sertifikat)}</td><td class="p-2">${fileBtn}</td><td class="p-2 text-center"><button onclick="editRiwayatRow('${p.ID_Data}', 'RIWAYAT_KOMPETENSI')" class="text-blue-600 hover:text-blue-800 bg-blue-50 px-2 py-1 rounded border border-blue-200 shadow-sm text-xs"><i class="fas fa-edit"></i> Edit</button></td></tr>`;
                 });
@@ -1260,7 +1345,7 @@ function updateProfileUI() {
             if (STATE.riwayat.kgb.length > 0) {
                 STATE.riwayat.kgb.forEach(p => {
                     let fileBtn = p.File_SK_KGB ? `<a href="${p.File_SK_KGB}" target="_blank" class="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs hover:bg-blue-200 whitespace-nowrap"><i class="fas fa-file-pdf"></i> Lihat SK</a>` : '-';
-                    tbodyKgb.innerHTML += `<tr class="border-b"><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Golongan', p.Golongan)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'No_SK_KGB', p.No_SK_KGB)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'TMT_KGB', p.TMT_KGB ? new Date(p.TMT_KGB).toLocaleDateString('id-ID') : '')}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Tanggal_KGB', p.Tanggal_KGB ? new Date(p.Tanggal_KGB).toLocaleDateString('id-ID') : '')}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Masa_Kerja_Tahun', p.Masa_Kerja_Tahun)} Thn, ${getRiwayatFieldHTML(p.ID_Data, 'Masa_Kerja_Bulan', p.Masa_Kerja_Bulan)} Bln</td><td class="p-2 text-green-600 font-medium">${getRiwayatFieldHTML(p.ID_Data, 'Gaji_Pokok_Baru', p.Gaji_Pokok_Baru)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Dasar_KGB', p.Dasar_KGB)}</td><td class="p-2">${fileBtn}</td><td class="p-2 text-center"><button onclick="editRiwayatRow('${p.ID_Data}', 'RIWAYAT_KGB')" class="text-blue-600 hover:text-blue-800 bg-blue-50 px-2 py-1 rounded border border-blue-200 shadow-sm text-xs"><i class="fas fa-edit"></i> Edit</button></td></tr>`;
+                    tbodyKgb.innerHTML += `<tr class="border-b"><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Golongan', p.Golongan)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'No_SK_KGB', p.No_SK_KGB)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'TMT_KGB', formatDate(p.TMT_KGB, ''))}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Tanggal_KGB', formatDate(p.Tanggal_KGB, ''))}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Masa_Kerja_Tahun', p.Masa_Kerja_Tahun)} Thn, ${getRiwayatFieldHTML(p.ID_Data, 'Masa_Kerja_Bulan', p.Masa_Kerja_Bulan)} Bln</td><td class="p-2 text-green-600 font-medium">${getRiwayatFieldHTML(p.ID_Data, 'Gaji_Pokok_Baru', p.Gaji_Pokok_Baru)}</td><td class="p-2">${getRiwayatFieldHTML(p.ID_Data, 'Dasar_KGB', p.Dasar_KGB)}</td><td class="p-2">${fileBtn}</td><td class="p-2 text-center"><button onclick="editRiwayatRow('${p.ID_Data}', 'RIWAYAT_KGB')" class="text-blue-600 hover:text-blue-800 bg-blue-50 px-2 py-1 rounded border border-blue-200 shadow-sm text-xs"><i class="fas fa-edit"></i> Edit</button></td></tr>`;
                 });
             } else { tbodyKgb.innerHTML = `<tr><td colspan="9" class="text-center p-4 text-gray-500">Belum ada data KGB.</td></tr>`; }
 
@@ -1292,8 +1377,7 @@ function updateProfileUI() {
                 STATE.myAntrian.forEach(a => {
                     if (a.Nilai_Baru && typeof a.Nilai_Baru === 'string') {
                         a.Nilai_Baru = a.Nilai_Baru.replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/g, match => {
-                            const d = new Date(match);
-                            return isNaN(d.getTime()) ? match : d.toLocaleDateString('id-ID', {day:'2-digit', month:'long', year:'numeric'});
+                            return formatDate(match, {day:'2-digit', month:'long', year:'numeric'});
                         });
                     }
                 });
@@ -1311,7 +1395,7 @@ function updateProfileUI() {
                         if(a.Alasan_Tolak) textAlasan = `<div class="mt-1 text-xs text-red-600 bg-red-50 p-1 border border-red-200 rounded"><b>Alasan:</b> ${a.Alasan_Tolak}</div>`;
                     }
                     
-                    const tgl = new Date(a.Tgl_Pengajuan).toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
+                    const tgl = formatDate(a.Tgl_Pengajuan, {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
                     tbody.innerHTML += `<tr class="border-b border-gray-100 hover:bg-gray-50"><td class="p-3 whitespace-nowrap align-top">${tgl}</td><td class="p-3 font-medium text-blue-600 align-top">${a.Kolom_Tujuan.replace(/_/g, ' ')}</td><td class="p-3 max-w-xs truncate align-top" title="${a.Nilai_Baru}">${a.Nilai_Baru}</td><td class="p-3 align-top"><span class="px-2 py-1 ${statusColor} rounded text-xs whitespace-nowrap inline-block">${statusIcon}</span>${textAlasan}</td></tr>`;
                 });
             } catch (err) { console.error(err); }
@@ -1584,7 +1668,7 @@ function renderTablePegawai() {
                     inputType = 'select'; inputOpts = { 'Laki-laki': 'Laki-laki', 'Perempuan': 'Perempuan' };
                 } else if (targetKolom === 'Tgl_Lahir' || targetKolom === 'TMT_Batas_Usia_Pensiun') {
                     inputType = 'date'; 
-                    if(currentVal) currentVal = new Date(currentVal).toISOString().split('T')[0];
+                    if(currentVal) currentVal = formatDateForInput(currentVal);
                 }
 
                 const swalConfig = {
@@ -1636,8 +1720,6 @@ function renderTablePegawai() {
                     kartu: resRiwayat.data_kartu || [],
                     identitas: (resMain.identitas_lain && resMain.identitas_lain.length > 0) ? resMain.identitas_lain[0] : {}
                 };
-
-                const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID') : '-';
                 
                 const urlFotoDrive = getDirectImageUrl(p.URL_Foto_Profil);
                 let base64Foto = 'https://via.placeholder.com/150';
@@ -1673,7 +1755,7 @@ function renderTablePegawai() {
                             <tr><td class="py-1 opacity-75">Pangkat/Gol</td><td class="font-medium">${p.Pangkat_Golongan || '-'}</td></tr>
                             <tr><td class="py-1 opacity-75">Unit Kerja</td><td class="font-medium">${p.Unit_Kerja || '-'}</td></tr>
                             <tr><td class="py-1 opacity-75">Jabatan Terakhir</td><td class="font-medium">${p.Jabatan_Terakhir || '-'}</td></tr>
-                            <tr><td class="py-1 opacity-75">Tempat, Tgl Lahir</td><td class="font-medium">${p.Tempat_Lahir || '-'}, ${formatDate(p.Tgl_Lahir)}</td></tr>
+                            <tr><td class="py-1 opacity-75">Tempat, Tgl Lahir</td><td class="font-medium">${[p.Tempat_Lahir, formatDate(p.Tgl_Lahir, '')].filter(Boolean).join(', ') || '-'}</td></tr>
                             <tr><td class="py-1 opacity-75">Jenis Kelamin</td><td class="font-medium">${p.Jenis_Kelamin || '-'}</td></tr>
                             <tr><td class="py-1 opacity-75">Agama</td><td class="font-medium">${p.Agama || '-'}</td></tr>
                             <tr><td class="py-1 opacity-75 align-top">Alamat</td><td class="font-medium">${p.Alamat_Domisili || '-'}</td></tr>
@@ -1753,8 +1835,7 @@ function renderTablePegawai() {
                 STATE.allAntrianGlobal.forEach(a => {
                     if (a.Nilai_Baru && typeof a.Nilai_Baru === 'string') {
                         a.Nilai_Baru = a.Nilai_Baru.replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/g, match => {
-                            const d = new Date(match);
-                            return isNaN(d.getTime()) ? match : d.toLocaleDateString('id-ID', {day:'2-digit', month:'long', year:'numeric'});
+                            return formatDate(match, {day:'2-digit', month:'long', year:'numeric'});
                         });
                     }
                 });
@@ -1774,7 +1855,7 @@ function renderTablePegawai() {
             if(pendingData.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="text-center p-4 opacity-70">Tidak ada pengajuan perubahan data baru.</td></tr>'; return; }
 
             pendingData.forEach(a => {
-                const tgl = new Date(a.Tgl_Pengajuan).toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
+                const tgl = formatDate(a.Tgl_Pengajuan, {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
                 let displayNilai = a.Nilai_Baru !== undefined && a.Nilai_Baru !== null ? String(a.Nilai_Baru) : '';
                 
                 if(displayNilai.startsWith('data:image/')) { displayNilai = `<img src="${displayNilai}" class="w-16 h-16 object-cover rounded cursor-pointer shadow border border-gray-300" onclick="Swal.fire({imageUrl: '${displayNilai}', imageWidth: 400, showConfirmButton: false})" title="Klik untuk memperbesar">`; } 
@@ -2298,12 +2379,7 @@ function renderTablePegawai() {
             else if (kolom === 'Jenis_ASN') { inputType = 'select'; inputOptions = { 'PNS': 'PNS', 'PPPK': 'PPPK', 'Tenaga Kontrak': 'Tenaga Kontrak', 'Tenaga Kegiatan': 'Tenaga Kegiatan' }; } 
             else if (kolom === 'Tgl_Lahir') { 
                 inputType = 'date'; 
-                if (currentValue && typeof currentValue === 'string' && currentValue.includes('T')) {
-                    currentValue = currentValue.split('T')[0];
-                } else if (currentValue && !isNaN(Date.parse(currentValue))) {
-                    const d = new Date(currentValue);
-                    currentValue = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, '0') + "-" + String(d.getDate()).padStart(2, '0');
-                }
+                if (currentValue) currentValue = formatDateForInput(currentValue);
             }
             else if (kolom === 'No_NPWP' || kolom === 'No_BPJS' || kolom === 'No_TASPEN') { inputType = 'number'; } 
 
@@ -2445,6 +2521,8 @@ function renderTablePegawai() {
                     } else {
                         swalConfig.inputAttributes = { accept: 'application/pdf' };
                     }
+                } else if (inputType === 'date') {
+                    swalConfig.inputValue = formatDateForInput(rowData[selectedKolom]);
                 } else {
                     swalConfig.inputValue = rowData[selectedKolom] || '';
                 }
@@ -3260,8 +3338,6 @@ function renderTablePegawai() {
             
             // TERAPKAN URL FOTO BASE64 DI PDF
             const urlFoto = p.URL_Foto_Profil_Base64 || 'https://via.placeholder.com/150';
-            
-            const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID') : '-';
 
             const tbodyPend = r.pendidikan?.length ? r.pendidikan.map(x => `<tr><td style="padding:8px; border:1px solid #ddd;">${x.Jenjang||'-'}</td><td style="padding:8px; border:1px solid #ddd;">${x.Instansi||'-'}</td><td style="padding:8px; border:1px solid #ddd;">${x.Jurusan||'-'}</td><td style="padding:8px; border:1px solid #ddd;">${x.Thn_Lulus||'-'}</td><td style="padding:8px; border:1px solid #ddd;">${x.No_Ijazah||'-'}</td><td style="padding:8px; border:1px solid #ddd;">${formatDate(x.Tgl_Ijazah)}</td><td style="padding:8px; border:1px solid #ddd;">${x.Pendidikan_Terakhir||'-'}</td></tr>`).join('') : `<tr><td colspan="7" style="padding:8px; border:1px solid #ddd; text-align:center;">Tidak ada data</td></tr>`;
             const tbodyPangkat = r.pangkat?.length ? r.pangkat.map(x => `<tr><td style="padding:8px; border:1px solid #ddd;">${x.Pangkat_Gol||'-'}</td><td style="padding:8px; border:1px solid #ddd;">${x.No_SK||'-'}</td><td style="padding:8px; border:1px solid #ddd;">${formatDate(x.TMT)}</td><td style="padding:8px; border:1px solid #ddd;">${formatDate(x.Tgl_SK)}</td><td style="padding:8px; border:1px solid #ddd;">${x.Masa_Kerja_Thn||'0'} Thn, ${x.Masa_Kerja_Bln||'0'} Bln</td><td style="padding:8px; border:1px solid #ddd;">${x.Pangkat_Sekarang||'-'}</td></tr>`).join('') : `<tr><td colspan="6" style="padding:8px; border:1px solid #ddd; text-align:center;">Tidak ada data</td></tr>`;
@@ -3301,7 +3377,7 @@ function renderTablePegawai() {
                 <table style="width:100%; border-collapse:collapse; font-size:12px; margin-bottom:15px;">
                     <tr><td style="width:30%; padding:5px; border:1px solid #ddd;">NIK (Identitas Utama)</td><td style="padding:5px; border:1px solid #ddd;">${p.NIK || '-'}</td></tr>
                     <tr><td style="padding:5px; border:1px solid #ddd;">Email SSO</td><td style="padding:5px; border:1px solid #ddd;">${p.Email_SSO || '-'}</td></tr>
-                    <tr><td style="padding:5px; border:1px solid #ddd;">Tempat, Tanggal Lahir</td><td style="padding:5px; border:1px solid #ddd;">${p.Tempat_Lahir || '-'}, ${formatDate(p.Tgl_Lahir)}</td></tr>
+                    <tr><td style="padding:5px; border:1px solid #ddd;">Tempat, Tanggal Lahir</td><td style="padding:5px; border:1px solid #ddd;">${[p.Tempat_Lahir, formatDate(p.Tgl_Lahir, '')].filter(Boolean).join(', ') || '-'}</td></tr>
                     <tr><td style="padding:5px; border:1px solid #ddd;">Jenis Kelamin</td><td style="padding:5px; border:1px solid #ddd;">${p.Jenis_Kelamin || '-'}</td></tr>
                     <tr><td style="padding:5px; border:1px solid #ddd;">Agama</td><td style="padding:5px; border:1px solid #ddd;">${p.Agama || '-'}</td></tr>
                     <tr><td style="padding:5px; border:1px solid #ddd;">Alamat</td><td style="padding:5px; border:1px solid #ddd;">${p.Alamat_Domisili || '-'}</td></tr>
