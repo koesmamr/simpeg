@@ -152,7 +152,7 @@
             <div class="p-4 flex items-center justify-between border-b border-gray-600">
                 <div class="flex items-center">
                     <img src="https://github.com/simpegkoesma/1/blob/main/logo%20rsud%202%20png.png?raw=true" alt="Logo" class="h-8 mr-3 object-contain">
-                    <span class="font-bold text-lg">SIMPEG</span>
+                    <span class="font-bold text-lg">SIMPEG <span class="bg-blue-500 text-white text-[10px] px-1.5 py-0.5 rounded ml-1 uppercase font-semibold">CF</span></span>
                 </div>
                 <button onclick="toggleSidebar()" class="md:hidden"><i class="fas fa-times"></i></button>
             </div>
@@ -961,7 +961,14 @@
 
     <!-- MAIN SCRIPT -->
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzkUkszNk24nIXJFuAtXnwTKZ_woDhffBGFWNR6ldrUNotKHsbyBjOckOe7-fc0hZgXzg/exec';
+        // --- KONFIGURASI API BACKEND (CLOUDFLARE WORKER) ---
+        const IS_LOCAL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const DEFAULT_PROD_URL = 'https://simpeg-api.syamsul18782.workers.dev';
+        const OVERRIDE_URL = localStorage.getItem('simpeg_api_url');
+        const SCRIPT_URL = OVERRIDE_URL || (IS_LOCAL ? 'http://127.0.0.1:8787' : DEFAULT_PROD_URL);
+        
+        // --- ENDPOINT GOOGLE DRIVE STORAGE (GAS) ---
+        const DRIVE_GAS_URL = 'https://script.google.com/macros/s/AKfycbzkUkszNk24nIXJFuAtXnwTKZ_woDhffBGFWNR6ldrUNotKHsbyBjOckOe7-fc0hZgXzg/exec';
         
         let STATE = { user: null, profile: null, riwayat: {}, identitasLain: null, allPegawai: [], myAntrian: [], allAntrianGlobal: [], filteredPegawai: [], currentPage: 1, rowsPerPage: 15 };
         let isRiwayatFetched = false;
