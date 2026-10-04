@@ -1,0 +1,24 @@
+{
+  "name": "SIMPEG RSUD dr. R. KOESMA",
+  "short_name": "SIMPEG KOESMA",
+  "description": "Sistem Informasi Kepegawaian RSUD dr. R. KOESMA Kabupaten Tuban",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e3a8a",
+  "theme_color": "#1e3a8a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://github.com/simpegkoesma/1/blob/main/logo%20rsud%202%20png.png?raw=true",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://github.com/simpegkoesma/1/blob/main/logo%20rsud%202%20png.png?raw=true",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -2,11 +2,18 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#1e3a8a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SIMPEG KOESMA">
     <title>SIMPEG KOESMA - RSUD dr. R. KOESMA</title>
     
-    <!-- Favicon -->
+    <!-- Favicon & Touch Icon & PWA Manifest -->
     <link rel="icon" href="https://github.com/simpegkoesma/1/blob/main/logo%20rsud%202%20png.png?raw=true" type="image/png">
+    <link rel="apple-touch-icon" href="https://github.com/simpegkoesma/1/blob/main/logo%20rsud%202%20png.png?raw=true">
+    <link rel="manifest" href="manifest.webmanifest">
 
     <!-- Libraries -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -43,6 +50,12 @@
             --bg-card: #fffaf0; --text-main: #5a3a22; --primary: #e2725b;
         }
 
+        /* Native Android Ergonomics & Touch Feedback */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
         body { background-color: var(--bg-body); color: var(--text-main); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; transition: all 0.3s; }
         .sidebar { background-color: var(--bg-sidebar); color: var(--text-sidebar); transition: all 0.3s; }
         .sidebar-item:hover { background-color: rgba(255,255,255,0.1); cursor: pointer; }
@@ -50,6 +63,50 @@
         .btn-primary { background-color: var(--primary); color: white; }
         .btn-primary:hover { opacity: 0.9; }
         .bg-body-color { background-color: var(--bg-body); } /* Helper untuk elemen pseudo/absolut */
+
+        /* Safe Area Padding for Modern Android Bezels / Gestures */
+        .safe-bottom {
+            padding-bottom: max(0.4rem, env(safe-area-inset-bottom, 0px));
+        }
+
+        /* Hide scrollbars on horizontal chip scroll while maintaining scrollability */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Android Bottom Nav Active State Styling */
+        .btm-nav-item {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        .btm-nav-item.active {
+            color: #2563eb;
+        }
+        .btm-nav-item.active .btm-pill {
+            background-color: #dbeafe;
+            color: #1d4ed8;
+            transform: scale(1.05);
+        }
+        [data-theme="dark"] .btm-nav-item.active {
+            color: #60a5fa;
+        }
+        [data-theme="dark"] .btm-nav-item.active .btm-pill {
+            background-color: #1e3a8a;
+            color: #93c5fd;
+        }
+
+        /* Smooth slide-up animation for mobile bottom sheet */
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        .animate-slide-up {
+            animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
 
         /* Particles Layer */
         #particles-js { position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: -1; background-color: #2c3e50; }
@@ -129,21 +186,40 @@
 
         <!-- Main Content -->
         <main class="flex-1 flex flex-col h-screen overflow-hidden">
-            <!-- Header -->
-            <header class="card shadow p-4 flex justify-between items-center z-10">
-                <div class="flex items-center">
-                    <button onclick="toggleSidebar()" class="md:hidden text-xl mr-4"><i class="fas fa-bars"></i></button>
-                    <h2 id="page-title" class="font-bold text-xl">Beranda</h2>
+            <!-- Header (Android Top App Bar on Mobile, Full Bar on Desktop) -->
+            <header class="card shadow-sm p-3 md:p-4 flex justify-between items-center z-10 border-b border-gray-200/50 dark:border-gray-800">
+                <div class="flex items-center space-x-2 md:space-x-3">
+                    <button onclick="toggleSidebar()" class="hidden md:inline-flex text-gray-600 hover:text-gray-900 text-lg mr-2"><i class="fas fa-bars"></i></button>
+                    <!-- Mobile Brand Logo -->
+                    <div class="md:hidden flex items-center">
+                        <img src="https://github.com/simpegkoesma/1/blob/main/logo%20rsud%202%20png.png?raw=true" alt="Logo" class="h-7 w-7 object-contain mr-2">
+                    </div>
+                    <div>
+                        <h2 id="page-title" class="font-bold text-lg md:text-xl leading-tight truncate">Beranda</h2>
+                        <span class="text-[10px] md:hidden text-gray-400 font-semibold tracking-wider uppercase block -mt-0.5">RSUD dr. R. Koesma</span>
+                    </div>
                 </div>
-                <div class="flex items-center">
-                    <!-- Tombol Refresh Data -->
-                    <button onclick="refreshCurrentPage(true)" class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 text-sm rounded shadow mr-2 transition"><i class="fas fa-sync-alt mr-1"></i> Refresh</button>
-                    <button onclick="exportMyData()" id="btn-export-pdf" class="btn-primary px-3 py-1 text-sm rounded shadow"><i class="fas fa-file-pdf mr-1"></i> Cetak CV</button>
+                <div class="flex items-center space-x-1.5 md:space-x-2">
+                    <!-- Mobile Quick Action Buttons (Icon Only with ripple/active effect) -->
+                    <button onclick="refreshCurrentPage(true)" title="Segarkan Data" class="md:hidden w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 flex items-center justify-center hover:bg-gray-200 active:scale-95 transition shadow-xs">
+                        <i class="fas fa-sync-alt text-xs"></i>
+                    </button>
+                    <button onclick="exportMyData()" title="Cetak CV" class="md:hidden w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 active:scale-95 transition shadow-xs">
+                        <i class="fas fa-file-pdf text-xs"></i>
+                    </button>
+
+                    <!-- Desktop Buttons -->
+                    <button onclick="refreshCurrentPage(true)" class="hidden md:inline-flex items-center bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 text-sm rounded shadow transition">
+                        <i class="fas fa-sync-alt mr-1"></i> Refresh
+                    </button>
+                    <button onclick="exportMyData()" id="btn-export-pdf" class="hidden md:inline-flex items-center btn-primary px-3 py-1 text-sm rounded shadow transition">
+                        <i class="fas fa-file-pdf mr-1"></i> Cetak CV
+                    </button>
                 </div>
             </header>
 
-            <!-- Pages -->
-            <div class="p-4 md:p-6 flex-1 overflow-y-auto" id="main-scroll-area">
+            <!-- Pages (dengan padding bawah aman untuk Bottom Navigation Bar di HP) -->
+            <div class="p-3 md:p-6 pb-24 md:pb-6 flex-1 overflow-y-auto" id="main-scroll-area">
                 
                 <!-- PAGE: BERANDA / DASHBOARD BARU -->
                 <div id="page-beranda" class="page-content">
@@ -313,6 +389,18 @@
                             <p class="text-sm opacity-75">Unit Kerja Saat Ini</p>
                             <p id="p-unit" class="font-bold text-lg text-blue-700 dark:text-blue-400">RSUD dr. R. KOESMA</p>
                         </div>
+                    </div>
+
+                    <!-- Horizontal Chips Subtab Navigation (Mobile & Touch Friendly) -->
+                    <div class="mb-5 -mx-1 px-1 overflow-x-auto no-scrollbar flex space-x-2 py-1 sticky top-0 z-10 bg-inherit backdrop-blur-xs">
+                        <button onclick="window.location.hash='profil'" class="subtab-chip whitespace-nowrap px-4 py-2 rounded-full text-xs font-semibold transition active:scale-95 shadow-xs flex items-center bg-blue-600 text-white" data-subtab="profil"><i class="fas fa-id-card mr-1.5"></i> Profil Utama</button>
+                        <button onclick="window.location.hash='pendidikan'" class="subtab-chip whitespace-nowrap px-4 py-2 rounded-full text-xs font-semibold transition active:scale-95 shadow-xs flex items-center bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700" data-subtab="pendidikan"><i class="fas fa-graduation-cap mr-1.5"></i> Pendidikan</button>
+                        <button onclick="window.location.hash='pangkat'" class="subtab-chip whitespace-nowrap px-4 py-2 rounded-full text-xs font-semibold transition active:scale-95 shadow-xs flex items-center bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700" data-subtab="pangkat"><i class="fas fa-medal mr-1.5"></i> Pangkat/Gol</button>
+                        <button onclick="window.location.hash='jabatan'" class="subtab-chip whitespace-nowrap px-4 py-2 rounded-full text-xs font-semibold transition active:scale-95 shadow-xs flex items-center bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700" data-subtab="jabatan"><i class="fas fa-briefcase mr-1.5"></i> Jabatan</button>
+                        <button onclick="window.location.hash='kompetensi'" class="subtab-chip whitespace-nowrap px-4 py-2 rounded-full text-xs font-semibold transition active:scale-95 shadow-xs flex items-center bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700" data-subtab="kompetensi"><i class="fas fa-certificate mr-1.5"></i> Kompetensi</button>
+                        <button onclick="window.location.hash='kgb'" class="subtab-chip whitespace-nowrap px-4 py-2 rounded-full text-xs font-semibold transition active:scale-95 shadow-xs flex items-center bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700" data-subtab="kgb"><i class="fas fa-money-bill-wave mr-1.5"></i> KGB</button>
+                        <button onclick="window.location.hash='keluarga'" class="subtab-chip whitespace-nowrap px-4 py-2 rounded-full text-xs font-semibold transition active:scale-95 shadow-xs flex items-center bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700" data-subtab="keluarga"><i class="fas fa-users mr-1.5"></i> Data Keluarga</button>
+                        <button onclick="window.location.hash='identitas'" class="subtab-chip whitespace-nowrap px-4 py-2 rounded-full text-xs font-semibold transition active:scale-95 shadow-xs flex items-center bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700" data-subtab="identitas"><i class="fas fa-fingerprint mr-1.5"></i> Identitas & Kartu</button>
                     </div>
 
                     <!-- Tab Content: Profil Utama -->
@@ -631,6 +719,192 @@
 
             </div>
         </main>
+
+        <!-- BOTTOM NAVIGATION BAR (KHUSUS MOBILE / ANDROID NATIVE FEEL) -->
+        <nav id="mobile-bottom-nav" class="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] safe-bottom flex justify-around items-center px-1 py-1 text-gray-500 dark:text-gray-400">
+            <!-- Tab 1: Beranda -->
+            <button onclick="navMobileTo('beranda')" id="btm-nav-beranda" class="btm-nav-item flex-1 flex flex-col items-center justify-center py-1">
+                <div class="btm-pill px-3 py-1 rounded-full transition flex items-center justify-center">
+                    <i class="fas fa-home text-base"></i>
+                </div>
+                <span class="text-[10px] font-medium tracking-tight mt-0.5">Beranda</span>
+            </button>
+
+            <!-- Tab 2: Profil -->
+            <button onclick="navMobileTo('profil')" id="btm-nav-profil" class="btm-nav-item flex-1 flex flex-col items-center justify-center py-1">
+                <div class="btm-pill px-3 py-1 rounded-full transition flex items-center justify-center">
+                    <i class="fas fa-id-card text-base"></i>
+                </div>
+                <span class="text-[10px] font-medium tracking-tight mt-0.5">Profil</span>
+            </button>
+
+            <!-- Tab 3: Riwayat -->
+            <button onclick="openMobileRiwayatSheet()" id="btm-nav-riwayat" class="btm-nav-item flex-1 flex flex-col items-center justify-center py-1">
+                <div class="btm-pill px-3 py-1 rounded-full transition flex items-center justify-center">
+                    <i class="fas fa-layer-group text-base"></i>
+                </div>
+                <span class="text-[10px] font-medium tracking-tight mt-0.5">Riwayat</span>
+            </button>
+
+            <!-- Tab 4: Antrian -->
+            <button onclick="navMobileAntrian()" id="btm-nav-antrian" class="btm-nav-item flex-1 flex flex-col items-center justify-center py-1 relative">
+                <div class="btm-pill px-3 py-1 rounded-full transition flex items-center justify-center relative">
+                    <i class="fas fa-tasks text-base"></i>
+                    <span id="badge-antrian-mobile" class="absolute -top-1 -right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.2 rounded-full hidden">0</span>
+                </div>
+                <span class="text-[10px] font-medium tracking-tight mt-0.5">Antrian</span>
+            </button>
+
+            <!-- Tab 5: Menu / Lainnya -->
+            <button onclick="openMobileMenuSheet()" id="btm-nav-menu" class="btm-nav-item flex-1 flex flex-col items-center justify-center py-1">
+                <div class="btm-pill px-3 py-1 rounded-full transition flex items-center justify-center">
+                    <i class="fas fa-th-large text-base"></i>
+                </div>
+                <span class="text-[10px] font-medium tracking-tight mt-0.5">Menu</span>
+            </button>
+        </nav>
+
+        <!-- BOTTOM SHEET: RIWAYAT PEGAWAI (PILIHAN DOKUMEN & KARIR) -->
+        <div id="mobile-riwayat-sheet" class="fixed inset-0 z-50 hidden flex flex-col justify-end">
+            <!-- Backdrop overlay -->
+            <div onclick="closeMobileSheets()" class="absolute inset-0 bg-black/60 backdrop-blur-xs transition-opacity"></div>
+            <!-- Sheet Card -->
+            <div class="relative bg-white dark:bg-gray-900 rounded-t-3xl max-h-[85vh] flex flex-col shadow-2xl z-10 animate-slide-up border-t border-gray-100 dark:border-gray-800 safe-bottom">
+                <!-- Drag Handle -->
+                <div class="w-full flex justify-center pt-3 pb-1 cursor-pointer" onclick="closeMobileSheets()">
+                    <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
+                </div>
+                <!-- Sheet Header -->
+                <div class="px-5 py-3 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
+                    <h3 class="font-bold text-base text-gray-800 dark:text-gray-100 flex items-center">
+                        <i class="fas fa-layer-group text-blue-600 mr-2"></i> Pilih Riwayat Pegawai
+                    </h3>
+                    <button onclick="closeMobileSheets()" class="w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 flex items-center justify-center hover:bg-gray-200">
+                        <i class="fas fa-times text-xs"></i>
+                    </button>
+                </div>
+                <!-- Sheet Grid Items -->
+                <div class="p-4 overflow-y-auto max-h-[65vh] grid grid-cols-2 gap-2.5">
+                    <button onclick="mobileNavigate('pendidikan')" class="p-3 bg-gray-50 dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-2xl flex items-center space-x-3 transition active:scale-95 text-left border border-gray-100 dark:border-gray-700/60">
+                        <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0"><i class="fas fa-graduation-cap"></i></div>
+                        <div><div class="text-xs font-bold text-gray-800 dark:text-gray-200">Pendidikan</div><div class="text-[10px] text-gray-400">Ijazah & Gelar</div></div>
+                    </button>
+                    <button onclick="mobileNavigate('pangkat')" class="p-3 bg-gray-50 dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-2xl flex items-center space-x-3 transition active:scale-95 text-left border border-gray-100 dark:border-gray-700/60">
+                        <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center flex-shrink-0"><i class="fas fa-medal"></i></div>
+                        <div><div class="text-xs font-bold text-gray-800 dark:text-gray-200">Pangkat/Gol</div><div class="text-[10px] text-gray-400">SK Golongan</div></div>
+                    </button>
+                    <button onclick="mobileNavigate('jabatan')" class="p-3 bg-gray-50 dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-2xl flex items-center space-x-3 transition active:scale-95 text-left border border-gray-100 dark:border-gray-700/60">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center flex-shrink-0"><i class="fas fa-briefcase"></i></div>
+                        <div><div class="text-xs font-bold text-gray-800 dark:text-gray-200">Jabatan</div><div class="text-[10px] text-gray-400">Tugas & Fungsi</div></div>
+                    </button>
+                    <button onclick="mobileNavigate('kompetensi')" class="p-3 bg-gray-50 dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-2xl flex items-center space-x-3 transition active:scale-95 text-left border border-gray-100 dark:border-gray-700/60">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center flex-shrink-0"><i class="fas fa-certificate"></i></div>
+                        <div><div class="text-xs font-bold text-gray-800 dark:text-gray-200">Kompetensi</div><div class="text-[10px] text-gray-400">Diklat & Seminar</div></div>
+                    </button>
+                    <button onclick="mobileNavigate('kgb')" class="p-3 bg-gray-50 dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-2xl flex items-center space-x-3 transition active:scale-95 text-left border border-gray-100 dark:border-gray-700/60">
+                        <div class="w-10 h-10 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center flex-shrink-0"><i class="fas fa-money-bill-wave"></i></div>
+                        <div><div class="text-xs font-bold text-gray-800 dark:text-gray-200">KGB</div><div class="text-[10px] text-gray-400">Gaji Berkala</div></div>
+                    </button>
+                    <button onclick="mobileNavigate('keluarga')" class="p-3 bg-gray-50 dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-2xl flex items-center space-x-3 transition active:scale-95 text-left border border-gray-100 dark:border-gray-700/60">
+                        <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center flex-shrink-0"><i class="fas fa-users"></i></div>
+                        <div><div class="text-xs font-bold text-gray-800 dark:text-gray-200">Keluarga</div><div class="text-[10px] text-gray-400">Susunan KK</div></div>
+                    </button>
+                    <button onclick="mobileNavigate('identitas')" class="col-span-2 p-3 bg-gray-50 dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-2xl flex items-center space-x-3 transition active:scale-95 text-left border border-gray-100 dark:border-gray-700/60">
+                        <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center flex-shrink-0"><i class="fas fa-fingerprint"></i></div>
+                        <div><div class="text-xs font-bold text-gray-800 dark:text-gray-200">Identitas Lain & Kartu</div><div class="text-[10px] text-gray-400">BPJS, STR, SIP, NPWP, Rekening, dll</div></div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTTOM SHEET: MENU / LAINNYA (ADMIN & PENGATURAN) -->
+        <div id="mobile-menu-sheet" class="fixed inset-0 z-50 hidden flex flex-col justify-end">
+            <!-- Backdrop overlay -->
+            <div onclick="closeMobileSheets()" class="absolute inset-0 bg-black/60 backdrop-blur-xs transition-opacity"></div>
+            <!-- Sheet Card -->
+            <div class="relative bg-white dark:bg-gray-900 rounded-t-3xl max-h-[90vh] flex flex-col shadow-2xl z-10 animate-slide-up border-t border-gray-100 dark:border-gray-800 safe-bottom">
+                <!-- Drag Handle -->
+                <div class="w-full flex justify-center pt-3 pb-1 cursor-pointer" onclick="closeMobileSheets()">
+                    <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
+                </div>
+                <!-- Sheet Header with User Info -->
+                <div class="px-5 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center space-x-3">
+                    <div class="w-11 h-11 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm overflow-hidden flex-shrink-0 shadow-xs">
+                        <i class="fas fa-user-circle text-2xl"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h4 id="mob-sheet-user-name" class="font-bold text-sm text-gray-800 dark:text-gray-100 truncate">Pegawai</h4>
+                        <div class="flex items-center space-x-2 mt-0.5">
+                            <span id="mob-sheet-user-role" class="text-[9px] font-bold uppercase px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">Role</span>
+                            <span id="mob-sheet-user-nik" class="text-[11px] text-gray-400 truncate">NIK: -</span>
+                        </div>
+                    </div>
+                    <button onclick="closeMobileSheets()" class="w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 flex items-center justify-center hover:bg-gray-200">
+                        <i class="fas fa-times text-xs"></i>
+                    </button>
+                </div>
+                <!-- Sheet Body -->
+                <div class="p-4 overflow-y-auto space-y-4 max-h-[70vh]">
+                    <!-- Admin Menu Section (hanya jika admin) -->
+                    <div id="mob-sheet-admin-section" class="hidden">
+                        <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-2">Menu Administrator</p>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="mobileNavigate('data-pegawai')" class="p-3 bg-gray-50 dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-2xl flex flex-col items-center text-center transition active:scale-95 border border-gray-100 dark:border-gray-700/60">
+                                <div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center mb-1.5"><i class="fas fa-users-cog text-sm"></i></div>
+                                <span class="text-xs font-semibold text-gray-700 dark:text-gray-200">Semua Pegawai</span>
+                            </button>
+                            <button onclick="mobileNavigate('antrian')" class="p-3 bg-gray-50 dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-2xl flex flex-col items-center text-center transition active:scale-95 border border-gray-100 dark:border-gray-700/60 relative">
+                                <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center mb-1.5"><i class="fas fa-tasks text-sm"></i></div>
+                                <span class="text-xs font-semibold text-gray-700 dark:text-gray-200">Antrian</span>
+                                <span id="badge-antrian-sheet" class="absolute top-2 right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.2 rounded-full hidden">0</span>
+                            </button>
+                            <button onclick="mobileNavigate('pengaturan')" class="p-3 bg-gray-50 dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-2xl flex flex-col items-center text-center transition active:scale-95 border border-gray-100 dark:border-gray-700/60">
+                                <div class="w-9 h-9 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center mb-1.5"><i class="fas fa-cog text-sm"></i></div>
+                                <span class="text-xs font-semibold text-gray-700 dark:text-gray-200">Pengaturan</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Fitur Cepat -->
+                    <div>
+                        <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-2">Aksi Cepat</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="closeMobileSheets(); exportMyData();" class="p-3 bg-gray-50 dark:bg-gray-800 rounded-2xl flex items-center space-x-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition active:scale-95 border border-gray-100 dark:border-gray-700/60">
+                                <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center"><i class="fas fa-file-pdf"></i></div>
+                                <div class="text-left"><div class="text-xs font-bold">Cetak CV</div><div class="text-[10px] text-gray-400">Export PDF</div></div>
+                            </button>
+                            <button onclick="closeMobileSheets(); refreshCurrentPage(true);" class="p-3 bg-gray-50 dark:bg-gray-800 rounded-2xl flex items-center space-x-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition active:scale-95 border border-gray-100 dark:border-gray-700/60">
+                                <div class="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center"><i class="fas fa-sync-alt"></i></div>
+                                <div class="text-left"><div class="text-xs font-bold">Refresh</div><div class="text-[10px] text-gray-400">Sinkron Data</div></div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Pilihan Tema Tampilan -->
+                    <div>
+                        <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-2">Tema Tampilan</p>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="setTheme('light');" class="py-2.5 px-3 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-semibold flex items-center justify-center space-x-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 transition">
+                                <i class="fas fa-sun text-amber-500"></i><span>Terang</span>
+                            </button>
+                            <button onclick="setTheme('dark');" class="py-2.5 px-3 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-semibold flex items-center justify-center space-x-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 transition">
+                                <i class="fas fa-moon text-blue-400"></i><span>Gelap</span>
+                            </button>
+                            <button onclick="setTheme('teracota');" class="py-2.5 px-3 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-semibold flex items-center justify-center space-x-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 transition">
+                                <i class="fas fa-leaf text-orange-500"></i><span>Klasik</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tombol Keluar (Logout) -->
+                    <div class="pt-2">
+                        <button onclick="closeMobileSheets(); logout();" class="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold flex items-center justify-center space-x-2 shadow-sm active:scale-95 transition">
+                            <i class="fas fa-sign-out-alt"></i><span>Keluar dari SIMPEG</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- MODAL CUSTOM EXPORT (DUAL LISTBOX) -->
@@ -833,6 +1107,32 @@
                 activeNav.classList.add('bg-gray-700', 'bg-opacity-50', 'border-l-4', 'border-blue-400');
             }
 
+            // Update active state di Bottom Navigation Bar Mobile
+            document.querySelectorAll('.btm-nav-item').forEach(el => el.classList.remove('active'));
+            if (hash === 'beranda') {
+                document.getElementById('btm-nav-beranda')?.classList.add('active');
+            } else if (hash === 'profil') {
+                document.getElementById('btm-nav-profil')?.classList.add('active');
+            } else if (['pendidikan', 'pangkat', 'jabatan', 'kompetensi', 'kgb', 'keluarga', 'identitas'].includes(hash)) {
+                document.getElementById('btm-nav-riwayat')?.classList.add('active');
+            } else if (hash === 'antrian') {
+                document.getElementById('btm-nav-antrian')?.classList.add('active');
+            } else if (['data-pegawai', 'pengaturan'].includes(hash)) {
+                document.getElementById('btm-nav-menu')?.classList.add('active');
+            }
+
+            // Update active subtab chip di halaman profil
+            document.querySelectorAll('.subtab-chip').forEach(chip => {
+                if (chip.getAttribute('data-subtab') === hash) {
+                    chip.classList.add('bg-blue-600', 'text-white');
+                    chip.classList.remove('bg-white', 'text-gray-700', 'dark:bg-gray-800', 'dark:text-gray-300');
+                    try { chip.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); } catch(e){}
+                } else {
+                    chip.classList.remove('bg-blue-600', 'text-white');
+                    chip.classList.add('bg-white', 'text-gray-700', 'dark:bg-gray-800', 'dark:text-gray-300');
+                }
+            });
+
             if(window.innerWidth < 768 && !document.getElementById('sidebar').classList.contains('hidden')) { toggleSidebar(); }
 
             if(hash === 'beranda') await renderDashboard();
@@ -867,6 +1167,75 @@
             if(showToast) {
                 Toast.fire({ icon: 'success', title: 'Data berhasil diperbarui' });
             }
+        }
+
+        // ==========================================
+        // MOBILE & BOTTOM SHEET NAVIGATION HELPERS
+        // ==========================================
+        function closeMobileSheets() {
+            document.getElementById('mobile-riwayat-sheet')?.classList.add('hidden');
+            document.getElementById('mobile-menu-sheet')?.classList.add('hidden');
+        }
+
+        function openMobileRiwayatSheet() {
+            closeMobileSheets();
+            document.getElementById('mobile-riwayat-sheet')?.classList.remove('hidden');
+        }
+
+        function openMobileMenuSheet() {
+            closeMobileSheets();
+            if (STATE.user) {
+                const nameEl = document.getElementById('mob-sheet-user-name');
+                const roleEl = document.getElementById('mob-sheet-user-role');
+                const nikEl = document.getElementById('mob-sheet-user-nik');
+                if (nameEl) nameEl.innerText = STATE.profile?.Nama_Lengkap || STATE.user.email || 'Pegawai';
+                if (roleEl) roleEl.innerText = (STATE.user.role || 'user').toUpperCase();
+                if (nikEl) nikEl.innerText = 'NIK: ' + (STATE.user.nik || '-');
+                if (['admin', 'superadmin'].includes(STATE.user.role)) {
+                    document.getElementById('mob-sheet-admin-section')?.classList.remove('hidden');
+                } else {
+                    document.getElementById('mob-sheet-admin-section')?.classList.add('hidden');
+                }
+            }
+            document.getElementById('mobile-menu-sheet')?.classList.remove('hidden');
+        }
+
+        function mobileNavigate(hash) {
+            closeMobileSheets();
+            window.location.hash = hash;
+        }
+
+        function navMobileTo(hash) {
+            closeMobileSheets();
+            window.location.hash = hash;
+        }
+
+        function navMobileAntrian() {
+            closeMobileSheets();
+            if (['admin', 'superadmin'].includes(STATE.user?.role)) {
+                window.location.hash = 'antrian';
+            } else {
+                window.location.hash = 'profil';
+                setTimeout(() => {
+                    const el = document.getElementById('dash-user-log-container') || document.querySelector('#tab-profil table');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }, 300);
+            }
+        }
+
+        function updateAntrianBadge(count) {
+            const b1 = document.getElementById('badge-antrian');
+            const b2 = document.getElementById('badge-antrian-mobile');
+            const b3 = document.getElementById('badge-antrian-sheet');
+            [b1, b2, b3].forEach(b => {
+                if (!b) return;
+                if (count > 0) {
+                    b.innerText = count;
+                    b.classList.remove('hidden');
+                } else {
+                    b.classList.add('hidden');
+                }
+            });
         }
 
         function initParticles() { particlesJS("particles-js", { "particles": {"number": {"value": 80},"color": {"value": "#ffffff"},"shape": {"type": "circle"},"opacity": {"value": 0.5},"size": {"value": 3},"line_linked": {"enable": true, "distance": 150, "color": "#ffffff", "opacity": 0.4, "width": 1},"move": {"enable": true, "speed": 2}}, "interactivity": {"events": {"onhover": {"enable": true, "mode": "grab"}}} }); }
@@ -1125,6 +1494,9 @@
             
             const pendingAntrian = STATE.myAntrian ? STATE.myAntrian.filter(a => a.Status === 'Pending').length : 0;
             document.getElementById('dash-user-antrian').innerText = pendingAntrian;
+            if (!['admin', 'superadmin'].includes(STATE.user?.role)) {
+                updateAntrianBadge(pendingAntrian);
+            }
 
             let totalJP = 0;
             if (STATE.riwayat.kompetensi) {
@@ -1177,14 +1549,7 @@
                 document.getElementById('dash-admin-kontrak').innerText = stats.kontrak;
                 document.getElementById('dash-admin-kegiatan').innerText = stats.kegiatan;
                 document.getElementById('dash-admin-antrian').innerText = stats.pendingAntrian;
-
-                const badge = document.getElementById('badge-antrian');
-                if(stats.pendingAntrian > 0) {
-                    badge.innerText = stats.pendingAntrian;
-                    badge.classList.remove('hidden');
-                } else {
-                    badge.classList.add('hidden');
-                }
+                updateAntrianBadge(stats.pendingAntrian);
 
                 const tbody = document.getElementById('dash-admin-table-antrian');
                 tbody.innerHTML = '';
@@ -1843,8 +2208,7 @@ function renderTablePegawai() {
                 renderTableAntrian(STATE.allAntrianGlobal); 
                 
                 const pendingCount = STATE.allAntrianGlobal.filter(a => a.Status === 'Pending').length;
-                const badge = document.getElementById('badge-antrian');
-                if(pendingCount > 0) { badge.innerText = pendingCount; badge.classList.remove('hidden'); } else { badge.classList.add('hidden'); }
+                updateAntrianBadge(pendingCount);
             } catch(e) { console.error('Error load antrian:', e); }
         }
 
