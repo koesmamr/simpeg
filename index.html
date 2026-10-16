@@ -1495,8 +1495,8 @@
                         textObj.classList.remove('text-red-600');
                         textObj.classList.add('text-gray-500');
                     }
-                } catch (e) { console.error('Gagal memuat pengaturan', e); }
-            }
+                }
+            } catch (e) { console.error('Gagal memuat pengaturan', e); }
         }
 
         async function toggleMaintenanceMode(cb) {
