@@ -1,0 +1,7 @@
+simpeg-cloudflare/
+gas-backend/
+.clasp.json
+node_modules/
+.wrangler/
+.env
+dist/
