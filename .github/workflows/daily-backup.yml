@@ -1,0 +1,19 @@
+name: Daily Database Backup to Telegram
+
+on:
+  schedule:
+    # Berjalan otomatis setiap hari pukul 18:00 UTC = 01:00 WIB
+    - cron: '0 18 * * *'
+  workflow_dispatch: # Mengizinkan trigger manual kapan saja dari GitHub
+
+jobs:
+  run-backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger SIMPEG Cloudflare Database Backup
+        run: |
+          echo "Memulai proses backup harian SIMPEG KOESMA..."
+          RESPONSE=$(curl -s -X POST https://simpeg-api.syamsul18782.workers.dev \
+            -H "Content-Type: application/json" \
+            -d '{"action":"triggerBackup","secret":"SIMPEG_KOESMA_BACKUP_SECRET_2026"}')
+          echo "Hasil Respon Server: $RESPONSE"

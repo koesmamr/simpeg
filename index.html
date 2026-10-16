@@ -757,6 +757,62 @@
                                 </label>
                             </div>
                         </div>
+
+                        <!-- CARD BACKUP DATABASE HARIAN & MANUAL -->
+                        <div id="card-backup" class="card rounded-lg shadow-md p-6 md:col-span-2 border-t-4 border-purple-600">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between pb-3 border-b mb-4 gap-3">
+                                <div>
+                                    <h3 class="font-bold text-lg flex items-center">
+                                        <i class="fas fa-database text-purple-600 mr-2 text-xl"></i> Backup Database Sistem (Cloudflare D1)
+                                    </h3>
+                                    <p class="text-xs text-gray-500 mt-0.5">Cadangan seluruh data kepegawaian, riwayat, antrian, dan pengaturan dikirim langsung ke Telegram.</p>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                                        <span class="w-2 h-2 rounded-full bg-green-500 mr-1.5 animate-pulse"></span>
+                                        Jadwal Harian: Aktif (01:00 WIB)
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+                                <div class="bg-gray-50 dark:bg-gray-800/50 p-3.5 rounded-xl border border-gray-200 dark:border-gray-700/60">
+                                    <div class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Jalur Notifikasi</div>
+                                    <div class="text-sm font-bold text-gray-800 dark:text-gray-100 flex items-center mt-1">
+                                        <i class="fab fa-telegram text-blue-500 text-base mr-1.5"></i> Saluran @koesmasurat
+                                    </div>
+                                    <div class="text-[11px] text-gray-500 mt-0.5">Lampiran file JSON terenkripsi</div>
+                                </div>
+                                <div class="bg-gray-50 dark:bg-gray-800/50 p-3.5 rounded-xl border border-gray-200 dark:border-gray-700/60">
+                                    <div class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Backup Terakhir</div>
+                                    <div id="text-last-backup" class="text-sm font-bold text-purple-700 dark:text-purple-400 mt-1">
+                                        Memuat...
+                                    </div>
+                                    <div class="text-[11px] text-gray-500 mt-0.5">Tersimpan di Cloudflare D1</div>
+                                </div>
+                                <div class="bg-gray-50 dark:bg-gray-800/50 p-3.5 rounded-xl border border-gray-200 dark:border-gray-700/60">
+                                    <div class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Cakupan Data</div>
+                                    <div class="text-sm font-bold text-gray-800 dark:text-gray-100 mt-1">
+                                        12 Tabel Lengkap
+                                    </div>
+                                    <div class="text-[11px] text-gray-500 mt-0.5">Profil, Riwayat, KGB, Antrian, dll.</div>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-wrap items-center gap-3 pt-2">
+                                <button onclick="triggerManualBackup()" id="btn-trigger-backup" class="px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold flex items-center space-x-2 shadow-sm active:scale-95 transition">
+                                    <i class="fas fa-paper-plane"></i>
+                                    <span>Backup Sekarang & Kirim ke Telegram</span>
+                                </button>
+                                <button onclick="downloadBackupLocal()" id="btn-download-backup" class="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl text-xs font-semibold flex items-center space-x-2 border border-gray-300 dark:border-gray-600 active:scale-95 transition">
+                                    <i class="fas fa-download"></i>
+                                    <span>Download File Backup (JSON)</span>
+                                </button>
+                                <span class="text-xs text-gray-400 italic ml-auto">
+                                    *Juga dieksekusi otomatis oleh GitHub Actions Cron setiap hari pukul 01:00 WIB.
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -1480,6 +1536,11 @@
                 const res = await apiCall({ action: 'getSettings', role: STATE.user ? STATE.user.role : 'user' });
                 if (res && res.appTheme) applyTheme(res.appTheme);
 
+                const lastBackupObj = document.getElementById('text-last-backup');
+                if (lastBackupObj && res.lastBackupAt) {
+                    lastBackupObj.innerText = res.lastBackupAt;
+                }
+
                 if (STATE.user && STATE.user.role === 'superadmin') {
                     document.getElementById('card-maintenance').classList.remove('hidden');
                     const toggle = document.getElementById('toggle-maintenance');
@@ -1497,6 +1558,78 @@
                     }
                 }
             } catch (e) { console.error('Gagal memuat pengaturan', e); }
+        }
+
+        async function triggerManualBackup() {
+            const { isConfirmed } = await Swal.fire({
+                title: 'Mulai Backup Database?',
+                text: 'Sistem akan mengekstrak seluruh 12 tabel database SIMPEG dan mengirimkannya langsung ke saluran Telegram @koesmasurat.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Jalankan Backup',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#9333ea',
+            });
+
+            if (!isConfirmed) return;
+
+            showLoader(true);
+            try {
+                const res = await apiCall({ action: 'triggerBackup', role: STATE.user.role });
+                showLoader(false);
+
+                if (res.status === 'success') {
+                    const lastBackupObj = document.getElementById('text-last-backup');
+                    if (lastBackupObj && res.timestamp) lastBackupObj.innerText = res.timestamp;
+
+                    Swal.fire({
+                        title: 'Backup Berhasil!',
+                        html: `
+                            <p class="text-sm text-gray-600 mb-3">${res.message}</p>
+                            <div class="text-left bg-gray-50 dark:bg-gray-800 p-3 rounded-lg text-xs font-mono border">
+                                <div><b>Berkas:</b> ${res.filename}</div>
+                                <div><b>Total Rekor:</b> ${res.totalRecords?.toLocaleString('id-ID')} baris data</div>
+                                <div><b>Waktu:</b> ${res.timestamp}</div>
+                            </div>
+                        `,
+                        icon: 'success',
+                        confirmButtonColor: '#9333ea',
+                    });
+                } else {
+                    Swal.fire('Gagal Backup', res.message || 'Terjadi kesalahan sistem.', 'error');
+                }
+            } catch (e) {
+                showLoader(false);
+                Swal.fire('Gagal Backup', e.message, 'error');
+            }
+        }
+
+        async function downloadBackupLocal() {
+            showLoader(true);
+            try {
+                const res = await apiCall({ action: 'triggerBackup', role: STATE.user.role });
+                showLoader(false);
+
+                if (res.status === 'success' && res.backupData) {
+                    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(res.backupData, null, 2));
+                    const downloadAnchor = document.createElement('a');
+                    downloadAnchor.setAttribute("href", dataStr);
+                    downloadAnchor.setAttribute("download", res.filename || `backup_simpeg_${new Date().toISOString().split('T')[0]}.json`);
+                    document.body.appendChild(downloadAnchor);
+                    downloadAnchor.click();
+                    downloadAnchor.remove();
+
+                    Toast.fire({
+                        icon: 'success',
+                        title: 'File backup berhasil diunduh ke komputer Anda.'
+                    });
+                } else {
+                    Swal.fire('Gagal Unduh', res.message || 'Terjadi kesalahan sistem.', 'error');
+                }
+            } catch (e) {
+                showLoader(false);
+                Swal.fire('Gagal Unduh', e.message, 'error');
+            }
         }
 
         async function toggleMaintenanceMode(cb) {
